@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hasil Love Language</title>
+
+        <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: #f7f3eb;
+            min-height: 100vh;
+            padding: 20px 20px 100px;
+            display: flex;
+            justify-content: center;
+        }
+        .app {
+            max-width: 720px;
+            width: 100%;
+        }
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px 25px;
+            box-shadow: 0 8px 30px rgba(58, 125, 118, 0.08);
+            border: 1px solid rgba(58, 125, 118, 0.06);
+            margin-bottom: 16px;
+        }
+        .card h1 {
+            font-size: 26px;
+            font-weight: 300;
+            color: #1d3b36;
+            margin-bottom: 6px;
+        }
+        .card h1 strong {
+            font-weight: 600;
+        }
+        .card .sub {
+            color: #5a6f6a;
+            font-weight: 300;
+            margin-bottom: 20px;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #5a6f6a;
+        }
+        .empty-state .icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+        }
+        .empty-state h3 {
+            color: #1d3b36;
+            margin-bottom: 8px;
+        }
+        .chart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .chart-item .label {
+            width: 100px;
+            font-weight: 600;
+            color: #1d3b36;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .chart-item .bar-bg {
+            flex: 1;
+            height: 24px;
+            background: #f0f7f5;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+        .chart-item .bar-fill {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+        .chart-item .percent {
+            width: 50px;
+            text-align: right;
+            font-weight: 700;
+            color: #1d3b36;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+        .btn {
+            display: inline-block;
+            background: #3a7d76;
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            text-decoration: none;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #2d655f;
+            transform: scale(1.02);
+        }
+        .btn-outline {
+            background: transparent;
+            color: #3a7d76;
+            border: 2px solid #3a7d76;
+        }
+        .btn-outline:hover {
+            background: #f0f7f5;
+            transform: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-group .btn {
+            flex: 1;
+            min-width: 120px;
+            text-align: center;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 20px 20px;
+            border-top: 1px solid rgba(58, 125, 118, 0.08);
+            max-width: 720px;
+            margin: 0 auto;
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -4px 30px rgba(45, 62, 59, 0.06);
+        }
+        .bottom-nav a {
+            text-decoration: none;
+            color: #b0c2bd;
+            font-size: 11px;
+            text-align: center;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            letter-spacing: 0.3px;
+        }
+        .bottom-nav a .nav-icon {
+            font-size: 22px;
+        }
+        .bottom-nav a.active {
+            color: #3a7d76;
+        }
+        .bottom-nav a:hover {
+            color: #3a7d76;
+        }
+        .date-badge {
+            font-size: 13px;
+            color: #8a9e99;
+            margin-bottom: 16px;
+        }
+        @media (max-width: 500px) {
+            .chart-item .label {
+                width: 70px;
+                font-size: 12px;
+            }
+            .chart-item .percent {
+                width: 40px;
+                font-size: 13px;
+            }
+            .btn-group {
+                flex-direction: column;
+            }
+            .btn-group .btn {
+                flex: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+
+        <!-- ===== KARTU HASIL ===== -->
+        <div class="card" id="hasilCard">
+            <h1>📊 <strong>Hasil</strong> Love Language</h1>
+            <div class="sub">Lihat hasil tes terakhirmu di sini</div>
+
+            <div id="hasilContainer">
+                <!-- Akan diisi oleh JavaScript -->
+            </div>
+
+            <div class="btn-group">
+                <a href="love-language.html" class="btn">🔄 Tes Ulang</a>
+                <a href="index.html" class="btn btn-outline">🏠 Beranda</a>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <div class="bottom-nav">
+            <a href="index.html">
+                <span class="nav-icon">🏠</span>
+                Beranda
+            </a>
+            <a href="love-language.html">
+                <span class="nav-icon">💑</span>
+                Tes
+            </a>
+            <a href="hasil.html" class="active">
+                <span class="nav-icon">📊</span>
+                Hasil
+            </a>
+            <a href="#" onclick="alert('Buka Profil')">
+                <span class="nav-icon">👤</span>
+                Profil
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  AMBIL DATA DARI LOCALSTORAGE
+        // ============================================================
+        function tampilkanHasil() {
+            const container = document.getElementById('hasilContainer');
+            const rawData = localStorage.getItem('loveLanguageResult');
+            const date = localStorage.getItem('loveLanguageDate');
+
+            if (!rawData) {
+                // Belum ada data
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <h3>Belum Ada Hasil</h3>
+                        <p>Kamu belum menyelesaikan tes Love Language.</p>
+                        <a href="love-language.html" class="btn" style="margin-top:16px;display:inline-block;">Mulai Tes →</a>
+                    </div>
+                `;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(rawData);
+                const sorted = Object.keys(data).sort((a, b) => {
+                    const valA = parseInt(data[a]);
+                    const valB = parseInt(data[b]);
+                    return valB - valA;
+                });
+
+                const colors = {
+                    'Words of Affirmation': '#6c5ce7',
+                    'Acts of Service': '#00b894',
+                    'Quality Time': '#d4a373',
+                    'Physical Touch': '#e17055',
+                    'Receiving Gifts': '#fd79a8'
+                };
+
+                const emoji = {
+                    'Words of Affirmation': '💬',
+                    'Acts of Service': '🤝',
+                    'Quality Time': '⏰',
+                    'Physical Touch': '🫂',
+                    'Receiving Gifts': '🎁'
+                };
+
+                let html = '';
+                if (date) {
+                    const d = new Date(date);
+                    html += `<div class="date-badge">📅 Terakhir dikerjakan: ${d.toLocaleDateString('id-ID')} ${d.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>`;
+                }
+
+                sorted.forEach(key => {
+                    const percent = parseInt(data[key]);
+                    const color = colors[key] || '#3a7d76';
+                    const emojiIcon = emoji[key] || '';
+                    html += `
+                        <div class="chart-item">
+                            <div class="label">${emojiIcon} ${key}</div>
+                            <div class="bar-bg">
+                                <div class="bar-fill" style="width:0%;background:${color};" data-width="${percent}"></div>
+                            </div>
+                            <div class="percent">${percent}%</div>
+                        </div>
+                    `;
+                });
+
+                // Tambahan: Love Language tertinggi
+                const topKey = sorted[0];
+                html += `
+                    <div style="margin-top:20px;padding:16px;background:#f0f7f5;border-radius:14px;text-align:center;">
+                        <div style="font-size:14px;color:#5a6f6a;">🌟 Love Language Utamamu</div>
+                        <div style="font-size:24px;font-weight:600;color:#1d3b36;margin-top:4px;">
+                            ${emoji[topKey] || ''} ${topKey}
+                        </div>
+                        <div style="font-size:14px;color:#5a6f6a;margin-top:2px;">${data[topKey]}%</div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+
+                // Animasi bar chart
+                setTimeout(() => {
+                    document.querySelectorAll('.bar-fill').forEach(el => {
+                        el.style.width = el.dataset.width + '%';
+                    });
+                }, 300);
+
+            } catch (e) {
+                container.innerHTML = `<div class="empty-state"><div class="icon">⚠️</div><h3>Data Error</h3><p>Ada masalah dengan data yang tersimpan.</p></div>`;
+            }
+        }
+
+        // Jalankan saat halaman dimuat
+        tampilkanHasil();
+
+        // Auto-refresh jika ada perubahan data (misal dari tab lain)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'loveLanguageResult') {
+                tampilkanHasil();
+            }
+        });
+    </script>
+</body>
+</html>
