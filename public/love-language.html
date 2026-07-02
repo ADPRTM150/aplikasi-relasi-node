@@ -5,476 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Love Language Check</title>
 
-    <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-<script src="firebase-config.js"></script>
+    <link rel="stylesheet" href="/css/style.css" />
+    <script src="/js/questions.js"></script>
 
-    <style>
-        /* ─── GLOBAL ─── */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: #f7f3eb;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px 20px 100px;
-        }
-        .container {
-            max-width: 700px;
-            width: 100%;
-            background: white;
-            border-radius: 30px;
-            padding: 30px 25px;
-            box-shadow: 0 20px 60px rgba(58, 125, 118, 0.10);
-            border: 1px solid rgba(58, 125, 118, 0.06);
-        }
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
 
-        /* ─── INTRO ─── */
-        .intro {
-            text-align: center;
-            padding: 20px 0;
-        }
-        .intro .icon {
-            font-size: 64px;
-            margin-bottom: 10px;
-        }
-        .intro h1 {
-            font-size: 28px;
-            color: #1d3b36;
-            margin-bottom: 8px;
-            font-weight: 300;
-        }
-        .intro h1 strong {
-            font-weight: 600;
-        }
-        .intro p {
-            color: #5a6f6a;
-            font-size: 16px;
-            line-height: 1.6;
-            font-weight: 300;
-        }
-        .selector-group {
-            margin: 16px 0 8px;
-        }
-        .selector-group .label {
-            font-size: 14px;
-            color: #5a6f6a;
-            margin-bottom: 10px;
-            font-weight: 500;
-        }
-        .selector-group .options {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-        }
-        .selector-group .options .btn-opt {
-            padding: 10px 20px;
-            border-radius: 50px;
-            border: 2px solid #dcebe7;
-            background: white;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            color: #5a6f6a;
-            flex: 1 1 auto;
-            min-width: 80px;
-        }
-        .selector-group .options .btn-opt:hover {
-            border-color: #3a7d76;
-            background: #f0f7f5;
-        }
-        .selector-group .options .btn-opt.active {
-            border-color: #3a7d76;
-            background: #3a7d76;
-            color: white;
-        }
-        .btn {
-            background: #3a7d76;
-            color: white;
-            border: none;
-            padding: 16px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            width: 100%;
-        }
-        .btn:hover {
-            background: #2d655f;
-            transform: scale(1.02);
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
-        .disclaimer-box {
-            background: #fdf8f0;
-            border-radius: 12px;
-            padding: 14px 18px;
-            margin: 16px 0;
-            border-left: 4px solid #d4a373;
-            text-align: left;
-        }
-        .disclaimer-box p {
-            font-size: 13px;
-            color: #5a6f6a;
-            line-height: 1.6;
-            margin: 0;
-        }
-
-        /* ─── SOAL ─── */
-        .soal-wrapper {
-            display: none;
-        }
-        .soal-wrapper.active {
-            display: block;
-        }
-        .progress {
-            background: #ede6ff;
-            border-radius: 20px;
-            height: 8px;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-        .progress .bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3a7d76, #7fb4ad);
-            border-radius: 20px;
-            transition: width 0.4s ease;
-            width: 0%;
-        }
-        .counter {
-            text-align: right;
-            font-size: 14px;
-            color: #5a6f6a;
-            margin-top: -18px;
-            margin-bottom: 20px;
-        }
-        .soal-text {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1d3b36;
-            margin-bottom: 25px;
-            line-height: 1.5;
-        }
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 30px;
-        }
-        .options label {
-            background: #f8f5ff;
-            border: 2px solid #ede6ff;
-            border-radius: 14px;
-            padding: 14px 18px;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .options label:hover {
-            background: #f3edff;
-            border-color: #c4b5fd;
-        }
-        .options input[type="radio"] {
-            accent-color: #3a7d76;
-            width: 18px;
-            height: 18px;
-            flex-shrink: 0;
-        }
-        .options label.selected {
-            background: #e6f2f0;
-            border-color: #3a7d76;
-        }
-        .nav-soal {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-        }
-        .nav-soal .btn {
-            width: auto;
-            padding: 12px 24px;
-            font-size: 15px;
-            flex: 1;
-        }
-        .nav-soal .btn-outline {
-            background: transparent;
-            color: #3a7d76;
-            border: 2px solid #3a7d76;
-        }
-        .nav-soal .btn-outline:hover {
-            background: #f0f7f5;
-            transform: none;
-        }
-
-        /* ─── HASIL ─── */
-        .hasil-wrapper {
-            display: none;
-        }
-        .hasil-wrapper.active {
-            display: block;
-        }
-        .hasil-title {
-            font-size: 26px;
-            color: #1d3b36;
-            text-align: center;
-            margin-bottom: 10px;
-            font-weight: 300;
-        }
-        .hasil-title strong {
-            font-weight: 600;
-        }
-        .hasil-sub {
-            text-align: center;
-            color: #5a6f6a;
-            margin-bottom: 25px;
-            font-weight: 300;
-        }
-        .chart-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-        .chart-item .label {
-            width: 100px;
-            font-weight: 600;
-            color: #1d3b36;
-            font-size: 14px;
-            flex-shrink: 0;
-        }
-        .chart-item .bar-bg {
-            flex: 1;
-            height: 24px;
-            background: #f0f7f5;
-            border-radius: 20px;
-            overflow: hidden;
-        }
-        .chart-item .bar-fill {
-            height: 100%;
-            border-radius: 20px;
-            transition: width 1s ease;
-            width: 0%;
-        }
-        .chart-item .percent {
-            width: 50px;
-            text-align: right;
-            font-weight: 700;
-            color: #1d3b36;
-            font-size: 15px;
-            flex-shrink: 0;
-        }
-
-        .detail-section {
-            margin-top: 30px;
-            border-top: 2px solid #f0f7f5;
-            padding-top: 25px;
-        }
-        .detail-tab {
-            background: #f8f5ff;
-            border-radius: 14px;
-            padding: 16px 18px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: 0.2s;
-            border-left: 4px solid transparent;
-        }
-        .detail-tab:hover {
-            background: #f3edff;
-        }
-        .detail-tab.open {
-            border-left-color: #3a7d76;
-            background: #f0f7f5;
-        }
-        .detail-tab .head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            color: #1d3b36;
-        }
-        .detail-tab .head .emoji {
-            font-size: 20px;
-        }
-        .detail-tab .body {
-            display: none;
-            padding-top: 14px;
-            color: #2d4a44;
-            line-height: 1.7;
-            font-size: 15px;
-        }
-        .detail-tab.open .body {
-            display: block;
-        }
-        .detail-tab .body ul {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
-        }
-        .detail-tab .body ul li {
-            padding: 6px 0;
-            border-bottom: 1px solid #ede6ff;
-        }
-        .detail-tab .body ul li:last-child {
-            border-bottom: none;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            margin-top: 25px;
-        }
-        .btn-group .btn {
-            flex: 1;
-            text-align: center;
-            text-decoration: none;
-        }
-        .btn-secondary {
-            background: #f0f7f5;
-            color: #1d3b36;
-        }
-        .btn-secondary:hover {
-            background: #dcebe7;
-        }
-
-        .note {
-            background: #fdf8f0;
-            border-radius: 14px;
-            padding: 18px;
-            margin-top: 25px;
-            font-size: 14px;
-            color: #5a6f6a;
-            line-height: 1.7;
-            border-left: 4px solid #d4a373;
-        }
-        .note strong {
-            color: #1d3b36;
-        }
-
-        /* ─── BOTTOM NAV ─── */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 16px 18px;
-            border-top: 1px solid rgba(58, 125, 118, 0.08);
-            max-width: 720px;
-            margin: 0 auto;
-            border-radius: 30px 30px 0 0;
-            box-shadow: 0 -4px 30px rgba(45, 62, 59, 0.06);
-        }
-        .bottom-nav a {
-            text-decoration: none;
-            color: #b0c2bd;
-            font-size: 10px;
-            text-align: center;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 1px;
-            letter-spacing: 0.3px;
-        }
-        .bottom-nav a .nav-icon {
-            font-size: 22px;
-        }
-        .bottom-nav a.active {
-            color: #3a7d76;
-        }
-        .bottom-nav a:hover {
-            color: #3a7d76;
-        }
-
-        /* ─── RESPONSIVE ─── */
-        @media (max-width: 500px) {
-            .container {
-                padding: 20px 15px;
+    <script>
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.href = '/login';
             }
-            .intro h1 {
-                font-size: 22px;
-            }
-            .soal-text {
-                font-size: 17px;
-            }
-            .chart-item .label {
-                width: 70px;
-                font-size: 12px;
-            }
-            .chart-item .percent {
-                width: 40px;
-                font-size: 13px;
-            }
-            .nav-soal {
-                flex-direction: column;
-            }
-            .nav-soal .btn {
-                width: 100%;
-            }
-            .btn-group {
-                flex-direction: column;
-            }
-            .selector-group .options .btn-opt {
-                flex: 1 1 40%;
-                min-width: 70px;
-                font-size: 13px;
-                padding: 8px 14px;
-            }
-        }
-    </style>
+        });
+    </script>
 </head>
 <body>
-
     <div class="container" id="app">
 
         <!-- ===== INTRO ===== -->
         <div class="intro" id="intro">
-            <div class="icon">💑</div>
+            <div class="icon">💬</div>
             <h1><strong>Love</strong> Language Check</h1>
             <p>Kenali cara kamu merasa dicintai dan dihargai dalam hubungan.</p>
 
-            <!-- Pilihan Gender -->
             <div class="selector-group">
                 <div class="label">👤 Pilih gender kamu:</div>
                 <div class="options" id="genderOptions">
-                    <button class="btn-opt" data-value="wanita" onclick="pilihGender('wanita')">👩 Perempuan</button>
-                    <button class="btn-opt" data-value="pria" onclick="pilihGender('pria')">👨 Laki-laki</button>
+                    <button class="btn-opt" data-value="wanita" onclick="pilihGender('wanita')">♀️ Perempuan</button>
+                    <button class="btn-opt" data-value="pria" onclick="pilihGender('pria')">♂️ Laki-laki</button>
                 </div>
             </div>
 
-            <!-- Pilihan Status Hubungan -->
             <div class="selector-group">
                 <div class="label">💞 Pilih status hubunganmu:</div>
                 <div class="options" id="statusOptions">
-                    <button class="btn-opt" data-value="single" onclick="pilihStatus('single')">💔 Single</button>
-                    <button class="btn-opt" data-value="pdkt" onclick="pilihStatus('pdkt')">💕 PDKT</button>
-                    <button class="btn-opt" data-value="pacaran" onclick="pilihStatus('pacaran')">💑 Pacaran</button>
+                    <button class="btn-opt" data-value="single" onclick="pilihStatus('single')">🔹 Single</button>
+                    <button class="btn-opt" data-value="pdkt" onclick="pilihStatus('pdkt')">🔸 PDKT</button>
+                    <button class="btn-opt" data-value="pacaran" onclick="pilihStatus('pacaran')">💞 Pacaran</button>
                     <button class="btn-opt" data-value="tunangan" onclick="pilihStatus('tunangan')">💍 Tunangan</button>
-                    <button class="btn-opt" data-value="menikah" onclick="pilihStatus('menikah')">👨‍👩‍👧 Menikah</button>
+                    <button class="btn-opt" data-value="menikah" onclick="pilihStatus('menikah')">💒 Menikah</button>
                 </div>
             </div>
 
-            <!-- Disclaimer -->
             <div class="disclaimer-box">
                 <p>⚠️ <strong>Disclaimer:</strong> Tes ini merupakan alat refleksi diri (self-assessment) untuk membantu memahami pola hubungan. Hasil bukan merupakan diagnosis psikologis dan tidak dapat menggantikan konsultasi dengan psikolog atau profesional kesehatan mental.</p>
             </div>
@@ -505,7 +79,7 @@
 
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="simpanHasil()">📋 Simpan Hasil</button>
-                <a href="index.html" class="btn" style="text-align:center;text-decoration:none;">🏠 Ke Beranda</a>
+                <a href="/" class="btn" style="text-align:center;text-decoration:none;">🏠 Ke Beranda</a>
             </div>
 
             <div class="note">
@@ -521,15 +95,15 @@
 
     <!-- ===== BOTTOM NAV ===== -->
     <div class="bottom-nav">
-        <a href="index.html">
+        <a href="/">
             <span class="nav-icon">🏠</span>
             Beranda
         </a>
-        <a href="love-language.html" class="active">
+        <a href="/love-language" class="active">
             <span class="nav-icon">❤️</span>
             Love
         </a>
-        <a href="hasil.html">
+        <a href="/hasil">
             <span class="nav-icon">📊</span>
             Hasil
         </a>
@@ -540,15 +114,9 @@
     </div>
 
     <script>
-        // ============================================================
-        //  STATE
-        // ============================================================
         let userGender = null;
         let userStatus = null;
 
-        // ============================================================
-        //  FUNGSI PILIH GENDER & STATUS
-        // ============================================================
         function pilihGender(gender) {
             userGender = gender;
             document.querySelectorAll('#genderOptions .btn-opt').forEach(btn => {
@@ -576,407 +144,6 @@
             }
         }
 
-        // ============================================================
-        //  MAP STATUS KE LABEL
-        // ============================================================
-        const STATUS_LABEL = {
-            single: '💔 Single',
-            pdkt: '💕 PDKT',
-            pacaran: '💑 Pacaran',
-            tunangan: '💍 Tunangan',
-            menikah: '👨‍👩‍👧 Menikah'
-        };
-
-        // ============================================================
-        //  DATA KATEGORI & WARNA
-        // ============================================================
-        const KATEGORI = [
-            'Words of Affirmation',
-            'Acts of Service',
-            'Quality Time',
-            'Physical Touch',
-            'Receiving Gifts'
-        ];
-
-        const EMOJI = {
-            'Words of Affirmation': '💬',
-            'Acts of Service': '🤝',
-            'Quality Time': '⏰',
-            'Physical Touch': '🫂',
-            'Receiving Gifts': '🎁'
-        };
-
-        const WARNA = {
-            'Words of Affirmation': '#6c5ce7',
-            'Acts of Service': '#00b894',
-            'Quality Time': '#d4a373',
-            'Physical Touch': '#e17055',
-            'Receiving Gifts': '#fd79a8'
-        };
-
-        // ============================================================
-        //  📝 DATA PERTANYAAN PER STATUS
-        //  SINGLE: 25 (5 per kategori)
-        //  PDKT: 30 (6 per kategori)
-        //  PACARAN: 40 (8 per kategori)
-        //  TUNANGAN: 35 (7 per kategori)
-        //  MENIKAH: 40 (8 per kategori)
-        // ============================================================
-        const PERTANYAAN = {
-            single: {
-                'Words of Affirmation': [
-                    'Saya merasa dihargai ketika teman atau keluarga mengatakan bahwa mereka bangga kepada saya.',
-                    'Saya merasa diperhatikan ketika orang terdekat mengucapkan terima kasih atas hal-hal kecil yang saya lakukan.',
-                    'Kata-kata penyemangat dari orang-orang terdekat membuat saya merasa lebih percaya diri.',
-                    'Saya senang ketika seseorang memuji usaha atau pencapaian saya.',
-                    'Saya merasa lebih tenang ketika orang lain mengungkapkan dukungannya secara langsung.'
-                ],
-                'Acts of Service': [
-                    'Saya merasa diperhatikan ketika seseorang membantu saya tanpa diminta.',
-                    'Bantuan kecil dari orang lain membuat saya merasa sangat dihargai.',
-                    'Saya merasa lebih dihargai ketika seseorang membantu saya saat sedang lelah.',
-                    'Saya senang ketika orang lain melakukan sesuatu untuk memudahkan hari saya.',
-                    'Saya lebih tersentuh oleh bantuan nyata daripada sekadar kata-kata.'
-                ],
-                'Quality Time': [
-                    'Saya merasa dihargai ketika seseorang memberikan perhatian penuh saat bersama saya.',
-                    'Menghabiskan waktu berkualitas dengan orang terdekat membuat saya merasa lebih dekat.',
-                    'Saya menikmati percakapan yang mendalam dengan orang-orang terpercaya.',
-                    'Saya merasa kecewa ketika seseorang lebih sibuk dengan ponselnya saat bersama saya.',
-                    'Saya merasa diperhatikan ketika seseorang meluangkan waktu khusus untuk saya.'
-                ],
-                'Physical Touch': [
-                    'Saya merasa nyaman ketika orang terdekat memberi pelukan hangat.',
-                    'Sentuhan lembut dari orang yang saya percaya membuat saya merasa tenang.',
-                    'Saya merasa lebih dekat dengan seseorang ketika kami berbagi sentuhan yang nyaman.',
-                    'Saya merindukan kedekatan fisik ketika lama tidak bertemu orang terdekat.',
-                    'Sentuhan sederhana, seperti tepukan di bahu, memiliki makna besar bagi saya.'
-                ],
-                'Receiving Gifts': [
-                    'Saya merasa dihargai ketika seseorang memberikan hadiah yang dipilih dengan penuh perhatian.',
-                    'Hadiah sederhana tetap terasa istimewa jika diberikan dengan tulus.',
-                    'Saya merasa bahagia ketika seseorang mengingat hal-hal kecil yang saya sukai.',
-                    'Saya menghargai kejutan kecil yang diberikan orang terdekat.',
-                    'Bagi saya, hadiah menjadi simbol perhatian dan kasih sayang.'
-                ]
-            },
-            pdkt: {
-                'Words of Affirmation': [
-                    'Saya merasa dihargai ketika calon pasangan mengatakan bahwa ia bangga kepada saya.',
-                    'Saya merasa dicintai ketika calon pasangan mengucapkan terima kasih atas hal-hal kecil yang saya lakukan.',
-                    'Kata-kata penyemangat dari calon pasangan membuat saya merasa lebih dekat dengannya.',
-                    'Saya senang ketika calon pasangan memuji usaha atau pencapaian saya.',
-                    'Saya merasa lebih tenang ketika calon pasangan mengungkapkan rasa sayangnya secara langsung.',
-                    'Saya merasa sedih jika calon pasangan jarang memberikan apresiasi secara verbal.'
-                ],
-                'Acts of Service': [
-                    'Saya merasa dicintai ketika calon pasangan membantu saya tanpa diminta.',
-                    'Bantuan kecil dari calon pasangan membuat saya merasa sangat diperhatikan.',
-                    'Saya merasa lebih dihargai ketika calon pasangan membantu saya saat sedang lelah.',
-                    'Saya senang ketika calon pasangan melakukan sesuatu untuk memudahkan hari saya.',
-                    'Saya merasa calon pasangan menunjukkan perhatiannya melalui tindakan nyata.',
-                    'Saya lebih tersentuh oleh bantuan daripada hadiah.'
-                ],
-                'Quality Time': [
-                    'Saya merasa paling dicintai ketika calon pasangan memberikan perhatian penuh saat bersama saya.',
-                    'Menghabiskan waktu berdua tanpa gangguan membuat saya merasa lebih dekat dengan calon pasangan.',
-                    'Saya menikmati percakapan yang mendalam bersama calon pasangan.',
-                    'Saya merasa kecewa ketika calon pasangan lebih sibuk dengan ponselnya saat bersama saya.',
-                    'Saya merasa hubungan kami semakin kuat setelah melakukan kegiatan bersama.',
-                    'Saya lebih memilih menghabiskan waktu bersama daripada menerima hadiah.'
-                ],
-                'Physical Touch': [
-                    'Saya merasa lebih dekat dengan calon pasangan ketika kami berpegangan tangan.',
-                    'Pelukan dari calon pasangan membuat saya merasa lebih tenang.',
-                    'Sentuhan lembut dari calon pasangan membuat saya merasa dicintai.',
-                    'Saya merasa nyaman ketika calon pasangan menunjukkan kasih sayang melalui sentuhan yang saya setujui.',
-                    'Saya merasa hubungan kami lebih hangat setelah berpelukan.',
-                    'Saya merindukan sentuhan fisik ketika lama tidak bertemu calon pasangan.'
-                ],
-                'Receiving Gifts': [
-                    'Saya merasa dicintai ketika calon pasangan memberikan hadiah yang dipilih dengan penuh perhatian.',
-                    'Hadiah sederhana tetap terasa istimewa jika diberikan dengan tulus.',
-                    'Saya merasa bahagia ketika calon pasangan membawa oleh-oleh untuk saya.',
-                    'Saya menghargai kejutan kecil yang diberikan calon pasangan.',
-                    'Saya merasa calon pasangan mengingat saya ketika memberikan sesuatu yang saya sukai.',
-                    'Bagi saya, hadiah menjadi simbol perhatian dan kasih sayang.'
-                ]
-            },
-            pacaran: {
-                'Words of Affirmation': [
-                    'Saya merasa paling dihargai ketika pasangan mengatakan bahwa ia bangga kepada saya.',
-                    'Saya merasa dicintai ketika pasangan mengucapkan terima kasih atas hal-hal kecil yang saya lakukan.',
-                    'Kata-kata penyemangat dari pasangan membuat saya merasa lebih dekat dengannya.',
-                    'Saya senang ketika pasangan memuji usaha atau pencapaian saya.',
-                    'Saya merasa lebih tenang ketika pasangan mengungkapkan rasa sayangnya secara langsung.',
-                    'Saya merasa sedih jika pasangan jarang memberikan apresiasi secara verbal.',
-                    'Saya merasa hubungan kami semakin erat setelah saling berbicara dari hati ke hati.',
-                    'Mendengar pasangan mengatakan "Aku mencintaimu" memiliki arti yang besar bagi saya.'
-                ],
-                'Acts of Service': [
-                    'Saya merasa dicintai ketika pasangan membantu pekerjaan saya tanpa diminta.',
-                    'Bantuan kecil dari pasangan membuat saya merasa sangat diperhatikan.',
-                    'Saya merasa lebih dihargai ketika pasangan membantu saya saat sedang lelah.',
-                    'Saya senang ketika pasangan melakukan sesuatu untuk memudahkan hari saya.',
-                    'Saya merasa pasangan menunjukkan kasih sayangnya melalui tindakan nyata.',
-                    'Saya lebih tersentuh oleh bantuan daripada hadiah.',
-                    'Ketika pasangan mengingat kebutuhan saya lalu membantu memenuhinya, saya merasa sangat dicintai.',
-                    'Saya merasa bahagia ketika pasangan rela meluangkan tenaga untuk membantu saya.'
-                ],
-                'Quality Time': [
-                    'Saya merasa paling dicintai ketika pasangan memberikan perhatian penuh saat bersama saya.',
-                    'Menghabiskan waktu berdua tanpa gangguan membuat saya merasa lebih dekat dengan pasangan.',
-                    'Saya menikmati percakapan yang mendalam bersama pasangan.',
-                    'Saya merasa kecewa ketika pasangan lebih sibuk dengan ponselnya saat bersama saya.',
-                    'Saya merasa hubungan kami semakin kuat setelah melakukan kegiatan bersama.',
-                    'Saya lebih memilih menghabiskan waktu bersama daripada menerima hadiah.',
-                    'Saya merasa diperhatikan ketika pasangan sengaja meluangkan waktu khusus untuk saya.',
-                    'Bagi saya, kehadiran pasangan sepenuhnya lebih penting daripada aktivitas yang dilakukan.'
-                ],
-                'Physical Touch': [
-                    'Saya merasa lebih dekat dengan pasangan ketika kami berpegangan tangan.',
-                    'Pelukan dari pasangan membuat saya merasa lebih tenang.',
-                    'Sentuhan lembut dari pasangan membuat saya merasa dicintai.',
-                    'Saya merasa nyaman ketika pasangan menunjukkan kasih sayang melalui sentuhan yang saya setujui.',
-                    'Saya merasa hubungan kami lebih hangat setelah berpelukan.',
-                    'Saya merindukan sentuhan fisik ketika lama tidak bertemu pasangan.',
-                    'Saya merasa lebih didukung ketika pasangan memeluk saya saat sedang sedih.',
-                    'Sentuhan sederhana, seperti menggenggam tangan atau merangkul, memiliki makna besar bagi saya.'
-                ],
-                'Receiving Gifts': [
-                    'Saya merasa dicintai ketika pasangan memberikan hadiah yang dipilih dengan penuh perhatian.',
-                    'Hadiah sederhana tetap terasa istimewa jika diberikan dengan tulus.',
-                    'Saya merasa bahagia ketika pasangan membawa oleh-oleh untuk saya.',
-                    'Saya menghargai kejutan kecil yang diberikan pasangan.',
-                    'Saya merasa pasangan mengingat saya ketika memberikan sesuatu yang saya sukai.',
-                    'Bagi saya, hadiah menjadi simbol perhatian dan kasih sayang.',
-                    'Saya senang menerima benda kecil yang memiliki makna khusus dari pasangan.',
-                    'Saya merasa dihargai ketika pasangan meluangkan waktu untuk memilih hadiah yang sesuai dengan saya.'
-                ]
-            },
-            tunangan: {
-                'Words of Affirmation': [
-                    'Saya merasa dicintai ketika calon suami/istri mengatakan bahwa ia bangga kepada saya.',
-                    'Saya merasa dicintai ketika calon suami/istri mengucapkan terima kasih atas hal-hal kecil yang saya lakukan.',
-                    'Kata-kata penyemangat dari calon suami/istri membuat saya merasa lebih dekat dengannya.',
-                    'Saya senang ketika calon suami/istri memuji usaha atau pencapaian saya.',
-                    'Saya merasa lebih tenang ketika calon suami/istri mengungkapkan rasa sayangnya secara langsung.',
-                    'Saya merasa sedih jika calon suami/istri jarang memberikan apresiasi secara verbal.',
-                    'Mendengar calon suami/istri mengatakan "Aku mencintaimu" memiliki arti yang besar bagi saya.'
-                ],
-                'Acts of Service': [
-                    'Saya merasa dicintai ketika calon suami/istri membantu pekerjaan saya tanpa diminta.',
-                    'Bantuan kecil dari calon suami/istri membuat saya merasa sangat diperhatikan.',
-                    'Saya merasa lebih dihargai ketika calon suami/istri membantu saya saat sedang lelah.',
-                    'Saya senang ketika calon suami/istri melakukan sesuatu untuk memudahkan hari saya.',
-                    'Saya merasa calon suami/istri menunjukkan kasih sayangnya melalui tindakan nyata.',
-                    'Saya lebih tersentuh oleh bantuan daripada hadiah.',
-                    'Ketika calon suami/istri mengingat kebutuhan saya lalu membantu memenuhinya, saya merasa sangat dicintai.'
-                ],
-                'Quality Time': [
-                    'Saya merasa paling dicintai ketika calon suami/istri memberikan perhatian penuh saat bersama saya.',
-                    'Menghabiskan waktu berdua tanpa gangguan membuat saya merasa lebih dekat dengan calon suami/istri.',
-                    'Saya menikmati percakapan yang mendalam bersama calon suami/istri.',
-                    'Saya merasa kecewa ketika calon suami/istri lebih sibuk dengan ponselnya saat bersama saya.',
-                    'Saya merasa hubungan kami semakin kuat setelah melakukan kegiatan bersama.',
-                    'Saya lebih memilih menghabiskan waktu bersama daripada menerima hadiah.',
-                    'Saya merasa diperhatikan ketika calon suami/istri sengaja meluangkan waktu khusus untuk saya.'
-                ],
-                'Physical Touch': [
-                    'Saya merasa lebih dekat dengan calon suami/istri ketika kami berpegangan tangan.',
-                    'Pelukan dari calon suami/istri membuat saya merasa lebih tenang.',
-                    'Sentuhan lembut dari calon suami/istri membuat saya merasa dicintai.',
-                    'Saya merasa nyaman ketika calon suami/istri menunjukkan kasih sayang melalui sentuhan yang saya setujui.',
-                    'Saya merasa hubungan kami lebih hangat setelah berpelukan.',
-                    'Saya merindukan sentuhan fisik ketika lama tidak bertemu calon suami/istri.',
-                    'Saya merasa lebih didukung ketika calon suami/istri memeluk saya saat sedang sedih.'
-                ],
-                'Receiving Gifts': [
-                    'Saya merasa dicintai ketika calon suami/istri memberikan hadiah yang dipilih dengan penuh perhatian.',
-                    'Hadiah sederhana tetap terasa istimewa jika diberikan dengan tulus.',
-                    'Saya merasa bahagia ketika calon suami/istri membawa oleh-oleh untuk saya.',
-                    'Saya menghargai kejutan kecil yang diberikan calon suami/istri.',
-                    'Saya merasa calon suami/istri mengingat saya ketika memberikan sesuatu yang saya sukai.',
-                    'Bagi saya, hadiah menjadi simbol perhatian dan kasih sayang.',
-                    'Saya senang menerima benda kecil yang memiliki makna khusus dari calon suami/istri.'
-                ]
-            },
-            menikah: {
-                'Words of Affirmation': [
-                    'Saya merasa dicintai ketika suami/istri mengatakan bahwa ia bangga kepada saya.',
-                    'Saya merasa dicintai ketika suami/istri mengucapkan terima kasih atas hal-hal kecil yang saya lakukan.',
-                    'Kata-kata penyemangat dari suami/istri membuat saya merasa lebih dekat dengannya.',
-                    'Saya senang ketika suami/istri memuji usaha atau pencapaian saya.',
-                    'Saya merasa lebih tenang ketika suami/istri mengungkapkan rasa sayangnya secara langsung.',
-                    'Saya merasa sedih jika suami/istri jarang memberikan apresiasi secara verbal.',
-                    'Saya merasa hubungan kami semakin erat setelah saling berbicara dari hati ke hati.',
-                    'Mendengar suami/istri mengatakan "Aku mencintaimu" memiliki arti yang besar bagi saya.'
-                ],
-                'Acts of Service': [
-                    'Saya merasa dicintai ketika suami/istri membantu pekerjaan saya tanpa diminta.',
-                    'Bantuan kecil dari suami/istri membuat saya merasa sangat diperhatikan.',
-                    'Saya merasa lebih dihargai ketika suami/istri membantu saya saat sedang lelah.',
-                    'Saya senang ketika suami/istri melakukan sesuatu untuk memudahkan hari saya.',
-                    'Saya merasa suami/istri menunjukkan kasih sayangnya melalui tindakan nyata.',
-                    'Saya lebih tersentuh oleh bantuan daripada hadiah.',
-                    'Ketika suami/istri mengingat kebutuhan saya lalu membantu memenuhinya, saya merasa sangat dicintai.',
-                    'Saya merasa bahagia ketika suami/istri rela meluangkan tenaga untuk membantu saya.'
-                ],
-                'Quality Time': [
-                    'Saya merasa paling dicintai ketika suami/istri memberikan perhatian penuh saat bersama saya.',
-                    'Menghabiskan waktu berdua tanpa gangguan membuat saya merasa lebih dekat dengan suami/istri.',
-                    'Saya menikmati percakapan yang mendalam bersama suami/istri.',
-                    'Saya merasa kecewa ketika suami/istri lebih sibuk dengan ponselnya saat bersama saya.',
-                    'Saya merasa hubungan kami semakin kuat setelah melakukan kegiatan bersama.',
-                    'Saya lebih memilih menghabiskan waktu bersama daripada menerima hadiah.',
-                    'Saya merasa diperhatikan ketika suami/istri sengaja meluangkan waktu khusus untuk saya.',
-                    'Bagi saya, kehadiran suami/istri sepenuhnya lebih penting daripada aktivitas yang dilakukan.'
-                ],
-                'Physical Touch': [
-                    'Saya merasa lebih dekat dengan suami/istri ketika kami berpegangan tangan.',
-                    'Pelukan dari suami/istri membuat saya merasa lebih tenang.',
-                    'Sentuhan lembut dari suami/istri membuat saya merasa dicintai.',
-                    'Saya merasa nyaman ketika suami/istri menunjukkan kasih sayang melalui sentuhan yang saya setujui.',
-                    'Saya merasa hubungan kami lebih hangat setelah berpelukan.',
-                    'Saya merindukan sentuhan fisik ketika lama tidak bertemu suami/istri.',
-                    'Saya merasa lebih didukung ketika suami/istri memeluk saya saat sedang sedih.',
-                    'Sentuhan sederhana, seperti menggenggam tangan atau merangkul, memiliki makna besar bagi saya.'
-                ],
-                'Receiving Gifts': [
-                    'Saya merasa dicintai ketika suami/istri memberikan hadiah yang dipilih dengan penuh perhatian.',
-                    'Hadiah sederhana tetap terasa istimewa jika diberikan dengan tulus.',
-                    'Saya merasa bahagia ketika suami/istri membawa oleh-oleh untuk saya.',
-                    'Saya menghargai kejutan kecil yang diberikan suami/istri.',
-                    'Saya merasa suami/istri mengingat saya ketika memberikan sesuatu yang saya sukai.',
-                    'Bagi saya, hadiah menjadi simbol perhatian dan kasih sayang.',
-                    'Saya senang menerima benda kecil yang memiliki makna khusus dari suami/istri.',
-                    'Saya merasa dihargai ketika suami/istri meluangkan waktu untuk memilih hadiah yang sesuai dengan saya.'
-                ]
-            }
-        };
-
-        // ============================================================
-        //  DATA DETAIL REKOMENDASI (dengan Gender + Status)
-        // ============================================================
-        function getDetailData() {
-            const isWanita = userGender === 'wanita';
-            const sebutan = isWanita ? 'kamu (cewe)' : 'kamu (cowo)';
-
-            // Rekomendasi berdasarkan status
-            const rekomendasiStatus = {
-                single: {
-                    'Words of Affirmation': `Untuk ${sebutan} yang sedang single, ini saat yang tepat untuk mengenali dirimu sendiri. Perhatikan bagaimana kamu merespons kata-kata dari orang-orang di sekitarmu.`,
-                    'Acts of Service': `Untuk ${sebutan} yang sedang single, kenali bagaimana kamu merespons bantuan dari orang lain. Apakah kamu merasa dihargai ketika seseorang membantu tanpa diminta?`,
-                    'Quality Time': `Untuk ${sebutan} yang sedang single, saat ini kamu bisa melatih kehadiran penuh untuk dirimu sendiri.`,
-                    'Physical Touch': `Untuk ${sebutan} yang sedang single, kenali batasan dan kenyamananmu terhadap sentuhan fisik.`,
-                    'Receiving Gifts': `Untuk ${sebutan} yang sedang single, perhatikan bagaimana perasaanmu ketika menerima hadiah dari orang terdekat.`
-                },
-                pdkt: {
-                    'Words of Affirmation': `Untuk ${sebutan} yang sedang PDKT, mulai perhatikan apakah calon pasanganmu terbuka menerima pujian dan kata-kata penghargaan darimu.`,
-                    'Acts of Service': `Untuk ${sebutan} yang sedang PDKT, perhatikan apakah calon pasanganmu menunjukkan perhatian melalui tindakan kecil.`,
-                    'Quality Time': `Untuk ${sebutan} yang sedang PDKT, kualitas waktu bersama lebih penting daripada kuantitas.`,
-                    'Physical Touch': `Untuk ${sebutan} yang sedang PDKT, penting untuk menghormati batasan masing-masing.`,
-                    'Receiving Gifts': `Untuk ${sebutan} yang sedang PDKT, hadiah kecil yang tulus bisa menjadi cara untuk menunjukkan perhatian.`
-                },
-                pacaran: {
-                    'Words of Affirmation': `Untuk ${sebutan} yang sedang pacaran, jadikan kebiasaan untuk saling memberi apresiasi setiap hari.`,
-                    'Acts of Service': `Untuk ${sebutan} yang sedang pacaran, tunjukkan cinta melalui tindakan nyata.`,
-                    'Quality Time': `Untuk ${sebutan} yang sedang pacaran, jadwalkan waktu berkualitas tanpa gangguan.`,
-                    'Physical Touch': `Untuk ${sebutan} yang sedang pacaran, sentuhan fisik seperti berpegangan tangan atau pelukan hangat bisa menjadi perekat emosional.`,
-                    'Receiving Gifts': `Untuk ${sebutan} yang sedang pacaran, kejutan kecil bisa membuat pasangan merasa diingat dan dihargai.`
-                },
-                tunangan: {
-                    'Words of Affirmation': `Untuk ${sebutan} yang sudah tunangan, bangun kebiasaan komunikasi yang sehat sebelum pernikahan.`,
-                    'Acts of Service': `Untuk ${sebutan} yang sudah tunangan, persiapan pernikahan bisa menjadi momen untuk saling membantu.`,
-                    'Quality Time': `Untuk ${sebutan} yang sudah tunangan, jangan biarkan persiapan pernikahan mengorbankan waktu berkualitas berdua.`,
-                    'Physical Touch': `Untuk ${sebutan} yang sudah tunangan, kedekatan fisik yang nyaman akan membantu mempererat ikatan menjelang pernikahan.`,
-                    'Receiving Gifts': `Untuk ${sebutan} yang sudah tunangan, hadiah tidak harus mahal, bisa berupa surat cinta atau kenang-kenangan kecil.`
-                },
-                menikah: {
-                    'Words of Affirmation': `Untuk ${sebutan} yang sudah menikah, kata-kata penghargaan dan dukungan menjadi kebutuhan harian.`,
-                    'Acts of Service': `Untuk ${sebutan} yang sudah menikah, pernikahan adalah kemitraan. Bantu pasangan dalam pekerjaan rumah tangga.`,
-                    'Quality Time': `Untuk ${sebutan} yang sudah menikah, di tengah kesibukan rumah tangga, tetap jadwalkan waktu berdua.`,
-                    'Physical Touch': `Untuk ${sebutan} yang sudah menikah, sentuhan fisik seperti pelukan atau genggaman tangan adalah bahasa cinta yang sederhana namun kuat.`,
-                    'Receiving Gifts': `Untuk ${sebutan} yang sudah menikah, kejutan kecil di hari biasa bisa lebih berarti daripada hadiah di hari besar.`
-                }
-            };
-
-            const baseData = {
-                'Words of Affirmation': {
-                    desc: 'Kamu cenderung merasa dicintai ketika pasangan memberikan penghargaan, dukungan, pujian, atau kata-kata yang menunjukkan perhatian dan kasih sayang.',
-                    plus: ['Mendengar "Aku bangga padamu."', 'Mendapat ucapan terima kasih.',
-                        'Mendengar pasangan mengapresiasi usahamu.',
-                        'Mendengar "Aku mencintaimu."', 'Diberi semangat ketika sedang menghadapi kesulitan.',
-                        'Mendapat pujian yang tulus.'
-                    ],
-                    minus: ['Kata-kata kasar.', 'Kritik yang terus-menerus.', 'Sindiran atau ejekan.',
-                        'Tidak pernah mendapatkan apresiasi.', 'Pasangan diam tanpa komunikasi ketika ada masalah.'
-                    ]
-                },
-                'Acts of Service': {
-                    desc: 'Kamu cenderung merasa dicintai ketika pasangan menunjukkan perhatian melalui tindakan nyata. Bantuan kecil yang dilakukan dengan tulus sering kali lebih bermakna daripada kata-kata.',
-                    plus: ['Dibantu memasak.', 'Dibantu membereskan rumah.', 'Pasangan menawarkan bantuan tanpa diminta.',
-                        'Dibuatkan makanan saat sedang lelah.', 'Pasangan membantu menyelesaikan pekerjaan.',
-                        'Pasangan mengingat kebutuhanmu.'
-                    ],
-                    minus: ['Janji yang tidak ditepati.', 'Pasangan bersikap cuek ketika kamu membutuhkan bantuan.',
-                        'Semua pekerjaan dibebankan kepadamu.', 'Pasangan tidak berinisiatif membantu.',
-                        'Merasa perjuanganmu tidak diperhatikan.'
-                    ]
-                },
-                'Quality Time': {
-                    desc: 'Kamu cenderung merasa dicintai ketika pasangan meluangkan waktu khusus untuk hadir sepenuhnya bersamamu. Kehadiran yang penuh perhatian membuatmu merasa dihargai dan diperhatikan.',
-                    plus: ['Mengobrol tanpa gangguan.', 'Makan bersama.', 'Jalan-jalan berdua.',
-                        'Quality time tanpa bermain ponsel.', 'Menonton film bersama.',
-                        'Pasangan benar-benar mendengarkan ceritamu.'
-                    ],
-                    minus: ['Pasangan sibuk dengan ponselnya saat bersama.', 'Janji bertemu sering dibatalkan.',
-                        'Jarang menghabiskan waktu bersama.', 'Pasangan tampak tidak fokus ketika berbicara.',
-                        'Selalu terburu-buru saat bersama.'
-                    ]
-                },
-                'Physical Touch': {
-                    desc: 'Kamu cenderung merasa dicintai melalui sentuhan fisik yang nyaman, aman, dan disepakati bersama. Sentuhan sederhana dapat memberikan rasa dekat, tenang, dan didukung secara emosional.',
-                    plus: ['Berpegangan tangan.', 'Pelukan hangat.', 'Rangkulan.',
-                        'Sentuhan lembut di bahu atau punggung.',
-                        'Duduk berdekatan.', 'Pelukan saat sedang sedih.'
-                    ],
-                    minus: ['Pasangan menghindari sentuhan tanpa penjelasan.',
-                        'Kurangnya kedekatan fisik yang membuatmu nyaman.',
-                        'Sentuhan yang dilakukan tanpa memperhatikan kenyamanan atau persetujuanmu.',
-                        'Pasangan menjaga jarak terus-menerus.',
-                        'Merasa diabaikan ketika membutuhkan dukungan fisik yang menenangkan.'
-                    ]
-                },
-                'Receiving Gifts': {
-                    desc: 'Kamu cenderung merasa dicintai ketika pasangan memberikan hadiah atau tanda perhatian yang dipilih dengan penuh makna. Yang terpenting bukan harga hadiah, tetapi usaha dan perhatian di baliknya.',
-                    plus: ['Mendapat hadiah kecil yang bermakna.', 'Dibawakan oleh-oleh.', 'Mendapat surat atau kartu ucapan.',
-                        'Pasangan mengingat hari-hari penting.', 'Mendapat kejutan sederhana.',
-                        'Diberikan sesuatu yang sesuai dengan kesukaanmu.'
-                    ],
-                    minus: ['Pasangan sering melupakan momen penting.', 'Tidak pernah mendapatkan tanda perhatian.',
-                        'Hadiah diberikan tanpa ketulusan atau sekadar formalitas.',
-                        'Pasangan tidak mengingat hal-hal yang kamu sukai.',
-                        'Merasa usahamu memberi perhatian tidak pernah dibalas.'
-                    ]
-                }
-            };
-
-            const result = {};
-            KATEGORI.forEach(k => {
-                result[k] = {
-                    desc: baseData[k].desc,
-                    plus: baseData[k].plus,
-                    minus: baseData[k].minus,
-                    action: [rekomendasiStatus[userStatus]?.[k] || `Perhatikan bagaimana ${k.toLowerCase()} berperan dalam hubunganmu.`]
-                };
-            });
-            return result;
-        }
-
-        // ============================================================
-        //  BUAT LIST SOAL BERDASARKAN STATUS
-        // ============================================================
         function getSoalByStatus(status) {
             const data = PERTANYAAN[status];
             if (!data) return [];
@@ -990,16 +157,52 @@
             return soal;
         }
 
-        // ============================================================
-        //  STATE SOAL
-        // ============================================================
+        function getDetailData() {
+            const rekomendasi = getRekomendasi(userGender, userStatus);
+            const baseData = {
+                'Words of Affirmation': {
+                    desc: 'Kamu cenderung merasa dicintai ketika pasangan memberikan penghargaan, dukungan, pujian, atau kata-kata yang menunjukkan perhatian dan kasih sayang.',
+                    plus: ['Mendengar "Aku bangga padamu."', 'Mendapat ucapan terima kasih.', 'Mendengar pasangan mengapresiasi usahamu.', 'Mendengar "Aku mencintaimu."', 'Diberi semangat ketika sedang menghadapi kesulitan.', 'Mendapat pujian yang tulus.'],
+                    minus: ['Kata-kata kasar.', 'Kritik yang terus-menerus.', 'Sindiran atau ejekan.', 'Tidak pernah mendapatkan apresiasi.', 'Pasangan diam tanpa komunikasi ketika ada masalah.']
+                },
+                'Acts of Service': {
+                    desc: 'Kamu cenderung merasa dicintai ketika pasangan menunjukkan perhatian melalui tindakan nyata. Bantuan kecil yang dilakukan dengan tulus sering kali lebih bermakna daripada kata-kata.',
+                    plus: ['Dibantu memasak.', 'Dibantu membereskan rumah.', 'Pasangan menawarkan bantuan tanpa diminta.', 'Dibuatkan makanan saat sedang lelah.', 'Pasangan membantu menyelesaikan pekerjaan.', 'Pasangan mengingat kebutuhanmu.'],
+                    minus: ['Janji yang tidak ditepati.', 'Pasangan bersikap cuek ketika kamu membutuhkan bantuan.', 'Semua pekerjaan dibebankan kepadamu.', 'Pasangan tidak berinisiatif membantu.', 'Merasa perjuanganmu tidak diperhatikan.']
+                },
+                'Quality Time': {
+                    desc: 'Kamu cenderung merasa dicintai ketika pasangan meluangkan waktu khusus untuk hadir sepenuhnya bersamamu. Kehadiran yang penuh perhatian membuatmu merasa dihargai dan diperhatikan.',
+                    plus: ['Mengobrol tanpa gangguan.', 'Makan bersama.', 'Jalan-jalan berdua.', 'Quality time tanpa bermain ponsel.', 'Menonton film bersama.', 'Pasangan benar-benar mendengarkan ceritamu.'],
+                    minus: ['Pasangan sibuk dengan ponselnya saat bersama.', 'Janji bertemu sering dibatalkan.', 'Jarang menghabiskan waktu bersama.', 'Pasangan tampak tidak fokus ketika berbicara.', 'Selalu terburu-buru saat bersama.']
+                },
+                'Physical Touch': {
+                    desc: 'Kamu cenderung merasa dicintai melalui sentuhan fisik yang nyaman, aman, dan disepakati bersama. Sentuhan sederhana dapat memberikan rasa dekat, tenang, dan didukung secara emosional.',
+                    plus: ['Berpegangan tangan.', 'Pelukan hangat.', 'Rangkulan.', 'Sentuhan lembut di bahu atau punggung.', 'Duduk berdekatan.', 'Pelukan saat sedang sedih.'],
+                    minus: ['Pasangan menghindari sentuhan tanpa penjelasan.', 'Kurangnya kedekatan fisik yang membuatmu nyaman.', 'Sentuhan yang dilakukan tanpa memperhatikan kenyamanan atau persetujuanmu.', 'Pasangan menjaga jarak terus-menerus.', 'Merasa diabaikan ketika membutuhkan dukungan fisik yang menenangkan.']
+                },
+                'Receiving Gifts': {
+                    desc: 'Kamu cenderung merasa dicintai ketika pasangan memberikan hadiah atau tanda perhatian yang dipilih dengan penuh makna. Yang terpenting bukan harga hadiah, tetapi usaha dan perhatian di baliknya.',
+                    plus: ['Mendapat hadiah kecil yang bermakna.', 'Dibawakan oleh-oleh.', 'Mendapat surat atau kartu ucapan.', 'Pasangan mengingat hari-hari penting.', 'Mendapat kejutan sederhana.', 'Diberikan sesuatu yang sesuai dengan kesukaanmu.'],
+                    minus: ['Pasangan sering melupakan momen penting.', 'Tidak pernah mendapatkan tanda perhatian.', 'Hadiah diberikan tanpa ketulusan atau sekadar formalitas.', 'Pasangan tidak mengingat hal-hal yang kamu sukai.', 'Merasa usahamu memberi perhatian tidak pernah dibalas.']
+                }
+            };
+
+            const result = {};
+            KATEGORI.forEach(k => {
+                result[k] = {
+                    desc: baseData[k].desc,
+                    plus: baseData[k].plus,
+                    minus: baseData[k].minus,
+                    action: [rekomendasi[k] || `Perhatikan bagaimana ${k.toLowerCase()} berperan dalam hubunganmu.`]
+                };
+            });
+            return result;
+        }
+
         let soalAcak = [];
         let currentIndex = 0;
         let jawaban = [];
 
-        // ============================================================
-        //  DOM REFS
-        // ============================================================
         const intro = document.getElementById('intro');
         const soalWrapper = document.getElementById('soalWrapper');
         const hasilWrapper = document.getElementById('hasilWrapper');
@@ -1010,30 +213,26 @@
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
 
-        // ============================================================
-        //  FUNGSI UTAMA
-        // ============================================================
+        function shuffle(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
         function mulaiTes() {
             if (!userGender || !userStatus) {
                 alert('Pilih gender dan status hubungan dulu ya!');
                 return;
             }
 
-            // Ambil soal sesuai status
             const rawSoal = getSoalByStatus(userStatus);
             if (rawSoal.length === 0) {
                 alert('Maaf, belum ada pertanyaan untuk status ini. Pilih status lain.');
                 return;
             }
 
-            // Acak soal
-            function shuffle(arr) {
-                for (let i = arr.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [arr[i], arr[j]] = [arr[j], arr[i]];
-                }
-                return arr;
-            }
             soalAcak = shuffle([...rawSoal]);
             jawaban = new Array(soalAcak.length).fill(null);
             currentIndex = 0;
@@ -1079,9 +278,9 @@
         function pilihJawaban(val) {
             jawaban[currentIndex] = val;
             const labels = optionsContainer.querySelectorAll('label');
-            labels.forEach((label, idx) => {
+            labels.forEach((label) => {
                 const radio = label.querySelector('input');
-                if (radio.value == val) {
+                if (radio && radio.value == val) {
                     label.classList.add('selected');
                 } else {
                     label.classList.remove('selected');
@@ -1109,9 +308,6 @@
             }
         }
 
-        // ============================================================
-        //  HASIL
-        // ============================================================
         function tampilkanHasil() {
             soalWrapper.classList.remove('active');
             hasilWrapper.classList.add('active');
@@ -1124,15 +320,15 @@
                 skor[soal.kategori] += val;
             });
 
-            const maxPerKategori = KATEGORI.reduce((acc, k) => {
+            const maxPerKategori = {};
+            KATEGORI.forEach(k => {
                 const count = soalAcak.filter(s => s.kategori === k).length;
-                acc[k] = count * 5;
-                return acc;
-            }, {});
+                maxPerKategori[k] = count * 5;
+            });
 
             const persen = {};
             KATEGORI.forEach(k => {
-                persen[k] = Math.round((skor[k] / maxPerKategori[k]) * 100);
+                persen[k] = maxPerKategori[k] > 0 ? Math.round((skor[k] / maxPerKategori[k]) * 100) : 0;
             });
 
             const sorted = KATEGORI.slice().sort((a, b) => persen[b] - persen[a]);
@@ -1214,14 +410,12 @@
             alert('📋 Hasil berhasil disimpan! Kamu bisa lihat di halaman Hasil nanti.');
         }
 
-        // Keyboard: Enter untuk next
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && soalWrapper.classList.contains('active')) {
                 nextSoal();
             }
         });
 
-        // Load data dari localStorage
         window.addEventListener('load', () => {
             const savedGender = localStorage.getItem('userGender');
             const savedStatus = localStorage.getItem('userStatus');
@@ -1229,6 +423,5 @@
             if (savedStatus) pilihStatus(savedStatus);
         });
     </script>
-
 </body>
 </html>
