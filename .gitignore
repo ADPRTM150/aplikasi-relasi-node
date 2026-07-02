@@ -10,3 +10,4 @@ public/firebase-config.js
 # Logs
 *.log
 .DS_Store
+.vercel

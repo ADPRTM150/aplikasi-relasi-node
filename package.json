@@ -2,16 +2,20 @@
   "name": "aplikasi-relasi-node",
   "version": "1.0.0",
   "description": "Website Relasi dengan Node.js",
+  "homepage": "https://adprtm150.github.io/aplikasi-relasi-node/",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "nodemon server/server.js"
+    "dev": "nodemon server/server.js",
+    "predeploy": "echo 'Deploying...'",
+    "deploy": "gh-pages -d public"
   },
   "dependencies": {
-    "express": "^4.19.2",
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
   },
   "devDependencies": {
+    "gh-pages": "^6.3.0",
     "nodemon": "^3.1.0"
   }
 }
