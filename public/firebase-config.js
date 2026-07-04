@@ -37,6 +37,9 @@ function logout() {
 }
 
 function simpanUser(user) {
+    // 🔥 Simpan nama user ke localStorage (DI LUAR objek Firestore)
+    localStorage.setItem('userName', user.displayName || 'Pengguna');
+
     const userRef = db.collection('users').doc(user.uid);
     userRef.set({
         uid: user.uid,

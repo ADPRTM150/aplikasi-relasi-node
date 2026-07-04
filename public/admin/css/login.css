@@ -1,0 +1,141 @@
+/* ============================================================
+   LOGIN ADMIN CSS - public/admin/css/login.css
+   ============================================================ */
+
+.login-container {
+    max-width: 400px;
+    width: 100%;
+    background: #ffffff;
+    border-radius: 24px;
+    padding: 40px 30px;
+    box-shadow: 0 20px 60px rgba(58, 125, 118, 0.12);
+    margin: 0 auto;
+}
+
+.login-container .logo {
+    text-align: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1d3b36;
+    margin-bottom: 4px;
+}
+
+.login-container .logo span {
+    color: #3a7d76;
+}
+
+.login-container .subtitle {
+    text-align: center;
+    color: #5a6f6a;
+    font-size: 14px;
+    margin-bottom: 24px;
+}
+
+.login-container .footer-note {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 11px;
+    color: #8a9e99;
+}
+
+.admin-body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    background: #f7f3eb;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    font-size: 13px;
+    color: #1d3b36;
+    margin-bottom: 4px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e0e8e5;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: 0.2s;
+    background: #ffffff;
+}
+
+.form-group input:focus {
+    border-color: #3a7d76;
+    outline: none;
+    box-shadow: 0 0 0 4px rgba(58, 125, 118, 0.1);
+}
+
+.btn-login {
+    width: 100%;
+    background: #3a7d76;
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 50px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: 'Inter', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-login:hover {
+    background: #2d655f;
+    transform: scale(1.02);
+}
+
+.error-message {
+    background: #fdf0ee;
+    color: #e17055;
+    padding: 12px;
+    border-radius: 12px;
+    font-size: 13px;
+    display: none;
+    margin-bottom: 16px;
+}
+
+.error-message.show {
+    display: block;
+}
+
+.back-link {
+    display: block;
+    text-align: center;
+    margin-top: 16px;
+    color: #5a6f6a;
+    font-size: 13px;
+    text-decoration: none;
+}
+
+.back-link:hover {
+    color: #3a7d76;
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 480px) {
+    .login-container {
+        padding: 30px 20px;
+    }
+    .login-container .logo {
+        font-size: 24px;
+    }
+    .btn-login {
+        font-size: 14px;
+        padding: 12px;
+    }
+}

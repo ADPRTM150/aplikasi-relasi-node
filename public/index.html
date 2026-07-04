@@ -5,7 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Relasi - Grow Closer, Love Better</title>
 
-    <!-- ===== CSS ===== -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- CSS EKSTERNAL -->
     <link rel="stylesheet" href="/css/style.css" />
 
     <!-- Firebase SDK -->
@@ -15,6 +21,7 @@
     <script src="/firebase-config.js"></script>
 </head>
 <body>
+
     <div class="app">
 
         <!-- ===== HEADER ===== -->
@@ -28,117 +35,107 @@
             </div>
         </div>
 
-        <!-- ===== GREETING ===== -->
-        <div class="greeting">
-            Hai, <strong id="userName">Pengguna</strong>! 👋
+<!-- ===== GREETING + IMAGE ===== -->
+        <div class="greeting-wrapper">
+            <div class="greeting-text">
+                <h1>Hai, <span id="userName">Pengguna</span>!</h1>
+                <p>Setiap hubungan bisa bertumbuh lebih sehat dengan memahami dan merawatnya bersama.</p>
+
+        <div style="margin-top: 6px; margin-bottom: 16px;">
+    <a href="/relationship-check" style="display:inline-flex; align-items:center; gap:10px; background:#3a7d76; color:white; padding:10px 18px; border-radius:50px; font-weight:600; font-size:13px; text-decoration:none; transition:all 0.3s ease;">
+        <span>📋</span>
+        Mulai Relationship Wellness Check
+        <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:11px; transition:all 0.3s ease;">
+            <i class="fas fa-arrow-right"></i>
+        </span>
+    </a>
+    <p style="font-size:11px; color:#5a6f6a; margin-top:4px; margin-bottom:0;">
+        <span>🔐</span>
+        Privat, aman, dan hanya kamu yang bisa melihat hasilnya.
+    </p>
+</div>
         </div>
 
-        <!-- ===== SCORE CARD ===== -->
-        <div class="score-card" id="scoreCard">
-            <div class="score-header">
-                <span class="label">Hubunganmu hari ini</span>
-                <div>
-                    <span class="value">😊 <span id="totalScore">83</span>%</span>
-                    <span class="status" id="statusLabel">Baik</span>
-                </div>
-            </div>
+        <div class="greeting-image">
+            <img src="img/Asset 1.svg" alt="Ilustrasi" />
+        </div>
+    </div>
 
-            <div id="kategoriContainer">
-                <!-- Akan diisi JavaScript -->
-            </div>
 
-            <div class="disclaimer-mini">
-                ⚠️ Skor ini adalah alat refleksi diri, bukan diagnosis profesional.
-            </div>
+        <!-- ===== GRID 4 FITUR ===== -->
+        <div class="card">
+            <h4 style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:16px;">Pilih yang ingin kamu lakukan hari ini</h4>
+            <div class="fitur-grid">
+                <a href="/love-language" class="fitur-item">
+                    <div class="icon">❤️</div>
+                    <div class="label">Kenali Love Language</div>
+                    <div class="desc">Temukan cara kamu dan pasangan memberi &amp; menerima cinta.</div>
+                    <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
+                </a>
 
-            <div class="area-fix" id="areaFix">
-                <div class="title">📌 Area yang perlu diperbaiki:</div>
-                <ul id="areaList">
-                    <!-- Akan diisi JavaScript -->
-                </ul>
-                <div class="saran" id="saranContainer">
-                    💡 <strong>Saran:</strong> <span id="saranText">Diskusikan rencana keuangan bersama pasangan minggu ini.</span>
-                </div>
+                <a href="#" class="fitur-item" onclick="alert('🚧 Segera hadir!')">
+                    <div class="icon">📆</div>
+                    <div class="label">Persiapan Sebelum Menikah</div>
+                    <div class="desc">Checklist topik penting untuk membangun fondasi yang kuat.</div>
+                    <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
+                </a>
+
+                <a href="#" class="fitur-item" onclick="alert('🚧 Segera hadir!')">
+                    <div class="icon">🎬</div>
+                    <div class="label">Video E-Course</div>
+                    <div class="desc">Video pembelajaran praktis tentang komunikasi, konflik, keintiman, dan banyak lagi.</div>
+                    <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
+                </a>
+
+                <a href="#" class="fitur-item" onclick="alert('🚧 Segera hadir!')">
+                    <div class="icon">📖</div>
+                    <div class="label">Baca &amp; Belajar</div>
+                    <div class="desc">Artikel, ebook, dan tips seputar hubungan yang bertumbuh.</div>
+                    <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
+                </a>
             </div>
         </div>
 
         <!-- ===== CHALLENGE HARI INI ===== -->
-        <div class="challenge-banner">
-            <div class="left">
-                <div class="tag">🎯 Challenge Hari Ini</div>
-                <div class="title">15 Menit Quality Time</div>
-                <div class="desc">Luangkan waktu tanpa gangguan bersama pasangan</div>
+        <div class="card challenge-card">
+            <div class="tag">🎯 Tantangan Hari Ini</div>
+            <h4>"Ucapkan satu apresiasi tulus kepada pasanganmu."</h4>
+            <button class="btn-challenge" onclick="alert('✅ Challenge diterima!')">Mulai Challenge</button>
+        </div>
+
+        <!-- ===== RIWAYAT TES ===== -->
+        <div class="card" id="riwayatCard">
+            <h4 style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:8px;">📊 Perjalanan Relasimu</h4>
+            <div id="riwayatContainer">
+                <!-- Akan diisi JavaScript -->
             </div>
-            <button class="right" onclick="alert('✅ Challenge diterima!')">Ambil →</button>
         </div>
 
-        <!-- ===== MENU GRID ===== -->
-        <div class="menu-grid">
-            <a href="/love-language" class="menu-item">
-                <div class="icon">❤️</div>
-                <div class="label">Love Language</div>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">💕</div>
-                <div class="label">Health Check</div>
-                <span class="badge-new">New</span>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">💍</div>
-                <div class="label">Pra Nikah</div>
-                <span class="badge-new">New</span>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">📚</div>
-                <div class="label">Ebook</div>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">📰</div>
-                <div class="label">Artikel</div>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">🎥</div>
-                <div class="label">Video</div>
-            </a>
-            <a href="#" class="menu-item" onclick="alert('🚧 Segera hadir!')">
-                <div class="icon">🎯</div>
-                <div class="label">Challenge</div>
-            </a>
-            <a href="/hasil" class="menu-item">
-                <div class="icon">📊</div>
-                <div class="label">Hasil</div>
-            </a>
-        </div>
-
-        <!-- ===== ARTIKEL ===== -->
-        <div class="section-title">📰 Artikel Terbaru</div>
-        <div class="content-list">
-            <a href="#" class="content-card" onclick="alert('Baca artikel')">
-                <div class="thumb">📖</div>
-                <div class="info">
-                    <div class="title">5 Cara Menjaga Komunikasi Sehat</div>
-                    <div class="desc">Tips praktis untuk pasangan</div>
-                </div>
-            </a>
-            <a href="#" class="content-card" onclick="alert('Baca artikel')">
-                <div class="thumb">📖</div>
-                <div class="info">
-                    <div class="title">Mengelola Konflik Tanpa Drama</div>
-                    <div class="desc">Panduan menyelesaikan perbedaan</div>
-                </div>
-            </a>
-        </div>
-
-        <!-- ===== VIDEO ===== -->
-        <div class="section-title">🎥 Video Pilihan</div>
-        <div class="content-list">
-            <a href="#" class="content-card" onclick="alert('Tonton video')">
-                <div class="thumb">▶️</div>
-                <div class="info">
-                    <div class="title">Apa Itu Love Language?</div>
-                    <div class="desc">Penjelasan singkat 5 menit</div>
-                </div>
-            </a>
+        <!-- ===== REKOMENDASI ===== -->
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+                <h4 style="font-size:15px;font-weight:600;color:var(--dark);">📖 Rekomendasi untukmu</h4>
+                <span style="font-size:12px;color:var(--medium);">Artikel & Ebook</span>
+            </div>
+            <div class="rekomendasi-list">
+                <a href="#" class="rekomendasi-item" onclick="alert('Baca artikel')">
+                    <span class="thumb">📰</span>
+                    <div class="info">
+                        <div class="title">5 Kebiasaan Kecil yang Bikin Hubungan Makin Dekat</div>
+                        <div class="meta">5 menit baca</div>
+                    </div>
+                    <span class="arrow">→</span>
+                </a>
+                <a href="#" class="rekomendasi-item" onclick="alert('Baca ebook')">
+                    <span class="thumb">📘</span>
+                    <div class="info">
+                        <div class="title">Panduan Komunikasi Sehat untuk Pasangan</div>
+                        <div class="meta">24 halaman</div>
+                    </div>
+                    <span class="arrow">→</span>
+                </a>
+            </div>
+            <button class="btn-lihat-semua" onclick="alert('🚧 Segera hadir!')">Lihat semua →</button>
         </div>
 
         <!-- ===== BOTTOM NAV ===== -->
@@ -151,183 +148,125 @@
                 <span class="nav-icon">❤️</span>
                 Love
             </a>
+            <a href="/relationship-check">
+                <span class="nav-icon">💕</span>
+                Health
+            </a>
             <a href="/hasil">
                 <span class="nav-icon">📊</span>
                 Hasil
             </a>
-            <a href="#" onclick="handleProfilClick()">
-                <span class="nav-icon">👤</span>
-                Profil
+            <a href="/profil">
+            <span class="nav-icon">👤</span>
+            Profil
             </a>
         </div>
 
     </div>
 
+    <!-- ============================================================ -->
+    <!--  JAVASCRIPT                                                -->
+    <!-- ============================================================ -->
+
     <script>
         // ============================================================
-        //  DATA SKOR
-        // ============================================================
-        const dataSkor = {
-            komunikasi: 82,
-            konflik: 65,
-            keuangan: 45,
-            keintiman: 78,
-            nilai: 90
-        };
-
-        const total = Object.values(dataSkor).reduce((a, b) => a + b, 0);
-        const rataRata = Math.round(total / Object.keys(dataSkor).length);
-
-        function getStatus(skor) {
-            if (skor >= 80) return { label: 'Sangat Baik', emoji: '🌟' };
-            if (skor >= 65) return { label: 'Baik', emoji: '😊' };
-            if (skor >= 50) return { label: 'Cukup', emoji: '🤔' };
-            return { label: 'Perlu Perhatian', emoji: '⚠️' };
-        }
-
-        function renderSkor() {
-            document.getElementById('totalScore').textContent = rataRata;
-            const status = getStatus(rataRata);
-            document.getElementById('statusLabel').textContent = `${status.emoji} ${status.label}`;
-
-            const container = document.getElementById('kategoriContainer');
-            const labels = {
-                komunikasi: 'Komunikasi',
-                konflik: 'Konflik',
-                keuangan: 'Keuangan',
-                keintiman: 'Keintiman',
-                nilai: 'Nilai & Tujuan'
-            };
-            const colors = {
-                komunikasi: '#3a7d76',
-                konflik: '#e17055',
-                keuangan: '#d4a373',
-                keintiman: '#6c5ce7',
-                nilai: '#00b894'
-            };
-
-            let html = '';
-            for (const [key, value] of Object.entries(dataSkor)) {
-                const starCount = Math.round(value / 20);
-                const stars = '★'.repeat(starCount) + '☆'.repeat(5 - starCount);
-                html += `
-                    <div class="kategori-item">
-                        <span class="label">${labels[key] || key}</span>
-                        <div class="bar-bg">
-                            <div class="bar-fill" style="width:0%;background:${colors[key] || '#3a7d76'};" data-width="${value}"></div>
-                        </div>
-                        <span class="percent">${value}%</span>
-                        <span class="star">${stars}</span>
-                    </div>
-                `;
-            }
-            container.innerHTML = html;
-
-            setTimeout(() => {
-                document.querySelectorAll('.bar-fill').forEach(el => {
-                    el.style.width = el.dataset.width + '%';
-                });
-            }, 300);
-
-            const areaList = document.getElementById('areaList');
-            const areaItems = [];
-            for (const [key, value] of Object.entries(dataSkor)) {
-                if (value < 70) {
-                    areaItems.push({ key, value, label: labels[key] || key });
-                }
-            }
-
-            if (areaItems.length > 0) {
-                let listHtml = '';
-                areaItems.forEach(item => {
-                    listHtml += `<li>• ${item.label} <span class="badge">${item.value}%</span></li>`;
-                });
-                areaList.innerHTML = listHtml;
-
-                const lowest = areaItems.reduce((a, b) => a.value < b.value ? a : b);
-                const saranMap = {
-                    komunikasi: 'Coba luangkan waktu 10 menit setiap hari untuk mengobrol tanpa gangguan.',
-                    konflik: 'Latihan mendengarkan aktif dan gunakan kata-kata "Saya merasa..." saat menyampaikan keluhan.',
-                    keuangan: 'Diskusikan rencana keuangan bersama pasangan dan buat anggaran bulanan.',
-                    keintiman: 'Jadwalkan kencan rutin dan ekspresikan kasih sayang melalui sentuhan kecil.',
-                    nilai: 'Diskusikan nilai-nilai penting dalam hidup dan bagaimana menerapkannya bersama.'
-                };
-                document.getElementById('saranText').textContent = saranMap[lowest.key] || 'Diskusikan area ini bersama pasangan.';
-            } else {
-                areaList.innerHTML = '<li style="color:#3a7d76;">✨ Semua area dalam kondisi baik! Pertahankan dan terus tingkatkan.</li>';
-                document.getElementById('saranText').textContent = 'Pertahankan komunikasi yang sehat dan terus saling mendukung.';
-            }
-        }
-
-        renderSkor();
-
-        // ============================================================
-        //  FIREBASE AUTH - RENDER USER (HANYA IKON PROFIL)
+        //  FIREBASE AUTH - RENDER USER
         // ============================================================
         firebase.auth().onAuthStateChanged((user) => {
             const userArea = document.getElementById('userArea');
             const userName = document.getElementById('userName');
 
-            console.log('🔥 Auth state changed:', user ? 'Login' : 'Logout');
-
             if (user) {
                 const foto = user.photoURL || '';
                 const nama = user.displayName || 'Pengguna';
                 userName.textContent = nama;
+
+                // Simpan nama ke localStorage
+                localStorage.setItem('userName', nama);
+
                 userArea.innerHTML = `
-                    <button class="profile-trigger" onclick="toggleDropdown()" style="background:transparent;border:none;cursor:pointer;padding:4px;border-radius:50%;">
-                        ${foto ? `<img src="${foto}" class="avatar" style="width:36px;height:36px;border-radius:50%;object-fit:cover;border:2px solid #e0e8e5;" />` : '<div class="avatar-placeholder" style="width:36px;height:36px;border-radius:50%;background:#e0e8e5;display:flex;align-items:center;justify-content:center;font-size:18px;color:#5a6f6a;">👤</div>'}
+                    <button class="profile-trigger" onclick="toggleDropdown()">
+                        ${foto ? `<img src="${foto}" class="avatar" />` : `<div class="avatar-placeholder">👤</div>`}
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="/profil.html" class="dropdown-item">👤 Profil</a>
+                        <a href="/profil" class="dropdown-item">👤 Profil</a>
                         <a href="/hasil" class="dropdown-item">📊 Hasil</a>
                         <a href="/love-language" class="dropdown-item">❤️ Love Language</a>
+                        <a href="/relationship-check" class="dropdown-item">💕 Health Check</a>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
                     </div>
                 `;
-                if (typeof simpanUser === 'function') simpanUser(user);
             } else {
                 userName.textContent = 'Pengguna';
                 userArea.innerHTML = `
-                    <button onclick="window.location.href='/login'" class="profile-trigger" style="background:transparent;border:none;cursor:pointer;padding:4px;border-radius:50%;display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:50%;background:#f0f7f5;transition:0.2s;color:#1d3b36;font-size:18px;">
-                        👤
+                    <button class="profile-trigger" onclick="window.location.href='/login'">
+                        <div class="avatar-placeholder">👤</div>
                     </button>
                 `;
             }
         });
 
-        // ============================================================
-        //  FUNGSI HANDLE PROFIL DI BOTTOM NAV
-        // ============================================================
-        function handleProfilClick() {
-            const user = firebase.auth().currentUser;
-            if (user) {
-                window.location.href = '/profil.html';
-            } else {
-                window.location.href = '/login';
-            }
-        }
-
-        // ============================================================
-        //  TOGGLE DROPDOWN
-        // ============================================================
         function toggleDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            if (dropdown) {
-                dropdown.classList.toggle('show');
-            }
+            const d = document.getElementById('userDropdown');
+            if (d) d.classList.toggle('show');
         }
 
-        document.addEventListener('click', function(event) {
-            const userArea = document.getElementById('userArea');
-            if (userArea && !userArea.contains(event.target)) {
-                const dropdown = document.getElementById('userDropdown');
-                if (dropdown) {
-                    dropdown.classList.remove('show');
-                }
+        document.addEventListener('click', function(e) {
+            const area = document.getElementById('userArea');
+            if (area && !area.contains(e.target)) {
+                const d = document.getElementById('userDropdown');
+                if (d) d.classList.remove('show');
             }
         });
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                firebase.auth().signOut().then(() => window.location.href = '/');
+            }
+        }
+
+        // ============================================================
+        //  TAMPILKAN RIWAYAT RELATIONSHIP CHECK
+        // ============================================================
+        function tampilkanRiwayat() {
+            const container = document.getElementById('riwayatContainer');
+            const rawData = localStorage.getItem('wellnessResult');
+
+            if (!rawData) {
+                container.innerHTML = `
+                    <p style="color:#8a9e99;font-size:14px;padding:8px 0;">Belum ada hasil Relationship Check.</p>
+                `;
+                return;
+            }
+
+            try {
+                const data = JSON.parse(rawData);
+                const tanggal = data.tanggal ? new Date(data.tanggal) : new Date();
+                const skor = data.skor || '--';
+
+                container.innerHTML = `
+                    <div class="riwayat-item">
+                        <div class="left">
+                            <div class="date">📅 ${tanggal.toLocaleDateString('id-ID')}</div>
+                            <div class="desc">Skor: ${skor}% · ${data.mode ? 'Jawaban ' + data.mode : 'Refleksi'}</div>
+                        </div>
+                        <div class="right">
+                            <a href="/hasil" class="btn-small primary">Lihat Hasil</a>
+                            <a href="/relationship-check" class="btn-small outline">Ulangi Check</a>
+                        </div>
+                    </div>
+                    <div style="margin-top:8px;font-size:13px;color:var(--medium);">
+                        Terus pertahankan hal-hal baik, dan yuk perkuat area yang bisa ditingkatkan!
+                    </div>
+                `;
+            } catch (e) {
+                container.innerHTML = `<p style="color:#8a9e99;font-size:14px;">Data riwayat tidak tersedia.</p>`;
+            }
+        }
+
+        tampilkanRiwayat();
     </script>
+
 </body>
 </html>

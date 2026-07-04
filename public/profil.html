@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Profil - Relasi</title>
+
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+
+    <style>
+        /* ===== PROFIL PAGE ===== */
+        .profil-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            padding: 30px 25px;
+            box-shadow: 0 8px 30px rgba(58, 125, 118, 0.08);
+            border: 1px solid rgba(58, 125, 118, 0.06);
+        }
+
+        .profil-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .profil-header .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid #3a7d76;
+        }
+
+        .profil-header .avatar-placeholder {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #e0e8e5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            color: #5a6f6a;
+            margin: 0 auto;
+        }
+
+        .profil-header h2 {
+            margin-top: 12px;
+            color: #1d3b36;
+            font-size: 22px;
+        }
+
+        .profil-header .email {
+            color: #5a6f6a;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #1d3b36;
+            font-size: 14px;
+            margin-bottom: 6px;
+        }
+
+        .form-group select,
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e8e5;
+            border-radius: 12px;
+            font-size: 15px;
+            font-family: inherit;
+            background: white;
+            transition: 0.2s;
+            color: #1d3b36;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus {
+            border-color: #3a7d76;
+            outline: none;
+        }
+
+        .btn-save {
+            background: #3a7d76;
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+
+        .btn-save:hover {
+            background: #2d655f;
+            transform: scale(1.02);
+        }
+
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .riwayat-section {
+            margin-top: 24px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f7f5;
+        }
+
+        .riwayat-section h3 {
+            font-size: 16px;
+            color: #1d3b36;
+            margin-bottom: 12px;
+        }
+
+        .riwayat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f0f7f5;
+            font-size: 14px;
+            color: #1d3b36;
+        }
+
+        .riwayat-item .label {
+            color: #5a6f6a;
+        }
+
+        .riwayat-item .value {
+            font-weight: 600;
+        }
+
+        .alert-save {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-save.success {
+            display: block;
+            background: #e6f2f0;
+            color: #1d3b36;
+            border-left: 4px solid #3a7d76;
+        }
+
+        .alert-save.error {
+            display: block;
+            background: #fdf0ee;
+            color: #e17055;
+            border-left: 4px solid #e17055;
+        }
+
+        .btn-logout {
+            background: transparent;
+            color: #e17055;
+            border: 2px solid #e17055;
+            padding: 12px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 12px;
+            transition: 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #fdf0ee;
+        }
+    </style>
+
+    <script>
+        // ============================================================
+        //  PROTEKSI: WAJIB LOGIN
+        // ============================================================
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.replace('/login');
+            } else {
+                loadProfil(user);
+            }
+        });
+    </script>
+</head>
+<body>
+
+    <div class="app">
+        <div class="profil-container">
+
+            <!-- ===== HEADER PROFIL ===== -->
+            <div class="profil-header" id="profilHeader">
+                <!-- Akan diisi JavaScript -->
+            </div>
+
+            <!-- ===== ALERT ===== -->
+            <div class="alert-save" id="alertSave"></div>
+
+            <!-- ===== FORM ===== -->
+            <form id="formProfil" onsubmit="simpanProfil(event)">
+                <div class="form-group">
+                    <label>👤 Gender</label>
+                    <select id="gender" required>
+                        <option value="">Pilih gender</option>
+                        <option value="pria">Laki-laki</option>
+                        <option value="wanita">Perempuan</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>💞 Status Hubungan</label>
+                    <select id="status" required>
+                        <option value="">Pilih status</option>
+                        <option value="single">Single</option>
+                        <option value="pdkt">PDKT</option>
+                        <option value="pacaran">Pacaran</option>
+                        <option value="tunangan">Tunangan</option>
+                        <option value="menikah">Menikah</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn-save" id="btnSave">💾 Simpan Profil</button>
+            </form>
+
+            <!-- ===== RIWAYAT LOVE LANGUAGE ===== -->
+            <div class="riwayat-section" id="riwayatSection">
+                <h3>📊 Riwayat Love Language</h3>
+                <div id="riwayatContainer">
+                    <p style="color:#8a9e99;font-size:14px;">Belum ada hasil tes.</p>
+                </div>
+            </div>
+
+            <!-- ===== LOGOUT ===== -->
+            <button class="btn-logout" onclick="logoutUser()">🚪 Logout</button>
+
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <div class="bottom-nav">
+            <a href="/">
+                <span class="nav-icon">🏠</span>
+                Beranda
+            </a>
+            <a href="/love-language">
+                <span class="nav-icon">❤️</span>
+                Love
+            </a>
+            <a href="/hasil">
+                <span class="nav-icon">📊</span>
+                Hasil
+            </a>
+            <a href="/profil" class="active">
+                <span class="nav-icon">👤</span>
+                Profil
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  LOAD PROFIL USER
+        // ============================================================
+        let currentUser = null;
+
+        function loadProfil(user) {
+            currentUser = user;
+
+            // Header
+            const header = document.getElementById('profilHeader');
+            const foto = user.photoURL || '';
+            const nama = user.displayName || 'Pengguna';
+            const email = user.email || '';
+
+            header.innerHTML = `
+                ${foto ? `<img src="${foto}" class="avatar" />` : `<div class="avatar-placeholder">👤</div>`}
+                <h2>${nama}</h2>
+                <div class="email">${email}</div>
+            `;
+
+            // Ambil data dari Firestore
+            const db = firebase.firestore();
+            db.collection('users').doc(user.uid).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const data = doc.data();
+                        document.getElementById('gender').value = data.gender || '';
+                        document.getElementById('status').value = data.status || '';
+                    }
+                })
+                .catch((err) => {
+                    console.error('Gagal load profil:', err);
+                });
+
+            // Tampilkan riwayat Love Language
+            tampilkanRiwayat();
+        }
+
+        // ============================================================
+        //  TAMPILKAN RIWAYAT LOVE LANGUAGE
+        // ============================================================
+        function tampilkanRiwayat() {
+            const container = document.getElementById('riwayatContainer');
+            const rawData = localStorage.getItem('loveLanguageResult');
+            const date = localStorage.getItem('loveLanguageDate');
+
+            if (!rawData) {
+                container.innerHTML = '<p style="color:#8a9e99;font-size:14px;">Belum ada hasil tes.</p>';
+                return;
+            }
+
+            try {
+                const data = JSON.parse(rawData);
+                const sorted = Object.keys(data).sort((a, b) => parseInt(data[b]) - parseInt(data[a]));
+
+                let html = '';
+                if (date) {
+                    const d = new Date(date);
+                    html += `<div style="font-size:12px;color:#8a9e99;margin-bottom:10px;">📅 ${d.toLocaleDateString('id-ID')}</div>`;
+                }
+
+                sorted.forEach(key => {
+                    html += `
+                        <div class="riwayat-item">
+                            <span class="label">${key}</span>
+                            <span class="value">${data[key]}</span>
+                        </div>
+                    `;
+                });
+
+                // Love Language utama
+                const topKey = sorted[0];
+                html += `
+                    <div style="margin-top:12px;padding:12px;background:#f0f7f5;border-radius:12px;text-align:center;">
+                        <span style="font-size:13px;color:#5a6f6a;">🌟 Love Language Utamamu</span>
+                        <div style="font-size:18px;font-weight:600;color:#1d3b36;">${topKey} — ${data[topKey]}</div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            } catch (e) {
+                container.innerHTML = '<p style="color:#8a9e99;font-size:14px;">Data error.</p>';
+            }
+        }
+
+        // ============================================================
+        //  SIMPAN PROFIL KE FIRESTORE
+        // ============================================================
+        function simpanProfil(e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btnSave');
+            const alert = document.getElementById('alertSave');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ Menyimpan...';
+            alert.className = 'alert-save';
+            alert.style.display = 'none';
+
+            const gender = document.getElementById('gender').value;
+            const status = document.getElementById('status').value;
+
+            if (!gender || !status) {
+                alert.className = 'alert-save error';
+                alert.style.display = 'block';
+                alert.textContent = '⚠️ Semua field harus diisi!';
+                btn.disabled = false;
+                btn.textContent = '💾 Simpan Profil';
+                return;
+            }
+
+            const db = firebase.firestore();
+            const user = firebase.auth().currentUser;
+
+            db.collection('users').doc(user.uid).set({
+                gender: gender,
+                status: status,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            }, { merge: true })
+            .then(() => {
+                // Simpan juga ke localStorage
+                localStorage.setItem('userGender', gender);
+                localStorage.setItem('userStatus', status);
+
+                alert.className = 'alert-save success';
+                alert.style.display = 'block';
+                alert.textContent = '✅ Profil berhasil disimpan!';
+                btn.disabled = false;
+                btn.textContent = '💾 Simpan Profil';
+
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 3000);
+            })
+            .catch((err) => {
+                alert.className = 'alert-save error';
+                alert.style.display = 'block';
+                alert.textContent = '❌ Gagal menyimpan: ' + err.message;
+                btn.disabled = false;
+                btn.textContent = '💾 Simpan Profil';
+            });
+        }
+
+        // ============================================================
+        //  LOGOUT
+        // ============================================================
+        function logoutUser() {
+            if (confirm('Yakin ingin logout?')) {
+                firebase.auth().signOut().then(() => {
+                    window.location.href = '/';
+                });
+            }
+        }
+    </script>
+
+</body>
+</html>

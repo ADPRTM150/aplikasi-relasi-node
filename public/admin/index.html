@@ -1,0 +1,1235 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard Admin - Relasi</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- CSS Admin (DIPISAH!) -->
+    <link rel="stylesheet" href="/admin/css/style.css" />
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+</head>
+<body>
+
+    <div class="admin-container">
+
+        <!-- ===== HEADER ===== -->
+        <div class="admin-header">
+            <div class="logo">
+                <span>📋</span> Relasi<span>Admin</span>
+            </div>
+            <div class="admin-info">
+                <span class="email"><span>📧</span> <span id="adminEmailDisplay">admin@relasi.com</span></span>
+                <button class="btn-logout" onclick="logoutAdmin()">
+                    <span>🚪</span> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- ===== NAV ===== -->
+        <div class="admin-nav">
+            <button class="active" data-tab="dashboard" onclick="switchTab('dashboard')">
+                <span>📊</span> Dashboard
+            </button>
+            <button data-tab="users" onclick="switchTab('users')">
+                <span>👥</span> Users
+            </button>
+            <button data-tab="articles" onclick="switchTab('articles')">
+                <span>📰</span> Artikel
+            </button>
+            <button data-tab="ebooks" onclick="switchTab('ebooks')">
+                <span>📚</span> Ebook
+            </button>
+            <button data-tab="videos" onclick="switchTab('videos')">
+                <span>🎥</span> Video
+            </button>
+            <button data-tab="couples" onclick="switchTab('couples')">
+                <span>💑</span> Pasangan
+            </button>
+            <button data-tab="sales" onclick="switchTab('sales')">
+                <span>💰</span> Penjualan
+            </button>
+            <button data-tab="adsense" onclick="switchTab('adsense')">
+                <span>📢</span> Ads Revenue
+            </button>
+            <button data-tab="settings" onclick="switchTab('settings')">
+                <span>⚙️</span> Settings
+            </button>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL DASHBOARD                                             -->
+        <!-- ============================================================ -->
+        <div class="panel active" id="panel-dashboard">
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <div class="stat-icon green"><span>👥</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statUsers">0</div>
+                        <div class="label">Total User</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pink"><span>📰</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statArticles">0</div>
+                        <div class="label">Total Artikel</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><span>📚</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statEbooks">0</div>
+                        <div class="label">Total Ebook</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><span>💑</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statCouples">0</div>
+                        <div class="label">Pasangan Terhubung</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>⏰</span> Aktivitas Terbaru</h3>
+                </div>
+                <div id="recentActivity">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>Belum ada aktivitas terbaru.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL USERS                                                 -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-users">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>👥</span> Daftar User</h3>
+                    <span class="badge-count" id="userCount">0 user</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Bergabung</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL ARTICLES                                              -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-articles">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>📰</span> Daftar Artikel</h3>
+                    <button class="btn-add" onclick="openArticleModal()">
+                        <span>➕</span> Tambah Artikel
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Kategori</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articleTableBody">
+                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL EBOOKS                                                -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-ebooks">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>📚</span> Daftar Ebook</h3>
+                    <button class="btn-add" onclick="openEbookModal()">
+                        <span>➕</span> Tambah Ebook
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Halaman</th>
+                                <th>Harga</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ebookTableBody">
+                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL VIDEOS                                                -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-videos">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>🎥</span> Daftar Video</h3>
+                    <button class="btn-add" onclick="openVideoModal()">
+                        <span>➕</span> Tambah Video
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Durasi</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="videoTableBody">
+                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL COUPLES                                               -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-couples">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>💑</span> Data Pasangan Terhubung</h3>
+                    <span class="badge-count" id="coupleCount">0 pasangan</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>User A</th>
+                                <th>User B</th>
+                                <th>Status</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coupleTableBody">
+                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL SALES                                                 -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-sales">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>💰</span> Data Penjualan Ebook</h3>
+                    <span class="badge-count" id="salesCount">0 transaksi</span>
+                </div>
+                <div class="stats-grid" style="margin-bottom:16px;">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><span>💳</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalSales">Rp 0</div>
+                            <div class="label">Total Pendapatan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><span>📚</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalEbooksSold">0</div>
+                            <div class="label">Total Terjual</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><span>👤</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalBuyers">0</div>
+                            <div class="label">Total Pembeli</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Pembeli</th>
+                                <th>Ebook</th>
+                                <th>Harga</th>
+                                <th>Tanggal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody">
+                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL ADSENSE                                               -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-adsense">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>📢</span> Google AdSense Revenue</h3>
+                    <span style="font-size:12px;color:var(--medium);">Update otomatis</span>
+                </div>
+                <div class="stats-grid" style="margin-bottom:16px;">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><span>💵</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalRevenue">$ 0</div>
+                            <div class="label">Total Pendapatan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><span>👁️</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalImpressions">0</div>
+                            <div class="label">Total Tayangan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><span>🖱️</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalClicks">0</div>
+                            <div class="label">Total Klik</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><span>📈</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsCTR">0%</div>
+                            <div class="label">CTR</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background:var(--light);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;">
+                    <h4 style="font-size:13px;color:var(--dark);margin-bottom:8px;">
+                        <span>📊</span> Pendapatan 7 Hari Terakhir
+                    </h4>
+                    <div class="chart-bars" id="adsChart"></div>
+                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--medium);margin-top:4px;">
+                        <span>Hari ini</span>
+                        <span>7 hari lalu</span>
+                    </div>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Tayangan</th>
+                                <th>Klik</th>
+                                <th>Pendapatan</th>
+                                <th>CTR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adsenseTableBody">
+                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL SETTINGS                                              -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-settings">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>⚙️</span> Pengaturan Admin</h3>
+                    <span style="font-size:12px;color:var(--medium);">Ubah email & password login admin</span>
+                </div>
+
+                <div class="alert" id="settingsAlert"></div>
+
+                <form id="settingsForm" onsubmit="saveSettings(event)">
+                    <div class="form-group">
+                        <label><span>📧</span> Email Admin</label>
+                        <input type="email" id="settingsEmail" required />
+                    </div>
+                    <div class="form-group">
+                        <label><span>🔑</span> Password Baru</label>
+                        <input type="text" id="settingsPassword" placeholder="Kosongkan jika tidak ingin mengubah password" />
+                        <p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin mengubah password.</p>
+                    </div>
+                    <div class="btn-group">
+                        <button type="submit" class="btn-save">
+                            <span>💾</span> Simpan Pengaturan
+                        </button>
+                        <button type="button" class="btn-cancel" onclick="resetSettings()" style="color:var(--red);border-color:var(--red);">
+                            <span>🔄</span> Reset ke Default
+                        </button>
+                    </div>
+                </form>
+
+                <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--light);">
+                    <p style="font-size:12px;color:var(--medium);">
+                        <span>ℹ️</span> Data login admin disimpan di Firestore.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  MODALS                                                       -->
+    <!-- ============================================================ -->
+
+    <!-- Modal Artikel -->
+    <div class="modal-overlay" id="articleModal">
+        <div class="modal-content">
+            <h3><span>📰</span> <span id="articleModalTitle">Tambah Artikel</span></h3>
+            <form id="articleForm">
+                <input type="hidden" id="articleEditId" />
+                <div class="form-group">
+                    <label>Judul</label>
+                    <input type="text" id="articleTitle" placeholder="Judul artikel" required />
+                </div>
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select id="articleCategory">
+                        <option value="Komunikasi">Komunikasi</option>
+                        <option value="Konflik">Konflik</option>
+                        <option value="Keuangan">Keuangan</option>
+                        <option value="Keintiman">Keintiman</option>
+                        <option value="Parenting">Parenting</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <input type="text" id="articleDesc" placeholder="Deskripsi singkat" required />
+                </div>
+                <div class="form-group">
+                    <label>Konten</label>
+                    <textarea id="articleContent" rows="4" placeholder="Isi artikel..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" id="articleThumb" placeholder="https://example.com/gambar.jpg" />
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('articleModal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Ebook -->
+    <div class="modal-overlay" id="ebookModal">
+        <div class="modal-content">
+            <h3><span>📚</span> <span id="ebookModalTitle">Tambah Ebook</span></h3>
+            <form id="ebookForm">
+                <input type="hidden" id="ebookEditId" />
+                <div class="form-group">
+                    <label>Judul</label>
+                    <input type="text" id="ebookTitle" placeholder="Judul ebook" required />
+                </div>
+                <div class="form-group">
+                    <label>Jumlah Halaman</label>
+                    <input type="number" id="ebookPages" placeholder="24" required />
+                </div>
+                <div class="form-group">
+                    <label>Harga (Rp) <span style="font-size:11px;color:#8a9e99;">Kosongkan jika gratis</span></label>
+                    <input type="number" id="ebookPrice" placeholder="50000" min="0" step="1000" />
+                    <p style="font-size:11px;color:#8a9e99;margin-top:4px;">Isi dengan angka tanpa titik/koma. Contoh: 50000</p>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <input type="text" id="ebookDesc" placeholder="Deskripsi ebook" />
+                </div>
+                <div class="form-group">
+                    <label>Thumbnail URL</label>
+                    <input type="text" id="ebookThumb" placeholder="https://example.com/cover.jpg" />
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('ebookModal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Video -->
+    <div class="modal-overlay" id="videoModal">
+        <div class="modal-content">
+            <h3><span>🎥</span> <span id="videoModalTitle">Tambah Video</span></h3>
+            <form id="videoForm">
+                <input type="hidden" id="videoEditId" />
+                <div class="form-group">
+                    <label>Judul</label>
+                    <input type="text" id="videoTitle" placeholder="Judul video" required />
+                </div>
+                <div class="form-group">
+                    <label>Durasi</label>
+                    <input type="text" id="videoDuration" placeholder="5:30" required />
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi</label>
+                    <input type="text" id="videoDesc" placeholder="Deskripsi video" />
+                </div>
+                <div class="form-group">
+                    <label>URL Video (YouTube)</label>
+                    <input type="text" id="videoUrl" placeholder="https://youtube.com/embed/..." />
+                </div>
+                <div class="btn-group">
+                    <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('videoModal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!--  JAVASCRIPT                                                   -->
+    <!-- ============================================================ -->
+
+    <script>
+        // ============================================================
+        //  CEK AKSES ADMIN
+        // ============================================================
+        if (localStorage.getItem('isAdmin') !== 'true') {
+            window.location.href = '/admin/login.html';
+        }
+
+        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+
+        // ============================================================
+        //  REFERENSI FIRESTORE (PAKAI DARI firebase-config.js)
+        // ============================================================
+        // ✅ db sudah tersedia dari firebase-config.js
+        // Tidak perlu deklarasi ulang!
+
+        // ============================================================
+        //  LOGOUT
+        // ============================================================
+        function logoutAdmin() {
+            if (confirm('Yakin ingin logout?')) {
+                localStorage.removeItem('isAdmin');
+                localStorage.removeItem('adminEmail');
+                window.location.href = '/admin/login.html';
+            }
+        }
+
+        // ============================================================
+        //  SWITCH TAB
+        // ============================================================
+        function switchTab(tab) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.admin-nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('panel-' + tab).classList.add('active');
+            document.querySelector(`.admin-nav button[data-tab="${tab}"]`).classList.add('active');
+        }
+
+        // ============================================================
+        //  MODAL
+        // ============================================================
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
+
+        document.querySelectorAll('.modal-overlay').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) this.classList.remove('show');
+            });
+        });
+
+        // ============================================================
+        //  FUNGSI CRUD - USERS
+        // ============================================================
+        async function loadUsers() {
+            const tbody = document.getElementById('userTableBody');
+            try {
+                const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    // Data dummy
+                    const dummyUsers = [
+                        { nama: 'Monica (demo)', email: 'monica@gmail.com', lastLogin: true, createdAt: { toDate: () =>
+                            new Date('2026-07-01') } },
+                        { nama: 'Budi (demo)', email: 'budi@gmail.com', lastLogin: true, createdAt: { toDate: () =>
+                            new Date('2026-07-02') } },
+                        { nama: 'Siti (demo)', email: 'siti@gmail.com', lastLogin: false, createdAt: { toDate: () =>
+                            new Date('2026-06-28') } }
+                    ];
+                    let html = '';
+                    dummyUsers.forEach(u => {
+                        html += `
+                            <tr>
+                                <td><strong>${u.nama}</strong></td>
+                                <td>${u.email}</td>
+                                <td><span class="badge ${u.lastLogin ? 'active' : 'inactive'}">${u.lastLogin ? '✅ Aktif' : '⏸️ Tidak Aktif'}</span></td>
+                                <td>${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            </tr>
+                        `;
+                    });
+                    tbody.innerHTML = html;
+                    document.getElementById('userCount').textContent = dummyUsers.length + ' user (demo)';
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    html += `
+                        <tr>
+                            <td><strong>${u.nama || 'Pengguna'}</strong></td>
+                            <td>${u.email || '-'}</td>
+                            <td><span class="badge ${u.lastLogin ? 'active' : 'inactive'}">${u.lastLogin ? '✅ Aktif' : '⏸️ Tidak Aktif'}</span></td>
+                            <td>${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('userCount').textContent = snapshot.size + ' user';
+            } catch (error) {
+                console.error('Error loading users:', error);
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data user.</td></tr>`;
+            }
+        }
+
+        // ============================================================
+        //  FUNGSI CRUD - ARTICLES
+        // ============================================================
+        async function loadArticles() {
+            const tbody = document.getElementById('articleTableBody');
+            try {
+                const snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>`;
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const a = doc.data();
+                    const id = doc.id;
+                    html += `
+                        <tr>
+                            <td><strong>${a.title}</strong></td>
+                            <td><span class="badge active">${a.category || 'Lainnya'}</span></td>
+                            <td>${a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editArticle('${id}')"><span>✏️</span> Edit</button>
+                                <button class="btn-delete" onclick="deleteArticle('${id}')"><span>🗑️</span> Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('statArticles').textContent = snapshot.size;
+            } catch (error) {
+                console.error('Error loading articles:', error);
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>`;
+            }
+        }
+
+        function openArticleModal(data) {
+            document.getElementById('articleModalTitle').textContent = data ? '✏️ Edit Artikel' : '📰 Tambah Artikel';
+            document.getElementById('articleEditId').value = data ? data.id : '';
+            document.getElementById('articleTitle').value = data ? data.title : '';
+            document.getElementById('articleCategory').value = data ? data.category : 'Komunikasi';
+            document.getElementById('articleDesc').value = data ? data.desc : '';
+            document.getElementById('articleContent').value = data ? data.content : '';
+            document.getElementById('articleThumb').value = data ? data.thumb : '';
+            openModal('articleModal');
+        }
+
+        document.getElementById('articleForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('articleEditId').value;
+            const data = {
+                title: document.getElementById('articleTitle').value,
+                category: document.getElementById('articleCategory').value,
+                desc: document.getElementById('articleDesc').value,
+                content: document.getElementById('articleContent').value,
+                thumb: document.getElementById('articleThumb').value || '📰',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (id) {
+                    await db.collection('articles').doc(id).update(data);
+                } else {
+                    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('articles').add(data);
+                }
+                closeModal('articleModal');
+                loadArticles();
+                updateStats();
+                this.reset();
+            } catch (error) {
+                console.error('Error saving article:', error);
+                alert('❌ Gagal menyimpan artikel.');
+            }
+        });
+
+        async function editArticle(id) {
+            try {
+                const doc = await db.collection('articles').doc(id).get();
+                if (doc.exists) {
+                    openArticleModal({ id, ...doc.data() });
+                }
+            } catch (error) {
+                console.error('Error loading article:', error);
+                alert('❌ Gagal memuat data artikel.');
+            }
+        }
+
+        async function deleteArticle(id) {
+            if (confirm('Yakin hapus artikel ini?')) {
+                try {
+                    await db.collection('articles').doc(id).delete();
+                    loadArticles();
+                    updateStats();
+                } catch (error) {
+                    console.error('Error deleting article:', error);
+                    alert('❌ Gagal menghapus artikel.');
+                }
+            }
+        }
+
+        // ============================================================
+        //  FUNGSI CRUD - EBOOKS (DENGAN HARGA & VALIDASI)
+        // ============================================================
+        async function loadEbooks() {
+            const tbody = document.getElementById('ebookTableBody');
+            try {
+                const snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>`;
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const e = doc.data();
+                    const id = doc.id;
+                    const harga = e.price > 0 ? 'Rp ' + e.price.toLocaleString() : '🆓 Gratis';
+                    html += `
+                        <tr>
+                            <td><strong>${e.title}</strong></td>
+                            <td>${e.pages || 0} halaman</td>
+                            <td>${harga}</td>
+                            <td>${e.createdAt ? new Date(e.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editEbook('${id}')"><span>✏️</span> Edit</button>
+                                <button class="btn-delete" onclick="deleteEbook('${id}')"><span>🗑️</span> Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('statEbooks').textContent = snapshot.size;
+            } catch (error) {
+                console.error('Error loading ebooks:', error);
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>`;
+            }
+        }
+
+        function openEbookModal(data) {
+            document.getElementById('ebookModalTitle').textContent = data ? '✏️ Edit Ebook' : '📚 Tambah Ebook';
+            document.getElementById('ebookEditId').value = data ? data.id : '';
+            document.getElementById('ebookTitle').value = data ? data.title : '';
+            document.getElementById('ebookPages').value = data ? data.pages : '';
+            document.getElementById('ebookPrice').value = data ? data.price : '';
+            document.getElementById('ebookDesc').value = data ? data.desc : '';
+            document.getElementById('ebookThumb').value = data ? data.thumb : '';
+            openModal('ebookModal');
+        }
+
+        document.getElementById('ebookForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // 🔥 Validasi Harga
+            const priceInput = document.getElementById('ebookPrice').value;
+            let price = parseInt(priceInput);
+            if (priceInput && (isNaN(price) || price < 0)) {
+                alert('❌ Harga harus berupa angka positif!');
+                return;
+            }
+            if (priceInput && price > 999999999) {
+                alert('❌ Harga terlalu besar! Maksimal Rp 999.999.999');
+                return;
+            }
+
+            const id = document.getElementById('ebookEditId').value;
+            const data = {
+                title: document.getElementById('ebookTitle').value,
+                pages: parseInt(document.getElementById('ebookPages').value) || 0,
+                price: price || 0,
+                desc: document.getElementById('ebookDesc').value,
+                thumb: document.getElementById('ebookThumb').value || '📘',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (id) {
+                    await db.collection('ebooks').doc(id).update(data);
+                } else {
+                    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('ebooks').add(data);
+                }
+                closeModal('ebookModal');
+                loadEbooks();
+                updateStats();
+                this.reset();
+            } catch (error) {
+                console.error('Error saving ebook:', error);
+                alert('❌ Gagal menyimpan ebook.');
+            }
+        });
+
+        async function editEbook(id) {
+            try {
+                const doc = await db.collection('ebooks').doc(id).get();
+                if (doc.exists) {
+                    openEbookModal({ id, ...doc.data() });
+                }
+            } catch (error) {
+                console.error('Error loading ebook:', error);
+                alert('❌ Gagal memuat data ebook.');
+            }
+        }
+
+        async function deleteEbook(id) {
+            if (confirm('Yakin hapus ebook ini?')) {
+                try {
+                    await db.collection('ebooks').doc(id).delete();
+                    loadEbooks();
+                    updateStats();
+                } catch (error) {
+                    console.error('Error deleting ebook:', error);
+                    alert('❌ Gagal menghapus ebook.');
+                }
+            }
+        }
+
+        // ============================================================
+        //  FUNGSI CRUD - VIDEOS
+        // ============================================================
+        async function loadVideos() {
+            const tbody = document.getElementById('videoTableBody');
+            try {
+                const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>`;
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const v = doc.data();
+                    const id = doc.id;
+                    html += `
+                        <tr>
+                            <td><strong>${v.title}</strong></td>
+                            <td>${v.duration || '-'}</td>
+                            <td>${v.createdAt ? new Date(v.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editVideo('${id}')"><span>✏️</span> Edit</button>
+                                <button class="btn-delete" onclick="deleteVideo('${id}')"><span>🗑️</span> Hapus</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data video.</td></tr>`;
+            }
+        }
+
+        function openVideoModal(data) {
+            document.getElementById('videoModalTitle').textContent = data ? '✏️ Edit Video' : '🎥 Tambah Video';
+            document.getElementById('videoEditId').value = data ? data.id : '';
+            document.getElementById('videoTitle').value = data ? data.title : '';
+            document.getElementById('videoDuration').value = data ? data.duration : '';
+            document.getElementById('videoDesc').value = data ? data.desc : '';
+            document.getElementById('videoUrl').value = data ? data.url : '';
+            openModal('videoModal');
+        }
+
+        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('videoEditId').value;
+            const data = {
+                title: document.getElementById('videoTitle').value,
+                duration: document.getElementById('videoDuration').value,
+                desc: document.getElementById('videoDesc').value,
+                url: document.getElementById('videoUrl').value,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            try {
+                if (id) {
+                    await db.collection('videos').doc(id).update(data);
+                } else {
+                    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    await db.collection('videos').add(data);
+                }
+                closeModal('videoModal');
+                loadVideos();
+                this.reset();
+            } catch (error) {
+                console.error('Error saving video:', error);
+                alert('❌ Gagal menyimpan video.');
+            }
+        });
+
+        async function editVideo(id) {
+            try {
+                const doc = await db.collection('videos').doc(id).get();
+                if (doc.exists) {
+                    openVideoModal({ id, ...doc.data() });
+                }
+            } catch (error) {
+                console.error('Error loading video:', error);
+                alert('❌ Gagal memuat data video.');
+            }
+        }
+
+        async function deleteVideo(id) {
+            if (confirm('Yakin hapus video ini?')) {
+                try {
+                    await db.collection('videos').doc(id).delete();
+                    loadVideos();
+                } catch (error) {
+                    console.error('Error deleting video:', error);
+                    alert('❌ Gagal menghapus video.');
+                }
+            }
+        }
+
+        // ============================================================
+        //  FUNGSI CRUD - COUPLES
+        // ============================================================
+        async function loadCouples() {
+            const tbody = document.getElementById('coupleTableBody');
+            try {
+                const snapshot = await db.collection('couples').orderBy('createdAt', 'desc').get();
+                if (snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">💑</div>Belum ada pasangan terhubung.</td></tr>`;
+                    return;
+                }
+                let html = '';
+                snapshot.forEach(doc => {
+                    const c = doc.data();
+                    const statusMap = {
+                        pending: '⏳ Menunggu',
+                        partial: '🔄 Sebagian',
+                        completed: '✅ Selesai'
+                    };
+                    html += `
+                        <tr>
+                            <td><code>${c.code || '-'}</code></td>
+                            <td>${c.userAName || '-'}</td>
+                            <td>${c.userBName || '⏳ Menunggu'}</td>
+                            <td><span class="badge ${c.status || 'pending'}">${statusMap[c.status] || '⏳ Menunggu'}</span></td>
+                            <td><button class="btn-edit" onclick="alert('Detail pasangan: ${c.code}')"><span>👁️</span> Detail</button></td>
+                        </tr>
+                    `;
+                });
+                tbody.innerHTML = html;
+                document.getElementById('coupleCount').textContent = snapshot.size + ' pasangan';
+                document.getElementById('statCouples').textContent = snapshot.size;
+            } catch (error) {
+                console.error('Error loading couples:', error);
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data pasangan.</td></tr>`;
+            }
+        }
+
+        // ============================================================
+        //  DATA PENJUALAN & ADSENSE (DUMMY)
+        // ============================================================
+        let salesData = [];
+        let adsenseData = [];
+
+        function generateSalesData() {
+            const ebooks = [
+                { name: 'Panduan Komunikasi Sehat', price: 45000 },
+                { name: 'Love Language untuk Pasangan', price: 35000 },
+                { name: 'Mengelola Konflik', price: 0 },
+                { name: 'Keuangan Rumah Tangga', price: 25000 }
+            ];
+            const buyers = ['Monica', 'Budi', 'Siti', 'Andi', 'Rina', 'Dewi', 'Agus', 'Nina'];
+            const statuses = ['success', 'pending', 'success', 'success', 'failed', 'success', 'success'];
+
+            salesData = [];
+            for (let i = 0; i < 15; i++) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const ebook = ebooks[Math.floor(Math.random() * ebooks.length)];
+                salesData.push({
+                    id: 'ORD-' + String(i + 1).padStart(4, '0'),
+                    buyer: buyers[Math.floor(Math.random() * buyers.length)],
+                    ebook: ebook.name,
+                    price: ebook.price > 0 ? ebook.price : Math.floor(Math.random() * 50000) + 25000,
+                    date: date.toISOString().split('T')[0],
+                    status: statuses[Math.floor(Math.random() * statuses.length)]
+                });
+            }
+        }
+
+        function generateAdsenseData() {
+            adsenseData = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                const impressions = Math.floor(Math.random() * 500) + 100;
+                const clicks = Math.floor(Math.random() * 30) + 2;
+                const revenue = (Math.random() * 2.5 + 0.5);
+                adsenseData.push({
+                    date: date.toISOString().split('T')[0],
+                    impressions: impressions,
+                    clicks: clicks,
+                    revenue: revenue,
+                    ctr: ((clicks / impressions) * 100).toFixed(1)
+                });
+            }
+        }
+
+        // ============================================================
+        //  RENDER SALES
+        // ============================================================
+        function renderSales() {
+            const tbody = document.getElementById('salesTableBody');
+            const totalSales = salesData.reduce((sum, s) => s.status === 'success' ? sum + s.price : sum, 0);
+            const totalSold = salesData.filter(s => s.status === 'success').length;
+            const uniqueBuyers = new Set(salesData.filter(s => s.status === 'success').map(s => s.buyer));
+
+            document.getElementById('totalSales').textContent = 'Rp ' + totalSales.toLocaleString();
+            document.getElementById('totalEbooksSold').textContent = totalSold;
+            document.getElementById('totalBuyers').textContent = uniqueBuyers.size;
+            document.getElementById('salesCount').textContent = salesData.length + ' transaksi';
+
+            if (salesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">💰</div>Belum ada transaksi penjualan.</td></tr>`;
+                return;
+            }
+
+            const statusMap = {
+                success: '✅ Berhasil',
+                pending: '⏳ Pending',
+                failed: '❌ Gagal'
+            };
+
+            tbody.innerHTML = salesData.map(s => `
+                <tr>
+                    <td><code>${s.id}</code></td>
+                    <td><strong>${s.buyer}</strong></td>
+                    <td>${s.ebook}</td>
+                    <td>Rp ${s.price.toLocaleString()}</td>
+                    <td>${s.date}</td>
+                    <td><span class="badge ${s.status}">${statusMap[s.status] || s.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================================
+        //  RENDER ADSENSE
+        // ============================================================
+        function renderAdsense() {
+            const tbody = document.getElementById('adsenseTableBody');
+            const totalRevenue = adsenseData.reduce((sum, a) => sum + a.revenue, 0);
+            const totalImpressions = adsenseData.reduce((sum, a) => sum + a.impressions, 0);
+            const totalClicks = adsenseData.reduce((sum, a) => sum + a.clicks, 0);
+            const avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : 0;
+
+            document.getElementById('adsTotalRevenue').textContent = '$ ' + totalRevenue.toFixed(2);
+            document.getElementById('adsTotalImpressions').textContent = totalImpressions.toLocaleString();
+            document.getElementById('adsTotalClicks').textContent = totalClicks.toLocaleString();
+            document.getElementById('adsCTR').textContent = avgCTR + '%';
+
+            const chartEl = document.getElementById('adsChart');
+            const maxRevenue = Math.max(...adsenseData.map(a => a.revenue), 1);
+            chartEl.innerHTML = adsenseData.map(a => `
+                <div class="chart-bar">
+                    <div class="bar" style="height:${(a.revenue / maxRevenue) * 100}%;background:#3a7d76;"></div>
+                    <span class="bar-label">${a.date.split('-')[2]}</span>
+                </div>
+            `).join('');
+
+            if (adsenseData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">📢</div>Belum ada data iklan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = adsenseData.map(a => `
+                <tr>
+                    <td>${a.date}</td>
+                    <td>${a.impressions.toLocaleString()}</td>
+                    <td>${a.clicks}</td>
+                    <td><strong>$ ${a.revenue.toFixed(2)}</strong></td>
+                    <td>${a.ctr}%</td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================================
+        //  UPDATE STATS
+        // ============================================================
+        async function updateStats() {
+            try {
+                const [usersSnap, articlesSnap, ebooksSnap, couplesSnap] = await Promise.all([
+                    db.collection('users').get(),
+                    db.collection('articles').get(),
+                    db.collection('ebooks').get(),
+                    db.collection('couples').get()
+                ]);
+                document.getElementById('statUsers').textContent = usersSnap.size;
+                document.getElementById('statArticles').textContent = articlesSnap.size;
+                document.getElementById('statEbooks').textContent = ebooksSnap.size;
+                document.getElementById('statCouples').textContent = couplesSnap.size;
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        // ============================================================
+        //  SETTINGS
+        // ============================================================
+        const DEFAULT_ADMIN = { email: 'admin@relasi.com', password: 'admin123' };
+
+        async function loadSettings() {
+            try {
+                const doc = await db.collection('admin').doc('settings').get();
+                if (doc.exists) {
+                    const data = doc.data();
+                    document.getElementById('settingsEmail').value = data.email || '';
+                } else {
+                    document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+                }
+            } catch (error) {
+                console.error('Error loading settings:', error);
+                document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+            }
+        }
+
+        async function saveSettings(e) {
+            e.preventDefault();
+            const email = document.getElementById('settingsEmail').value.trim();
+            const password = document.getElementById('settingsPassword').value.trim();
+
+            if (!email) {
+                showSettingsAlert('Email tidak boleh kosong!', 'error');
+                return;
+            }
+
+            const data = { email, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+            if (password) data.password = password;
+
+            try {
+                await db.collection('admin').doc('settings').set(data, { merge: true });
+                document.getElementById('adminEmailDisplay').textContent = email;
+                showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
+                document.getElementById('settingsPassword').value = '';
+            } catch (error) {
+                console.error('Error saving settings:', error);
+                showSettingsAlert('❌ Gagal menyimpan pengaturan.', 'error');
+            }
+        }
+
+        async function resetSettings() {
+            if (confirm('Yakin reset ke default (admin@relasi.com / admin123)?')) {
+                try {
+                    await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
+                    document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+                    document.getElementById('settingsPassword').value = '';
+                    document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
+                    showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
+                } catch (error) {
+                    console.error('Error resetting settings:', error);
+                    showSettingsAlert('❌ Gagal reset pengaturan.', 'error');
+                }
+            }
+        }
+
+        function showSettingsAlert(message, type) {
+            const alert = document.getElementById('settingsAlert');
+            alert.textContent = message;
+            alert.className = 'alert show ' + type;
+            setTimeout(() => alert.classList.remove('show'), 4000);
+        }
+
+        // ============================================================
+        //  INIT
+        // ============================================================
+        async function init() {
+            await loadSettings();
+            await loadUsers();
+            await loadArticles();
+            await loadEbooks();
+            await loadVideos();
+            await loadCouples();
+            await updateStats();
+            generateSalesData();
+            generateAdsenseData();
+            renderSales();
+            renderAdsense();
+        }
+
+        init();
+
+        // Auto refresh setiap 30 detik
+        setInterval(() => {
+            loadUsers();
+            loadArticles();
+            loadEbooks();
+            loadVideos();
+            loadCouples();
+            updateStats();
+        }, 30000);
+    </script>
+
+</body>
+</html>

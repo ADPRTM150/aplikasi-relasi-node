@@ -8,7 +8,8 @@
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
     "predeploy": "echo 'Deploying...'",
-    "deploy": "gh-pages -d public"
+    "deploy": "gh-pages -d public",
+    "vercel-build": "echo 'Hello from Vercel!'"
   },
   "dependencies": {
     "dotenv": "^16.4.5",

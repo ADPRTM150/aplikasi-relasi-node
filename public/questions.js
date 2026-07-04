@@ -267,44 +267,46 @@ const PERTANYAAN = {
 //  REKOMENDASI BERDASARKAN STATUS
 // ============================================================
 function getRekomendasi(userGender, userStatus) {
+     // 🔥 Ambil nama user dari localStorage
+    const userName = localStorage.getItem('userName') || 'Pengguna';
     const isWanita = userGender === 'wanita';
     const sebutan = isWanita ? 'kamu (cewe)' : 'kamu (cowo)';
 
     const rekomendasi = {
         single: {
-            'Words of Affirmation': `Untuk ${sebutan} yang sedang single, ini saat yang tepat untuk mengenali dirimu sendiri. Perhatikan bagaimana kamu merespons kata-kata dari orang-orang di sekitarmu.`,
-            'Acts of Service': `Untuk ${sebutan} yang sedang single, kenali bagaimana kamu merespons bantuan dari orang lain. Apakah kamu merasa dihargai ketika seseorang membantu tanpa diminta?`,
-            'Quality Time': `Untuk ${sebutan} yang sedang single, saat ini kamu bisa melatih kehadiran penuh untuk dirimu sendiri.`,
-            'Physical Touch': `Untuk ${sebutan} yang sedang single, kenali batasan dan kenyamananmu terhadap sentuhan fisik.`,
-            'Receiving Gifts': `Untuk ${sebutan} yang sedang single, perhatikan bagaimana perasaanmu ketika menerima hadiah dari orang terdekat.`
+            'Words of Affirmation': `Untuk ${userName} yang sedang single, ini saat yang tepat untuk mengenali dirimu sendiri. Perhatikan bagaimana kamu merespons kata-kata dari orang-orang di sekitarmu.`,
+            'Acts of Service': `Untuk ${userName} yang sedang single, kenali bagaimana kamu merespons bantuan dari orang lain. Apakah kamu merasa dihargai ketika seseorang membantu tanpa diminta?`,
+            'Quality Time': `Untuk ${userName} yang sedang single, saat ini kamu bisa melatih kehadiran penuh untuk dirimu sendiri.`,
+            'Physical Touch': `Untuk ${userName} yang sedang single, kenali batasan dan kenyamananmu terhadap sentuhan fisik.`,
+            'Receiving Gifts': `Untuk ${userName} yang sedang single, perhatikan bagaimana perasaanmu ketika menerima hadiah dari orang terdekat.`
         },
         pdkt: {
-            'Words of Affirmation': `Untuk ${sebutan} yang sedang PDKT, mulai perhatikan apakah calon pasanganmu terbuka menerima pujian dan kata-kata penghargaan darimu.`,
-            'Acts of Service': `Untuk ${sebutan} yang sedang PDKT, perhatikan apakah calon pasanganmu menunjukkan perhatian melalui tindakan kecil.`,
-            'Quality Time': `Untuk ${sebutan} yang sedang PDKT, kualitas waktu bersama lebih penting daripada kuantitas.`,
-            'Physical Touch': `Untuk ${sebutan} yang sedang PDKT, penting untuk menghormati batasan masing-masing.`,
-            'Receiving Gifts': `Untuk ${sebutan} yang sedang PDKT, hadiah kecil yang tulus bisa menjadi cara untuk menunjukkan perhatian.`
+            'Words of Affirmation': `Untuk ${userName} yang sedang PDKT, mulai perhatikan apakah calon pasanganmu terbuka menerima pujian dan kata-kata penghargaan darimu.`,
+            'Acts of Service': `Untuk ${userName} yang sedang PDKT, perhatikan apakah calon pasanganmu menunjukkan perhatian melalui tindakan kecil.`,
+            'Quality Time': `Untuk ${userName} yang sedang PDKT, kualitas waktu bersama lebih penting daripada kuantitas.`,
+            'Physical Touch': `Untuk ${userName} yang sedang PDKT, penting untuk menghormati batasan masing-masing.`,
+            'Receiving Gifts': `Untuk ${userName} yang sedang PDKT, hadiah kecil yang tulus bisa menjadi cara untuk menunjukkan perhatian.`
         },
         pacaran: {
-            'Words of Affirmation': `Untuk ${sebutan} yang sedang pacaran, jadikan kebiasaan untuk saling memberi apresiasi setiap hari.`,
-            'Acts of Service': `Untuk ${sebutan} yang sedang pacaran, tunjukkan cinta melalui tindakan nyata.`,
-            'Quality Time': `Untuk ${sebutan} yang sedang pacaran, jadwalkan waktu berkualitas tanpa gangguan.`,
-            'Physical Touch': `Untuk ${sebutan} yang sedang pacaran, sentuhan fisik seperti berpegangan tangan atau pelukan hangat bisa menjadi perekat emosional.`,
-            'Receiving Gifts': `Untuk ${sebutan} yang sedang pacaran, kejutan kecil bisa membuat pasangan merasa diingat dan dihargai.`
+            'Words of Affirmation': `Untuk ${userName} yang sedang pacaran, jadikan kebiasaan untuk saling memberi apresiasi setiap hari.`,
+            'Acts of Service': `Untuk ${userName} yang sedang pacaran, tunjukkan cinta melalui tindakan nyata.`,
+            'Quality Time': `Untuk ${userName} yang sedang pacaran, jadwalkan waktu berkualitas tanpa gangguan.`,
+            'Physical Touch': `Untuk ${userName} yang sedang pacaran, sentuhan fisik seperti berpegangan tangan atau pelukan hangat bisa menjadi perekat emosional.`,
+            'Receiving Gifts': `Untuk ${userName} yang sedang pacaran, kejutan kecil bisa membuat pasangan merasa diingat dan dihargai.`
         },
         tunangan: {
-            'Words of Affirmation': `Untuk ${sebutan} yang sudah tunangan, bangun kebiasaan komunikasi yang sehat sebelum pernikahan.`,
-            'Acts of Service': `Untuk ${sebutan} yang sudah tunangan, persiapan pernikahan bisa menjadi momen untuk saling membantu.`,
-            'Quality Time': `Untuk ${sebutan} yang sudah tunangan, jangan biarkan persiapan pernikahan mengorbankan waktu berkualitas berdua.`,
-            'Physical Touch': `Untuk ${sebutan} yang sudah tunangan, kedekatan fisik yang nyaman akan membantu mempererat ikatan menjelang pernikahan.`,
-            'Receiving Gifts': `Untuk ${sebutan} yang sudah tunangan, hadiah tidak harus mahal, bisa berupa surat cinta atau kenang-kenangan kecil.`
+            'Words of Affirmation': `Untuk ${userName} yang sudah tunangan, bangun kebiasaan komunikasi yang sehat sebelum pernikahan.`,
+            'Acts of Service': `Untuk ${userName} yang sudah tunangan, persiapan pernikahan bisa menjadi momen untuk saling membantu.`,
+            'Quality Time': `Untuk ${userName} yang sudah tunangan, jangan biarkan persiapan pernikahan mengorbankan waktu berkualitas berdua.`,
+            'Physical Touch': `Untuk ${userName} yang sudah tunangan, kedekatan fisik yang nyaman akan membantu mempererat ikatan menjelang pernikahan.`,
+            'Receiving Gifts': `Untuk ${userName} yang sudah tunangan, hadiah tidak harus mahal, bisa berupa surat cinta atau kenang-kenangan kecil.`
         },
         menikah: {
-            'Words of Affirmation': `Untuk ${sebutan} yang sudah menikah, kata-kata penghargaan dan dukungan menjadi kebutuhan harian.`,
-            'Acts of Service': `Untuk ${sebutan} yang sudah menikah, pernikahan adalah kemitraan. Bantu pasangan dalam pekerjaan rumah tangga.`,
-            'Quality Time': `Untuk ${sebutan} yang sudah menikah, di tengah kesibukan rumah tangga, tetap jadwalkan waktu berdua.`,
-            'Physical Touch': `Untuk ${sebutan} yang sudah menikah, sentuhan fisik seperti pelukan atau genggaman tangan adalah bahasa cinta yang sederhana namun kuat.`,
-            'Receiving Gifts': `Untuk ${sebutan} yang sudah menikah, kejutan kecil di hari biasa bisa lebih berarti daripada hadiah di hari besar.`
+            'Words of Affirmation': `Untuk ${userName} yang sudah menikah, kata-kata penghargaan dan dukungan menjadi kebutuhan harian.`,
+            'Acts of Service': `Untuk ${userName} yang sudah menikah, pernikahan adalah kemitraan. Bantu pasangan dalam pekerjaan rumah tangga.`,
+            'Quality Time': `Untuk ${userName} yang sudah menikah, di tengah kesibukan rumah tangga, tetap jadwalkan waktu berdua.`,
+            'Physical Touch': `Untuk ${userName} yang sudah menikah, sentuhan fisik seperti pelukan atau genggaman tangan adalah bahasa cinta yang sederhana namun kuat.`,
+            'Receiving Gifts': `Untuk ${userName} yang sudah menikah, kejutan kecil di hari biasa bisa lebih berarti daripada hadiah di hari besar.`
         }
     };
 

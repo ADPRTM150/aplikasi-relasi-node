@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login Admin - Relasi</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- CSS Admin (Umum) -->
+    <link rel="stylesheet" href="/admin/css/style.css" />
+
+    <!-- CSS Login Admin (Khusus) -->
+    <link rel="stylesheet" href="/admin/css/login.css" />
+</head>
+<body>
+
+    <div class="admin-body">
+        <div class="login-container">
+            <div class="logo">❤️ Relasi<span>Admin</span></div>
+            <p class="subtitle">Login untuk mengelola konten & data</p>
+
+            <div class="error-message" id="errorMessage">
+                ⚠️ <span id="errorText">Email atau password salah.</span>
+            </div>
+
+            <form id="loginForm" onsubmit="loginAdmin(event)">
+                <div class="form-group">
+                    <label>📧 Email Admin</label>
+                    <input type="email" id="adminEmail" placeholder="admin@relasi.com" required />
+                </div>
+                <div class="form-group">
+                    <label>🔑 Password</label>
+                    <input type="password" id="adminPassword" placeholder="Masukkan password" required />
+                </div>
+                <button type="submit" class="btn-login">
+                    <span>🚪</span> Login
+                </button>
+            </form>
+
+            <a href="/" class="back-link">← Kembali ke Beranda</a>
+            <div class="footer-note">💡 Default: admin@relasi.com / admin123</div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        //  LOGIN ADMIN (PAKAI SETTINGS DARI LOCALSTORAGE / FIRESTORE)
+        // ============================================================
+
+        // Load admin settings dari localStorage (jika ada)
+        function getAdminSettings() {
+            const saved = localStorage.getItem('adminSettings');
+            if (saved) {
+                try {
+                    return JSON.parse(saved);
+                } catch (e) {
+                    return { email: 'admin@relasi.com', password: 'admin123' };
+                }
+            }
+            return { email: 'admin@relasi.com', password: 'admin123' };
+        }
+
+        function loginAdmin(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            const settings = getAdminSettings();
+
+            if (email === settings.email && password === settings.password) {
+                // ✅ Login berhasil
+                localStorage.setItem('isAdmin', 'true');
+                localStorage.setItem('adminEmail', email);
+                window.location.href = '/admin';
+            } else {
+                // ❌ Login gagal
+                errorText.textContent = 'Email atau password salah. Coba lagi!';
+                errorDiv.classList.add('show');
+                setTimeout(() => errorDiv.classList.remove('show'), 4000);
+            }
+        }
+
+        // Cek jika sudah login, langsung redirect ke dashboard
+        if (localStorage.getItem('isAdmin') === 'true') {
+            window.location.href = '/admin';
+        }
+    </script>
+
+</body>
+</html>
