@@ -100,7 +100,6 @@ app.post('/api/admin/login', async (req, res) => {
     try {
         const { email, password } = req.body;
 
-        // Validasi input
         if (!email || !password) {
             return res.status(400).json({ 
                 success: false, 
@@ -108,7 +107,6 @@ app.post('/api/admin/login', async (req, res) => {
             });
         }
 
-        // Cek email
         if (email !== process.env.ADMIN_EMAIL) {
             return res.status(401).json({ 
                 success: false, 
@@ -116,7 +114,6 @@ app.post('/api/admin/login', async (req, res) => {
             });
         }
 
-        // Cek password (bcrypt compare)
         const isValid = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
         if (!isValid) {
             return res.status(401).json({ 
@@ -125,7 +122,6 @@ app.post('/api/admin/login', async (req, res) => {
             });
         }
 
-        // Generate JWT Token
         const token = jwt.sign(
             { email, role: 'admin' },
             process.env.JWT_SECRET || 'relasi_super_secret_key_change_this_12345',
@@ -135,10 +131,7 @@ app.post('/api/admin/login', async (req, res) => {
         res.json({
             success: true,
             token,
-            user: { 
-                email, 
-                role: 'admin' 
-            }
+            user: { email, role: 'admin' }
         });
 
     } catch (error) {
@@ -186,9 +179,6 @@ app.get('/api/admin/verify', verifyAdminToken, (req, res) => {
     });
 });
 
-// ============================================================
-//  🔥 GET ALL USERS (ADMIN ONLY)
-// ============================================================
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
         const snapshot = await db.collection('users').get();
@@ -247,7 +237,6 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
         const { role } = req.body;
         const userId = req.user.uid;
 
-        // Cek apakah user sudah punya test aktif
         const existing = await db.collection('wellness_tests')
             .where('userId', '==', userId)
             .where('completedAt', '==', null)
@@ -268,7 +257,6 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Buat test baru
         const inviteCode = generateInviteCode();
         console.log('📌 Generated inviteCode:', inviteCode);
 
@@ -307,7 +295,6 @@ app.get('/api/wellness/test/:testId', verifyFirebaseToken, async (req, res) => {
         const { testId } = req.params;
         const userId = req.user.uid;
         
-        // Validasi format testId
         if (!testId || testId.length < 10) {
             return res.status(400).json({ success: false, message: 'ID tes tidak valid' });
         }
@@ -320,18 +307,11 @@ app.get('/api/wellness/test/:testId', verifyFirebaseToken, async (req, res) => {
         
         const data = doc.data();
         
-        // Cek akses: hanya pemilik test
         if (data.userId !== userId) {
             return res.status(403).json({ success: false, message: 'Akses ditolak' });
         }
         
-        // Kirim semua data (termasuk results jika ada)
-        const responseData = {
-            ...data,
-            id: doc.id
-        };
-        
-        // Hapus data sensitif (jawaban detail)
+        const responseData = { ...data, id: doc.id };
         delete responseData.userAnswers;
         delete responseData.partnerAnswers;
         
@@ -352,13 +332,11 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         const { testId, role, answers } = req.body;
         const userId = req.user.uid;
 
-        // Debug: Log received data
         console.log('🔍 Received submit request:');
         console.log('  testId:', testId);
         console.log('  role:', role);
         console.log('  answers count:', Object.keys(answers || {}).length);
 
-        // Validasi input
         if (!testId) {
             return res.status(400).json({ 
                 success: false, 
@@ -380,7 +358,6 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Validasi role
         if (role !== 'user' && role !== 'partner') {
             return res.status(400).json({ 
                 success: false, 
@@ -388,7 +365,6 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Validasi setiap jawaban (1-5)
         const validAnswers = {};
         let isValid = true;
         let questionCount = 0;
@@ -411,7 +387,6 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Minimal 64 pertanyaan untuk wellness
         if (questionCount < 64) {
             return res.status(400).json({ 
                 success: false, 
@@ -431,7 +406,6 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         
         const testData = testDoc.data();
         
-        // Cek akses
         if (testData.userId !== userId) {
             return res.status(403).json({ 
                 success: false, 
@@ -439,7 +413,6 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Cek apakah sudah diisi sebelumnya
         if (role === 'user' && testData.userCompleted) {
             return res.status(400).json({ 
                 success: false, 
@@ -454,23 +427,18 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             });
         }
 
-        // Siapkan update data
         const updateData = {
             [`${role}Answers`]: validAnswers,
             [`${role}Completed`]: true,
             [`${role}CompletedAt`]: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        // Cek apakah keduanya sudah selesai
         const isComplete = (role === 'user' && testData.partnerCompleted) ||
                            (role === 'partner' && testData.userCompleted);
 
         if (isComplete) {
-            // Ambil jawaban dari kedua pihak
             const userAnswers = role === 'user' ? validAnswers : testData.userAnswers;
             const partnerAnswers = role === 'partner' ? validAnswers : testData.partnerAnswers;
-            
-            // Hitung hasil
             const results = calculateWellnessResults(userAnswers, partnerAnswers);
             updateData.results = results;
             updateData.completedAt = admin.firestore.FieldValue.serverTimestamp();
@@ -478,11 +446,9 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
 
         await testRef.update(updateData);
         
-        // Ambil data terbaru
         const updatedDoc = await testRef.get();
         const data = updatedDoc.data();
 
-        // Kirim response dengan inviteCode
         res.json({
             success: true,
             testId: testId,
@@ -507,7 +473,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         const { inviteCode } = req.body;
         const userId = req.user.uid;
         
-        // Validasi format
         if (!inviteCode || typeof inviteCode !== 'string') {
             return res.status(400).json({ 
                 success: false, 
@@ -516,8 +481,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         }
 
         const code = inviteCode.trim().toUpperCase();
-        
-        // Validasi format WELL-XXXX-XXXX-XXXX
         const codePattern = /^WELL-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
         if (!codePattern.test(code)) {
             return res.status(400).json({ 
@@ -526,7 +489,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
             });
         }
 
-        // Cari test dengan invite code tersebut
         const snapshot = await db.collection('wellness_tests')
             .where('inviteCode', '==', code)
             .get();
@@ -541,7 +503,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         const doc = snapshot.docs[0];
         const data = doc.data();
 
-        // Cek apakah user ini pemilik test
         if (data.userId !== userId) {
             return res.status(403).json({ 
                 success: false, 
@@ -549,7 +510,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
             });
         }
 
-        // Cek apakah partner sudah mengisi
         if (data.partnerCompleted) {
             return res.status(400).json({ 
                 success: false, 
@@ -557,7 +517,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
             });
         }
 
-        // Cek apakah user sudah mengisi
         if (!data.userCompleted) {
             return res.status(400).json({ 
                 success: false, 
@@ -592,7 +551,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
 function generateInviteCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     const segments = [];
-    
     for (let i = 0; i < 3; i++) {
         let seg = '';
         for (let j = 0; j < 4; j++) {
@@ -600,7 +558,6 @@ function generateInviteCode() {
         }
         segments.push(seg);
     }
-    
     return `WELL-${segments[0]}-${segments[1]}-${segments[2]}`;
 }
 
@@ -624,16 +581,13 @@ function calculateWellnessResults(userAnswers, partnerAnswers) {
     Object.entries(dimMap).forEach(([dim, ids]) => {
         let userSum = 0;
         let partnerSum = 0;
-        
         ids.forEach(id => {
             userSum += userAnswers[id] || 0;
             partnerSum += partnerAnswers[id] || 0;
         });
-        
         const userPercent = (userSum / maxPerDimension) * 100;
         const partnerPercent = (partnerSum / maxPerDimension) * 100;
         const avgPercent = (userPercent + partnerPercent) / 2;
-        
         dimensionScores[dim] = Math.round(avgPercent);
         totalUser += userSum;
         totalPartner += partnerSum;
@@ -656,7 +610,6 @@ function calculateWellnessResults(userAnswers, partnerAnswers) {
 
     const riskQuestions = [5, 13, 19, 54];
     const riskSignals = [];
-    
     riskQuestions.forEach(qId => {
         const userAns = userAnswers[qId] || 0;
         const partnerAns = partnerAnswers[qId] || 0;
@@ -685,7 +638,7 @@ function calculateWellnessResults(userAnswers, partnerAnswers) {
 }
 
 // ============================================================
-//  🔥 ROUTING HALAMAN
+//  🔥 ROUTING HALAMAN - TANPA .html
 // ============================================================
 
 app.get('/', (req, res) => {
@@ -732,6 +685,7 @@ app.get('/admin/login', (req, res) => {
 //  🔥 REDIRECT & ERROR HANDLER
 // ============================================================
 
+// Redirect .html ke tanpa .html
 app.get('/*.html', (req, res) => {
     const url = req.originalUrl.replace(/\.html$/, '');
     res.redirect(301, url);
@@ -747,16 +701,29 @@ app.get('/admin/login/', (req, res) => {
 
 // 404 Handler
 app.use((req, res) => {
+    // Cek apakah file statis ada
+    const fs = require('fs');
+    const filePath = path.join(__dirname, '../public', req.path);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        return res.sendFile(filePath);
+    }
+    
+    // Cek apakah file dengan .html ada
+    const htmlPath = path.join(__dirname, '../public', req.path + '.html');
+    if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
+        return res.sendFile(htmlPath);
+    }
+    
     res.status(404).send(`
         <!DOCTYPE html>
         <html>
         <head>
             <title>404 - Halaman Tidak Ditemukan</title>
             <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #f7f3eb; }
+                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #fdf6f2; }
                 h1 { font-size: 72px; color: #1d3b36; }
                 p { color: #5a6f6a; }
-                a { color: #3a7d76; text-decoration: none; font-weight: 600; }
+                a { color: #f8b4c8; text-decoration: none; font-weight: 600; }
                 a:hover { text-decoration: underline; }
             </style>
         </head>
