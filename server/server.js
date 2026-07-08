@@ -5,6 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
 
 // ============================================================
 //  🔥 FIREBASE ADMIN
@@ -66,6 +67,34 @@ app.use(cors({
     credentials: true
 }));
 
+// ============================================================
+//  🔥 SERVE STATIC FILES DULUAN
+// ============================================================
+app.use((req, res, next) => {
+    // Lewati request API
+    if (req.path.startsWith('/api/')) {
+        return next();
+    }
+    
+    const filePath = path.join(__dirname, '../public', req.path);
+    
+    // Jika file ada di public, langsung kirim
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+        return res.sendFile(filePath);
+    }
+    
+    // Jika file dengan .html ada
+    const htmlPath = path.join(__dirname, '../public', req.path + '.html');
+    if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
+        return res.sendFile(htmlPath);
+    }
+    
+    next();
+});
+
+// Static files
+app.use(express.static(path.join(__dirname, '../public')));
+
 // Redirect .html → tanpa .html
 app.use((req, res, next) => {
     if (req.path.endsWith('.html')) {
@@ -75,9 +104,6 @@ app.use((req, res, next) => {
     }
     next();
 });
-
-// Static files
-app.use(express.static(path.join(__dirname, '../public')));
 
 // ============================================================
 //  🔥 ENDPOINT: KIRIM FIREBASE CONFIG KE FRONTEND
@@ -702,7 +728,6 @@ app.get('/admin/login/', (req, res) => {
 // 404 Handler
 app.use((req, res) => {
     // Cek apakah file statis ada
-    const fs = require('fs');
     const filePath = path.join(__dirname, '../public', req.path);
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         return res.sendFile(filePath);
