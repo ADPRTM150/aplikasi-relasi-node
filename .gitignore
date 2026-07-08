@@ -1,13 +1,25 @@
 # Node modules
 node_modules/
 
-# Environment variables (API Key, dll)
+# Environment variables
 .env
+.env.local
+.env.*.local
 
-# Firebase config (client-side) - JANGAN DI-COMMIT!
-public/firebase-config.js
+# Firebase Admin SDK key - RAHASIA!
+server/serviceAccountKey.json
 
 # Logs
 *.log
+npm-debug.log*
+
+# OS files
 .DS_Store
+Thumbs.db
+
+# Vercel
 .vercel
+
+# Build files
+dist/
+build/
