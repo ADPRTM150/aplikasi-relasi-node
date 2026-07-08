@@ -12,8 +12,13 @@
     "vercel-build": "echo 'Hello from Vercel!'"
   },
   "dependencies": {
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.6",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "firebase-admin": "^11.11.0",
+    "jsonwebtoken": "^9.0.3"
   },
   "devDependencies": {
     "gh-pages": "^6.3.0",

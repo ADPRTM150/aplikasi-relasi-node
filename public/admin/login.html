@@ -49,7 +49,7 @@
         //  LOGIN ADMIN (PAKAI SETTINGS DARI LOCALSTORAGE / FIRESTORE)
         // ============================================================
 
-        // Load admin settings dari localStorage (jika ada)
+        // 🔥 Load admin settings dari localStorage atau Firestore
         function getAdminSettings() {
             const saved = localStorage.getItem('adminSettings');
             if (saved) {
@@ -76,6 +76,14 @@
                 // ✅ Login berhasil
                 localStorage.setItem('isAdmin', 'true');
                 localStorage.setItem('adminEmail', email);
+                
+                // 🔥 Simpan nama admin (untuk createdBy)
+                const adminName = email.split('@')[0] || 'Admin';
+                localStorage.setItem('adminName', adminName);
+                
+                // 🔥 Simpan UID sementara (untuk tracking)
+                localStorage.setItem('adminUid', 'admin_' + Date.now());
+
                 window.location.href = '/admin';
             } else {
                 // ❌ Login gagal
@@ -85,7 +93,7 @@
             }
         }
 
-        // Cek jika sudah login, langsung redirect ke dashboard
+        // 🔥 Cek jika sudah login, langsung redirect ke dashboard
         if (localStorage.getItem('isAdmin') === 'true') {
             window.location.href = '/admin';
         }

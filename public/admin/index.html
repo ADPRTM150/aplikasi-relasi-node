@@ -27,7 +27,11 @@
                 <span>📋</span> Relasi<span>Admin</span>
             </div>
             <div class="admin-info">
-                <span class="email"><span>📧</span> <span id="adminEmailDisplay">admin@relasi.com</span></span>
+                <span class="email">
+                    <span>👤</span> 
+                    <span id="adminNameDisplay">Admin</span> 
+                    (<span id="adminEmailDisplay">admin@relasi.com</span>)
+                </span>
                 <button class="btn-logout" onclick="logoutAdmin()">
                     <span>🚪</span> Logout
                 </button>
@@ -157,6 +161,8 @@
                             <tr>
                                 <th>Judul</th>
                                 <th>Kategori</th>
+                                <th>Status</th>       <!-- 🔥 Kolom Baru -->
+                                <th>Dibuat Oleh</th>  <!-- 🔥 Kolom Baru -->
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
                             </tr>
@@ -424,16 +430,18 @@
     <!--  MODALS                                                       -->
     <!-- ============================================================ -->
 
-    <!-- Modal Artikel -->
+        <!-- ===== MODAL ARTIKEL ===== -->
     <div class="modal-overlay" id="articleModal">
         <div class="modal-content">
             <h3><span>📰</span> <span id="articleModalTitle">Tambah Artikel</span></h3>
             <form id="articleForm">
                 <input type="hidden" id="articleEditId" />
+                
                 <div class="form-group">
                     <label>Judul</label>
                     <input type="text" id="articleTitle" placeholder="Judul artikel" required />
                 </div>
+                
                 <div class="form-group">
                     <label>Kategori</label>
                     <select id="articleCategory">
@@ -445,18 +453,31 @@
                         <option value="Lainnya">Lainnya</option>
                     </select>
                 </div>
+                
+                <!-- 🔥 FIELD STATUS -->
+                <div class="form-group">
+                    <label>📌 Status</label>
+                    <select id="articleStatus">
+                        <option value="draft">⏳ Draft (belum tampil di publik)</option>
+                        <option value="published">✅ Published (tampil di publik)</option>
+                    </select>
+                </div>
+                
                 <div class="form-group">
                     <label>Deskripsi</label>
                     <input type="text" id="articleDesc" placeholder="Deskripsi singkat" required />
                 </div>
+                
                 <div class="form-group">
                     <label>Konten</label>
                     <textarea id="articleContent" rows="4" placeholder="Isi artikel..."></textarea>
                 </div>
+                
                 <div class="form-group">
                     <label>Thumbnail URL</label>
                     <input type="text" id="articleThumb" placeholder="https://example.com/gambar.jpg" />
                 </div>
+                
                 <div class="btn-group">
                     <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
                     <button type="button" class="btn-cancel" onclick="closeModal('articleModal')">Batal</button>
@@ -464,7 +485,6 @@
             </form>
         </div>
     </div>
-
     <!-- Modal Ebook -->
     <div class="modal-overlay" id="ebookModal">
         <div class="modal-content">
@@ -543,6 +563,7 @@
         }
 
         document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+        document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
 
         // ============================================================
         //  REFERENSI FIRESTORE (PAKAI DARI firebase-config.js)
@@ -641,24 +662,36 @@
         }
 
         // ============================================================
-        //  FUNGSI CRUD - ARTICLES
+        //  FUNGSI CRUD - ARTICLES (DENGAN STATUS + createdBy)
         // ============================================================
+
         async function loadArticles() {
             const tbody = document.getElementById('articleTableBody');
             try {
                 const snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>`;
                     return;
                 }
                 let html = '';
                 snapshot.forEach(doc => {
                     const a = doc.data();
                     const id = doc.id;
+                    
+                    // 🔥 Status badge
+                    const statusBadge = a.status === 'published' 
+                        ? '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>'
+                        : '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
+                    
+                    // 🔥 Nama pembuat
+                    const createdBy = a.createdBy?.name || a.createdBy?.email || 'Admin';
+                    
                     html += `
                         <tr>
                             <td><strong>${a.title}</strong></td>
                             <td><span class="badge active">${a.category || 'Lainnya'}</span></td>
+                            <td>${statusBadge}</td>
+                            <td>👤 ${createdBy}</td>
                             <td>${a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
                             <td>
                                 <button class="btn-edit" onclick="editArticle('${id}')"><span>✏️</span> Edit</button>
@@ -671,7 +704,7 @@
                 document.getElementById('statArticles').textContent = snapshot.size;
             } catch (error) {
                 console.error('Error loading articles:', error);
-                tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>`;
             }
         }
 
@@ -680,6 +713,7 @@
             document.getElementById('articleEditId').value = data ? data.id : '';
             document.getElementById('articleTitle').value = data ? data.title : '';
             document.getElementById('articleCategory').value = data ? data.category : 'Komunikasi';
+            document.getElementById('articleStatus').value = data ? data.status : 'draft'; // 🔥 Tambahkan ini
             document.getElementById('articleDesc').value = data ? data.desc : '';
             document.getElementById('articleContent').value = data ? data.content : '';
             document.getElementById('articleThumb').value = data ? data.thumb : '';
@@ -688,10 +722,17 @@
 
         document.getElementById('articleForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+            
             const id = document.getElementById('articleEditId').value;
+            
+            // 🔥 Ambil data admin dari localStorage
+            const adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+            const adminName = localStorage.getItem('adminName') || 'Admin';
+            
             const data = {
                 title: document.getElementById('articleTitle').value,
                 category: document.getElementById('articleCategory').value,
+                status: document.getElementById('articleStatus').value, // 🔥 Status
                 desc: document.getElementById('articleDesc').value,
                 content: document.getElementById('articleContent').value,
                 thumb: document.getElementById('articleThumb').value || '📰',
@@ -700,9 +741,16 @@
 
             try {
                 if (id) {
+                    // 🔥 Saat edit, update tanpa mengubah createdBy
                     await db.collection('articles').doc(id).update(data);
                 } else {
+                    // 🔥 Saat tambah, tambahkan createdBy
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    data.createdBy = {
+                        email: adminEmail,
+                        name: adminName,
+                        uid: localStorage.getItem('adminUid') || ''
+                    };
                     await db.collection('articles').add(data);
                 }
                 closeModal('articleModal');
@@ -1135,8 +1183,8 @@
             }
         }
 
-        // ============================================================
-        //  SETTINGS
+// ============================================================
+        //  SETTINGS ADMIN (FIRESTORE) - LENGKAP DENGAN VALIDASI
         // ============================================================
         const DEFAULT_ADMIN = { email: 'admin@relasi.com', password: 'admin123' };
 
@@ -1147,6 +1195,7 @@
                     const data = doc.data();
                     document.getElementById('settingsEmail').value = data.email || '';
                 } else {
+                    await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
                     document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
                 }
             } catch (error) {
@@ -1157,40 +1206,86 @@
 
         async function saveSettings(e) {
             e.preventDefault();
+
             const email = document.getElementById('settingsEmail').value.trim();
             const password = document.getElementById('settingsPassword').value.trim();
 
+            // 🔥 Validasi Email
             if (!email) {
                 showSettingsAlert('Email tidak boleh kosong!', 'error');
                 return;
             }
+            if (!email.includes('@') || !email.includes('.')) {
+                showSettingsAlert('Email tidak valid! Masukkan email yang benar (contoh: admin@domain.com)', 'error');
+                return;
+            }
 
-            const data = { email, updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
-            if (password) data.password = password;
+            // 🔥 Validasi Password (minimal 6 karakter jika diisi)
+            if (password && password.length < 6) {
+                showSettingsAlert('Password minimal 6 karakter!', 'error');
+                return;
+            }
+
+            const data = {
+                email: email,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            };
+
+            if (password) {
+                data.password = password;
+            }
 
             try {
                 await db.collection('admin').doc('settings').set(data, { merge: true });
+
                 document.getElementById('adminEmailDisplay').textContent = email;
+
+                // 🔥 Update localStorage agar login menggunakan data baru
+                const adminSettings = { email: email, password: password || DEFAULT_ADMIN.password };
+                localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
+                localStorage.setItem('adminEmail', email);
+
                 showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
                 document.getElementById('settingsPassword').value = '';
+
+                setTimeout(() => {
+                    if (confirm('Pengaturan berhasil disimpan. Login ulang dengan email baru?')) {
+                        localStorage.removeItem('isAdmin');
+                        window.location.href = '/admin/login';
+                    }
+                }, 1500);
+
             } catch (error) {
                 console.error('Error saving settings:', error);
-                showSettingsAlert('❌ Gagal menyimpan pengaturan.', 'error');
+                showSettingsAlert('❌ Gagal menyimpan pengaturan: ' + error.message, 'error');
             }
         }
 
         async function resetSettings() {
-            if (confirm('Yakin reset ke default (admin@relasi.com / admin123)?')) {
-                try {
-                    await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
-                    document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
-                    document.getElementById('settingsPassword').value = '';
-                    document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
-                    showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
-                } catch (error) {
-                    console.error('Error resetting settings:', error);
-                    showSettingsAlert('❌ Gagal reset pengaturan.', 'error');
-                }
+            if (!confirm('Yakin reset ke default (admin@relasi.com / admin123)?')) return;
+
+            try {
+                await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
+
+                localStorage.setItem('adminSettings', JSON.stringify(DEFAULT_ADMIN));
+                localStorage.setItem('adminEmail', DEFAULT_ADMIN.email);
+
+                document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+                document.getElementById('settingsPassword').value = '';
+                document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
+
+                showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
+
+                setTimeout(() => {
+                    if (confirm('Reset berhasil. Login ulang dengan default?')) {
+                        localStorage.removeItem('isAdmin');
+                        window.location.href = '/admin/login';
+                    }
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error resetting settings:', error);
+                showSettingsAlert('❌ Gagal reset pengaturan: ' + error.message, 'error');
             }
         }
 

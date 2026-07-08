@@ -1,0 +1,2088 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Relationship Wellness Check - Relasi</title>
+
+    <!-- NO CACHE -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <!-- ============================================================
+         🔥 1. FIREBASE SDK (HARUS PERTAMA!)
+         ============================================================ -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- ============================================================
+         🔥 2. FIREBASE CONFIG (TANPA MODULE)
+         ============================================================ -->
+    <script src="/firebase-config.js"></script>
+
+    <!-- ============================================================
+         🔥 3. WELLNESS QUESTIONS (TANPA MODULE)
+         ============================================================ -->
+    <script src="/questions/wellness-questions.js"></script>
+
+    <style>
+        /* ============================================
+           RESET & ROOT - BRAND RELASI
+           ============================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #1d3b36;
+            --primary-light: #2a5a52;
+            --primary-dark: #142b27;
+            --secondary: #e8d5c4;
+            --gold: #d4a373;
+            --pink-light: #ffdde6;
+            --pink: #f8b4c8;
+            --cream: #fdf6f2;
+            --white: #ffe9e9;
+            --text-primary: #1d2a26;
+            --text-secondary: #5a6f6a;
+            --text-light: #8a9a95;
+            --shadow: 0 20px 60px rgba(29, 59, 54, 0.08);
+            --shadow-hover: 0 30px 80px rgba(29, 59, 54, 0.15);
+            --radius: 20px;
+            --radius-sm: 12px;
+            --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        html,
+        body {
+            font-family: var(--font);
+            background: var(--pink-light);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* ============================================
+           HEADER
+           ============================================ */
+        header {
+            background: var(--white);
+            border-bottom: 1px solid rgba(29, 59, 54, 0.06);
+            padding: 16px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.92);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo .heart-icon {
+            font-size: 28px;
+            display: inline-block;
+            animation: heartbeat 2s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            14% {
+                transform: scale(1.15);
+            }
+            28% {
+                transform: scale(1);
+            }
+            42% {
+                transform: scale(1.1);
+            }
+            70% {
+                transform: scale(1);
+            }
+        }
+
+        .logo .logo-text {
+            background: linear-gradient(135deg, var(--primary), var(--pink-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        nav a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 30px;
+            transition: var(--transition);
+        }
+
+        nav a:hover {
+            background: var(--pink-light);
+            color: var(--primary);
+        }
+
+        nav a.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+
+        nav a.active:hover {
+            background: var(--primary-light);
+        }
+
+        #logout-link {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        #logout-link:hover {
+            color:var(--primary-light);
+            background: rgba(192, 57, 43, 0.08);
+        }
+
+        /* ============================================
+           WELLNESS CONTAINER
+           ============================================ */
+        .wellness-container {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        .wellness-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .wellness-header .badge {
+            display: inline-block;
+            background: var(--pink-light);
+            color: var(--primary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 16px;
+            border-radius: 30px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .wellness-header h1 {
+            font-size: 40px;
+            font-weight: 900;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--primary), var(--pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .wellness-header p {
+            color: var(--text-secondary);
+            font-size: 18px;
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* ============================================
+           STEP
+           ============================================ */
+        .step {
+            display: none;
+            animation: fadeUp 0.6s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* ============================================
+           CONSENT CARD
+           ============================================ */
+        .consent-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid rgba(29, 59, 54, 0.04);
+        }
+
+        .consent-card .icon-big {
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .consent-card h2 {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .consent-card .sub-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+
+        .disclaimer-box {
+            background: var(--pink-light);
+            border-left: 4px solid var(--pink);
+            padding: 16px 20px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 24px;
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .disclaimer-box strong {
+            color: var(--primary);
+        }
+
+        .consent-items {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0 28px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            padding: 14px 18px;
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+            border: 2px solid transparent;
+        }
+
+        .checkbox-item:hover {
+            background: var(--pink-light);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            accent-color: var(--pink);
+            cursor: pointer;
+        }
+
+        .checkbox-item .required-badge {
+            background: #fce4e4;
+            color: #c0392b;
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .checkbox-item.optional {
+            opacity: 0.6;
+        }
+
+        .checkbox-item.optional .required-badge {
+            display: none;
+        }
+
+        .checkbox-item.checked {
+            border-color: var(--pink);
+            background: var(--pink-light);
+        }
+
+        /* ============================================
+           BUTTONS
+           ============================================ */
+        .btn-primary {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 16px 40px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: var(--font);
+            min-width: 160px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(29, 59, 54, 0.25);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 2px solid var(--pink-light);
+            padding: 14px 32px;
+            border-radius: 50px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--pink);
+            color: var(--primary);
+            background: var(--pink-light);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: #c0392b;
+            border: 2px solid #fce4e4;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            font-family: var(--font);
+        }
+
+        .btn-danger:hover {
+            background: #fce4e4;
+            border-color: #c0392b;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* ============================================
+           MAIN ACTION
+           ============================================ */
+        .main-action {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .main-action .btn-primary {
+            font-size: 22px;
+            padding: 20px 64px;
+            box-shadow: 0 8px 30px rgba(29, 59, 54, 0.15);
+        }
+
+        .main-action .btn-primary:hover {
+            box-shadow: 0 16px 50px rgba(29, 59, 54, 0.25);
+        }
+
+        .main-action .sub-text {
+            margin-top: 16px;
+            font-size: 15px;
+            color: var(--text-light);
+        }
+
+        .main-action .sub-text a {
+            color: var(--primary);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+        }
+
+        .main-action .sub-text a:hover {
+            color: var(--pink);
+        }
+
+        /* ============================================
+           INVITE SECTION
+           ============================================ */
+        .invite-section {
+            background: linear-gradient(135deg, var(--pink-light), #ffe8ef);
+            border: 2px dashed var(--pink);
+            border-radius: var(--radius);
+            padding: 32px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .invite-section .invite-icon {
+            font-size: 44px;
+            margin-bottom: 8px;
+        }
+
+        .invite-section h3 {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .invite-section p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .invite-input-group {
+            display: flex;
+            gap: 12px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .invite-input-group input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid #d5cec6;
+            border-radius: var(--radius-sm);
+            font-size: 18px;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 2px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: var(--transition);
+            background: var(--white);
+        }
+
+        .invite-input-group input:focus {
+            border-color: var(--pink);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(248, 180, 200, 0.3);
+        }
+
+        .invite-input-group .btn-primary {
+            padding: 16px 32px;
+            flex-shrink: 0;
+            min-width: 120px;
+        }
+
+        .invite-error {
+            color: #c0392b;
+            background: #fce4e4;
+            padding: 12px 18px;
+            border-radius: var(--radius-sm);
+            font-size: 14px;
+            margin-top: 14px;
+            display: none;
+        }
+
+        /* ============================================
+           QUESTION CARD
+           ============================================ */
+        .question-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 2px solid transparent;
+            transition: var(--transition);
+        }
+
+        .question-card.error {
+            border-color: #c0392b;
+            animation: shake 0.4s ease;
+        }
+
+        @keyframes shake {
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-8px);
+            }
+            75% {
+                transform: translateX(8px);
+            }
+        }
+
+        .question-number {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        .question-text {
+            font-size: 22px;
+            font-weight: 600;
+            line-height: 1.6;
+            margin-bottom: 28px;
+            color: var(--text-primary);
+        }
+
+        .scale-options {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+
+        .scale-btn {
+            padding: 14px 8px;
+            background: var(--cream);
+            border: 2px solid transparent;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition);
+            color: var(--text-secondary);
+            text-align: center;
+            font-family: var(--font);
+            min-height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .scale-btn:hover {
+            background: var(--pink-light);
+            transform: translateY(-2px);
+        }
+
+        .scale-btn.selected {
+            border-color: var(--pink);
+            background: var(--pink-light);
+            color: var(--primary);
+            box-shadow: 0 4px 20px rgba(248, 180, 200, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .nav-buttons .btn-primary {
+            flex: 1;
+        }
+
+        .nav-buttons .btn-secondary {
+            flex-shrink: 0;
+        }
+
+        /* ============================================
+           PROGRESS
+           ============================================ */
+        .progress-section {
+            margin-bottom: 28px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e8e4e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--pink));
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
+
+        .progress-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        #dimension-label {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        /* ============================================
+           INVITE CODE DISPLAY
+           ============================================ */
+        .invite-code-display {
+            background: linear-gradient(135deg, var(--pink-light), #ffe8ef);
+            border: 2px solid var(--pink);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+        }
+
+        .invite-code-display .icon-big {
+            font-size: 56px;
+            margin-bottom: 8px;
+        }
+
+        .invite-code-display h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .invite-code-display p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-bottom: 20px;
+        }
+
+        .invite-code-display .big-code {
+            font-size: 36px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 6px;
+            color: var(--primary);
+            background: var(--white);
+            padding: 16px 32px;
+            border-radius: var(--radius-sm);
+            display: inline-block;
+            margin: 12px 0 20px;
+            border: 2px solid rgba(29, 59, 54, 0.08);
+        }
+
+        .invite-code-display .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ============================================
+           RESULTS
+           ============================================ */
+        .result-card {
+            background: var(--white);
+            padding: 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            border: 1px solid rgba(29, 59, 54, 0.04);
+        }
+
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 36px;
+        }
+
+        .score-circle {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--pink));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--white);
+            flex-shrink: 0;
+            box-shadow: 0 8px 30px rgba(29, 59, 54, 0.15);
+        }
+
+        .score-number {
+            font-size: 48px;
+            font-weight: 900;
+            line-height: 1;
+        }
+
+        .score-label {
+            font-size: 14px;
+            opacity: 0.85;
+            font-weight: 500;
+        }
+
+        .score-info h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .score-info p {
+            color: var(--text-secondary);
+            font-size: 15px;
+        }
+
+        .strength-grid,
+        .priority-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .strength-item,
+        .priority-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: var(--cream);
+            border-radius: var(--radius-sm);
+            transition: var(--transition);
+        }
+
+        .strength-item:hover,
+        .priority-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(29, 59, 54, 0.06);
+        }
+
+        .strength-item .score,
+        .priority-item .score {
+            margin-left: auto;
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 15px;
+        }
+
+        .priority-item .score {
+            color: var(--pink);
+        }
+
+        .rec-item {
+            display: flex;
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid rgba(29, 59, 54, 0.06);
+        }
+
+        .rec-item:last-child {
+            border-bottom: none;
+        }
+
+        .rec-number {
+            width: 32px;
+            height: 32px;
+            background: var(--pink);
+            color: var(--white);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .rec-dimension {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--primary);
+        }
+
+        .rec-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .risk-alert {
+            background: #fdf6f0;
+            border: 2px solid #e67e22;
+            border-radius: var(--radius-sm);
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .risk-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .risk-header h3 {
+            color: #d35400;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .risk-contacts {
+            background: var(--white);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+
+        .risk-contacts p {
+            margin: 2px 0;
+            font-size: 14px;
+        }
+
+        .waiting-card {
+            text-align: center;
+            padding: 60px 32px;
+            background: var(--white);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .waiting-icon {
+            font-size: 72px;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%,
+            100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .waiting-card h2 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 12px;
+        }
+
+        .waiting-card p {
+            color: var(--text-secondary);
+            font-size: 16px;
+            max-width: 400px;
+            margin: 8px auto;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .action-buttons .btn-primary,
+        .action-buttons .btn-secondary {
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .delete-section {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(29, 59, 54, 0.08);
+            margin-top: 20px;
+        }
+
+        /* ============================================
+           RESPONSIVE
+           ============================================ */
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 12px;
+                padding: 0 16px;
+            }
+
+            nav {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 4px;
+            }
+
+            nav a {
+                font-size: 13px;
+                padding: 6px 14px;
+            }
+
+            .wellness-container {
+                padding: 24px 16px 60px;
+            }
+
+            .wellness-header h1 {
+                font-size: 30px;
+            }
+
+            .wellness-header p {
+                font-size: 16px;
+            }
+
+            .consent-card {
+                padding: 24px;
+            }
+
+            .question-card {
+                padding: 24px;
+            }
+
+            .question-text {
+                font-size: 18px;
+            }
+
+            .scale-options {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+
+            .scale-btn {
+                font-size: 12px;
+                min-height: 48px;
+                padding: 10px 6px;
+            }
+
+            .score-display {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .score-circle {
+                width: 120px;
+                height: 120px;
+            }
+
+            .score-number {
+                font-size: 40px;
+            }
+
+            .strength-grid,
+            .priority-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .invite-input-group {
+                flex-direction: column;
+            }
+
+            .invite-code-display {
+                padding: 24px;
+            }
+
+            .invite-code-display .big-code {
+                font-size: 22px;
+                padding: 12px 16px;
+                letter-spacing: 3px;
+            }
+
+            .main-action .btn-primary {
+                font-size: 18px;
+                padding: 16px 40px;
+                width: 100%;
+            }
+
+            .nav-buttons {
+                flex-direction: column;
+            }
+
+            .nav-buttons .btn-secondary {
+                order: 1;
+            }
+
+            .action-buttons .btn-primary,
+            .action-buttons .btn-secondary {
+                min-width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wellness-header h1 {
+                font-size: 24px;
+            }
+
+            .strength-grid,
+            .priority-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .scale-options {
+                grid-template-columns: 1fr 1fr;
+                gap: 6px;
+            }
+
+            .scale-btn {
+                font-size: 11px;
+                min-height: 44px;
+                padding: 8px 4px;
+            }
+
+            .checkbox-item {
+                font-size: 13px;
+                padding: 12px 14px;
+            }
+
+            .consent-card {
+                padding: 16px;
+            }
+
+            .question-card {
+                padding: 16px;
+            }
+
+            .question-text {
+                font-size: 16px;
+            }
+
+            .invite-code-display .big-code {
+                font-size: 18px;
+                letter-spacing: 2px;
+                padding: 10px 14px;
+            }
+
+            .score-circle {
+                width: 100px;
+                height: 100px;
+            }
+
+            .score-number {
+                font-size: 32px;
+            }
+
+            .btn-primary {
+                padding: 14px 28px;
+                font-size: 14px;
+                min-width: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+         HEADER
+         ============================================================ -->
+    <header>
+        <div class="container">
+            <a href="/" class="logo">
+                <span class="heart-icon">💚</span>
+                <span class="logo-text">Relasi</span>
+            </a>
+            <nav>
+                <a href="/">Beranda</a>
+                <a href="/love-language.html">Love Language</a>
+                <a href="/relationship-check.html" class="active">Wellness</a>
+                <a href="/profil.html">Profil</a>
+                <a href="#" id="logout-link">Logout</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ============================================================
+         MAIN CONTENT
+         ============================================================ -->
+    <section class="wellness-container">
+        <div class="wellness-header">
+            <div class="badge">✨ Refleksi Hubungan</div>
+            <h1>Relationship Wellness</h1>
+            <p>Refleksi edukatif untuk memahami kekuatan hubungan dan area yang dapat diperkuat bersama.</p>
+        </div>
+
+        <!-- STEP 1: CONSENT -->
+        <div id="step-consent" class="step active">
+            <div class="consent-card">
+                <div class="icon-big">🌱</div>
+                <h2>Sebelum Memulai</h2>
+                <p class="sub-text">Baca dengan saksama sebelum melanjutkan refleksi</p>
+
+                <div class="disclaimer-box">
+                    <p>
+                        <strong>Relationship Wellness Check</strong> adalah alat refleksi edukatif
+                        untuk membantu memahami pola hubungan. Fitur ini <strong>bukan</strong>
+                        pemeriksaan psikologis, diagnosis, terapi, atau penentu kualitas hubungan.
+                    </p>
+                </div>
+
+                <div class="consent-items">
+                    <label class="checkbox-item" id="consent-label-1">
+                        <input type="checkbox" id="consent-1" />
+                        <span>Saya memahami bahwa fitur ini adalah refleksi edukatif, bukan diagnosis atau terapi.</span>
+                        <span class="required-badge">WAJIB</span>
+                    </label>
+                    <label class="checkbox-item" id="consent-label-2">
+                        <input type="checkbox" id="consent-2" />
+                        <span>Saya setuju jawaban saya diproses untuk menghasilkan hasil pribadi.</span>
+                        <span class="required-badge">WAJIB</span>
+                    </label>
+                    <label class="checkbox-item" id="consent-label-3">
+                        <input type="checkbox" id="consent-3" />
+                        <span>Saya telah membaca <a href="#" style="color:var(--primary);font-weight:600;">Kebijakan Privasi</a> dan <a href="#" style="color:var(--primary);font-weight:600;">Ketentuan Penggunaan</a>.</span>
+                        <span class="required-badge">WAJIB</span>
+                    </label>
+                    <label class="checkbox-item optional" id="consent-label-4">
+                        <input type="checkbox" id="consent-4" />
+                        <span>(Opsional) Saya setuju data saya yang telah dianonimkan digunakan untuk pengembangan fitur.</span>
+                    </label>
+                </div>
+
+                <button class="btn-primary btn-block" id="consent-btn" disabled>
+                    Saya Setuju & Lanjutkan →
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: MAIN ACTION -->
+        <div id="step-main" class="step">
+            <div class="main-action">
+                <button class="btn-primary" id="start-test-btn">
+                    🚀 Mulai Refleksi
+                </button>
+                <p class="sub-text">
+                    Atau <a id="show-invite-link">masukkan kode invitasi</a> jika pasangan Anda sudah mengisi.
+                </p>
+            </div>
+
+            <div id="invite-section" class="invite-section" style="display:none;">
+                <div class="invite-icon">🔑</div>
+                <h3>Masukkan Kode Invitasi</h3>
+                <p>Masukkan kode yang diberikan oleh pasangan Anda untuk mengisi tes.</p>
+                <div class="invite-input-group">
+                    <input type="text" id="invite-code-input" placeholder="WELL-XXXX-XXXX-XXXX" maxlength="19" />
+                    <button class="btn-primary" id="verify-invite-btn">Verifikasi</button>
+                </div>
+                <div id="invite-error" class="invite-error"></div>
+            </div>
+        </div>
+
+        <!-- STEP 3: TEST QUESTIONS -->
+        <div id="step-test" class="step">
+            <div class="progress-section">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width:0%;"></div>
+                </div>
+                <div class="progress-label">
+                    <span id="dimension-label">Komunikasi</span>
+                    <span id="question-counter">1/64</span>
+                </div>
+            </div>
+
+            <div class="question-card" id="question-card">
+                <div class="question-number" id="question-number">Pertanyaan 1</div>
+                <p class="question-text" id="question-text">...</p>
+                <div class="scale-options" id="scale-options">
+                    <button class="scale-btn" data-value="1">Sangat Tidak Setuju</button>
+                    <button class="scale-btn" data-value="2">Tidak Setuju</button>
+                    <button class="scale-btn" data-value="3">Netral</button>
+                    <button class="scale-btn" data-value="4">Setuju</button>
+                    <button class="scale-btn" data-value="5">Sangat Setuju</button>
+                </div>
+                <div class="nav-buttons">
+                    <button class="btn-secondary" id="prev-btn" style="visibility:hidden;">← Kembali</button>
+                    <button class="btn-primary" id="next-btn">Selanjutnya →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- STEP 4: INVITE CODE DISPLAY -->
+        <div id="step-invite-display" class="step">
+            <div class="invite-code-display">
+                <div class="icon-big">✅</div>
+                <h2>Jawaban Tersimpan!</h2>
+                <p>Bagikan kode ini dengan pasangan Anda agar mereka bisa mengisi secara terpisah.</p>
+                <div class="big-code" id="generated-invite-code">WELL-XXXX-XXXX</div>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="copyInviteCode()">📋 Salin Kode</button>
+                    <button class="btn-secondary" onclick="shareInviteCode()">📤 Kirim ke Pasangan</button>
+                </div>
+                <p style="margin-top:20px;font-size:14px;color:var(--text-light);">
+                    Setelah pasangan mengisi, hasil akan digabungkan dan ditampilkan secara otomatis.
+                </p>
+                <button class="btn-secondary" onclick="checkResultStatus()" style="margin-top:12px;">
+                    👀 Cek Status Hasil
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 5: RESULTS -->
+        <div id="step-results" class="step">
+            <div id="results-container"></div>
+        </div>
+    </section>
+
+    <!-- ============================================================
+         JAVASCRIPT
+         ============================================================ -->
+    <script>
+        // ============================================================
+        //  🔥 TUNGGU FIREBASE SIAP
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 DOM loaded, checking Firebase...');
+
+            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                console.log('✅ Firebase sudah siap!');
+                initApp();
+            } else {
+                console.log('⏳ Menunggu Firebase siap...');
+                let attempts = 0;
+                const maxAttempts = 30;
+                const checkFirebase = setInterval(() => {
+                    attempts++;
+                    console.log(`⏳ Attempt ${attempts}/${maxAttempts}...`);
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        clearInterval(checkFirebase);
+                        console.log('✅ Firebase siap!');
+                        initApp();
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(checkFirebase);
+                        console.error('❌ Firebase tidak siap setelah timeout');
+                        document.body.innerHTML = `
+                            <div style="text-align:center;padding:80px 20px;font-family:sans-serif;">
+                                <h2 style="color:#c0392b;">⚠️ Gagal Memuat Firebase</h2>
+                                <p style="color:#666;margin-top:8px;">Refresh halaman atau coba lagi nanti.</p>
+                                <button onclick="location.reload()" style="margin-top:20px;padding:12px 32px;background:#1d3b36;color:white;border:none;border-radius:30px;font-size:16px;cursor:pointer;">Refresh Halaman</button>
+                            </div>
+                        `;
+                    }
+                }, 500);
+            }
+        });
+
+        function initApp() {
+            console.log('🔥 initApp() called!');
+
+            // ============================================================
+            //  🔥 AMBIL DARI GLOBAL
+            // ============================================================
+            const API_BASE = window.API_BASE || '/api';
+            const wellnessQuestions = window.wellnessQuestions || [];
+            const wellnessDimensions = window.wellnessDimensions || [];
+            const wellnessRecommendations = window.wellnessRecommendations || {};
+
+            console.log('✅ API_BASE:', API_BASE);
+            console.log('✅ Jumlah pertanyaan:', wellnessQuestions.length);
+
+            // ============================================================
+            //  🔥 STATE
+            // ============================================================
+            const state = {
+                currentStep: 'consent',
+                testId: null,
+                currentQuestion: 0,
+                answers: {},
+                results: null,
+                inviteCode: null,
+                isPartner: false
+            };
+
+            // ============================================================
+            //  🔥 DOM REFS
+            // ============================================================
+            const steps = {
+                consent: document.getElementById('step-consent'),
+                main: document.getElementById('step-main'),
+                test: document.getElementById('step-test'),
+                inviteDisplay: document.getElementById('step-invite-display'),
+                results: document.getElementById('step-results')
+            };
+
+            console.log('✅ Steps found:', Object.keys(steps).every(k => steps[k] !== null));
+
+            const consentBtn = document.getElementById('consent-btn');
+            const startTestBtn = document.getElementById('start-test-btn');
+            const showInviteLink = document.getElementById('show-invite-link');
+            const inviteSection = document.getElementById('invite-section');
+            const inviteInput = document.getElementById('invite-code-input');
+            const verifyInviteBtn = document.getElementById('verify-invite-btn');
+            const inviteError = document.getElementById('invite-error');
+            const questionText = document.getElementById('question-text');
+            const questionNumber = document.getElementById('question-number');
+            const dimensionLabel = document.getElementById('dimension-label');
+            const questionCounter = document.getElementById('question-counter');
+            const progressFill = document.getElementById('progress-fill');
+            const scaleOptions = document.getElementById('scale-options');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const generatedCodeEl = document.getElementById('generated-invite-code');
+            const resultsContainer = document.getElementById('results-container');
+
+            // ============================================================
+            //  🔥 CHECKBOX STYLING
+            // ============================================================
+            document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', function() {
+                    this.closest('.checkbox-item').classList.toggle('checked', this.checked);
+                });
+            });
+
+            // ============================================================
+            //  🔥 HELPER: CEK LOGIN
+            // ============================================================
+            function getCurrentUser() {
+                return new Promise((resolve) => {
+                    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                        unsubscribe();
+                        resolve(user);
+                    });
+                });
+            }
+
+            // ============================================================
+            //  🔥 STEP 1: CONSENT
+            // ============================================================
+            document.querySelectorAll('#step-consent input[type="checkbox"]').forEach(cb => {
+                cb.addEventListener('change', () => {
+                    const required = ['consent-1', 'consent-2', 'consent-3'];
+                    const allChecked = required.every(id => document.getElementById(id).checked);
+                    consentBtn.disabled = !allChecked;
+                });
+            });
+
+            consentBtn.addEventListener('click', () => {
+                showStep('main');
+            });
+
+            // ============================================================
+            //  🔥 STEP NAVIGATION
+            // ============================================================
+            function showStep(step) {
+                Object.keys(steps).forEach(key => {
+                    if (steps[key]) {
+                        steps[key].classList.toggle('active', key === step);
+                    }
+                });
+                state.currentStep = step;
+                document.querySelector('.wellness-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // ============================================================
+            //  🔥 STEP 2: MAIN ACTION
+            // ============================================================
+            showInviteLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                const isVisible = inviteSection.style.display !== 'none';
+                inviteSection.style.display = isVisible ? 'none' : 'block';
+                if (!isVisible) inviteInput.focus();
+            });
+
+            // ============================================================
+            //  🔥 START TEST
+            // ============================================================
+            startTestBtn.addEventListener('click', async () => {
+                const user = await getCurrentUser();
+                if (!user) {
+                    alert('⚠️ Silakan login terlebih dahulu!');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                try {
+                    const idToken = await user.getIdToken();
+                    const res = await fetch(`${API_BASE}/wellness/start`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ role: 'user' })
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        state.testId = data.testId;
+                        state.answers = {};
+                        state.currentQuestion = 0;
+                        state.isPartner = false;
+                        showStep('test');
+                        renderQuestion(0);
+                    } else {
+                        alert(data.message || 'Terjadi kesalahan.');
+                    }
+                } catch (error) {
+                    console.error('Start test error:', error);
+                    alert('Terjadi kesalahan.');
+                }
+            });
+
+            // ============================================================
+            //  🔥 VERIFY INVITE
+            // ============================================================
+            verifyInviteBtn.addEventListener('click', verifyInvite);
+            inviteInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') verifyInvite();
+            });
+            inviteInput.addEventListener('input', () => {
+                inviteInput.value = inviteInput.value.toUpperCase();
+            });
+
+            async function verifyInvite() {
+                const code = inviteInput.value.trim().toUpperCase();
+                if (!code) {
+                    inviteError.textContent = 'Masukkan kode invitasi.';
+                    inviteError.style.display = 'block';
+                    return;
+                }
+
+                const codePattern = /^WELL-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
+                if (!codePattern.test(code)) {
+                    inviteError.textContent = 'Format kode tidak valid. Contoh: WELL-ABCD-1234-EFGH';
+                    inviteError.style.display = 'block';
+                    return;
+                }
+
+                const user = await getCurrentUser();
+                if (!user) {
+                    alert('⚠️ Silakan login terlebih dahulu!');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                try {
+                    const idToken = await user.getIdToken();
+                    const res = await fetch(`${API_BASE}/wellness/verify-invite`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify({ inviteCode: code })
+                    });
+
+                    const data = await res.json();
+                    if (data.success) {
+                        state.testId = data.testId;
+                        state.answers = {};
+                        state.currentQuestion = 0;
+                        state.isPartner = true;
+                        inviteError.style.display = 'none';
+                        inviteSection.style.display = 'none';
+                        showStep('test');
+                        renderQuestion(0);
+                    } else {
+                        inviteError.textContent = data.message || 'Kode tidak valid.';
+                        inviteError.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Verify invite error:', error);
+                    inviteError.textContent = 'Terjadi kesalahan. Coba lagi.';
+                    inviteError.style.display = 'block';
+                }
+            }
+
+            // ============================================================
+            //  🔥 RENDER QUESTION
+            // ============================================================
+            function renderQuestion(index) {
+                const q = wellnessQuestions[index];
+                if (!q) {
+                    console.error('Question not found at index:', index);
+                    return;
+                }
+
+                questionText.textContent = q.text;
+                questionNumber.textContent = `Pertanyaan ${index + 1}`;
+
+                const dim = wellnessDimensions.find(d => d.id === q.dimension);
+                dimensionLabel.textContent = `${dim?.icon || ''} ${dim?.label || q.dimension}`;
+
+                const total = wellnessQuestions.length;
+                const progress = ((index + 1) / total) * 100;
+                progressFill.style.width = `${progress}%`;
+                questionCounter.textContent = `${index + 1}/${total}`;
+
+                const selected = state.answers[q.id];
+                document.querySelectorAll('.scale-btn').forEach(btn => {
+                    btn.classList.toggle('selected', parseInt(btn.dataset.value) === selected);
+                });
+
+                prevBtn.style.visibility = index > 0 ? 'visible' : 'hidden';
+                nextBtn.textContent = index === total - 1 ? 'Lihat Hasil ✨' : 'Selanjutnya →';
+            }
+
+            // ============================================================
+            //  🔥 SCALE & NAVIGATION
+            // ============================================================
+            scaleOptions.addEventListener('click', (e) => {
+                const btn = e.target.closest('.scale-btn');
+                if (!btn) return;
+
+                const value = parseInt(btn.dataset.value);
+                const q = wellnessQuestions[state.currentQuestion];
+                state.answers[q.id] = value;
+
+                document.querySelectorAll('.scale-btn').forEach(b => {
+                    b.classList.toggle('selected', parseInt(b.dataset.value) === value);
+                });
+            });
+
+            nextBtn.addEventListener('click', async () => {
+                const q = wellnessQuestions[state.currentQuestion];
+                if (!state.answers[q.id]) {
+                    const card = document.getElementById('question-card');
+                    card.classList.add('error');
+                    setTimeout(() => card.classList.remove('error'), 600);
+                    return;
+                }
+
+                if (state.currentQuestion === wellnessQuestions.length - 1) {
+                    await submitAnswers();
+                } else {
+                    state.currentQuestion++;
+                    renderQuestion(state.currentQuestion);
+                }
+            });
+
+            prevBtn.addEventListener('click', () => {
+                if (state.currentQuestion > 0) {
+                    state.currentQuestion--;
+                    renderQuestion(state.currentQuestion);
+                }
+            });
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowRight' || e.key === 'Enter') {
+                    if (state.currentStep === 'test') nextBtn.click();
+                }
+                if (e.key === 'ArrowLeft' && state.currentStep === 'test') {
+                    prevBtn.click();
+                }
+            });
+
+            // ============================================================
+            //  🔥 SUBMIT ANSWERS
+            // ============================================================
+            async function submitAnswers() {
+                const role = state.isPartner ? 'partner' : 'user';
+                const user = await getCurrentUser();
+
+                if (!user) {
+                    alert('⚠️ Silakan login terlebih dahulu!');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                const totalQuestions = wellnessQuestions.length;
+                const answered = Object.keys(state.answers).length;
+
+                if (answered < totalQuestions) {
+                    alert(`⚠️ Masih ada ${totalQuestions - answered} pertanyaan yang belum dijawab!`);
+                    return;
+                }
+
+                const originalText = nextBtn.textContent;
+                nextBtn.textContent = '⏳ Menyimpan...';
+                nextBtn.disabled = true;
+
+                try {
+                    const idToken = await user.getIdToken();
+
+                    const cleanedAnswers = {};
+                    for (const [key, value] of Object.entries(state.answers)) {
+                        cleanedAnswers[key] = Number(value);
+                    }
+
+                    const payload = {
+                        testId: state.testId,
+                        role: role,
+                        answers: cleanedAnswers
+                    };
+
+                    console.log('📤 Sending payload:', payload);
+
+                    const res = await fetch(`${API_BASE}/wellness/submit`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${idToken}`
+                        },
+                        credentials: 'include',
+                        body: JSON.stringify(payload)
+                    });
+
+                    const responseText = await res.text();
+                    console.log('📥 Raw Response:', responseText);
+
+                    let data;
+                    try {
+                        data = JSON.parse(responseText);
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        alert('Terjadi kesalahan pada server.');
+                        return;
+                    }
+
+                    console.log('📥 Parsed Response:', data);
+
+                    if (res.ok && data.success) {
+                        let inviteCode = data.inviteCode || null;
+
+                        if (data.isComplete) {
+                            state.results = data.results;
+                            showStep('results');
+                            renderResults(data.results);
+                        } else {
+                            if (inviteCode) {
+                                state.inviteCode = inviteCode;
+                                showStep('invite-display');
+                                generatedCodeEl.textContent = inviteCode;
+                            } else {
+                                const savedData = JSON.parse(localStorage.getItem('wellnessTestData') || '{}');
+                                if (savedData.inviteCode) {
+                                    state.inviteCode = savedData.inviteCode;
+                                    showStep('invite-display');
+                                    generatedCodeEl.textContent = savedData.inviteCode;
+                                } else {
+                                    showWaitingPartner();
+                                }
+                            }
+                        }
+                    } else {
+                        alert('❌ ' + (data?.message || 'Gagal menyimpan jawaban.'));
+                    }
+                } catch (error) {
+                    console.error('Submit error:', error);
+                    alert('Terjadi kesalahan: ' + error.message);
+                } finally {
+                    nextBtn.textContent = originalText;
+                    nextBtn.disabled = false;
+                }
+            }
+
+            // ============================================================
+            //  🔥 WAITING PARTNER
+            // ============================================================
+            function showWaitingPartner() {
+                showStep('results');
+                resultsContainer.innerHTML = `
+                    <div class="waiting-card">
+                        <div class="waiting-icon">⏳</div>
+                        <h2>Menunggu Pasangan</h2>
+                        <p>Jawaban Anda telah tersimpan. Kami menunggu pasangan Anda untuk mengisi.</p>
+                        <p style="color:var(--text-light);font-size:14px;margin-top:4px;">Hasil akan muncul otomatis setelah pasangan selesai.</p>
+                        <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
+                            <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ============================================================
+            //  🔥 SHOW WAITING RESULT
+            // ============================================================
+            function showWaitingResult() {
+                showStep('results');
+                resultsContainer.innerHTML = `
+                    <div style="text-align:center;padding:60px 20px;background:white;border-radius:20px;box-shadow:var(--shadow);">
+                        <div style="font-size:72px;margin-bottom:16px;">⏳</div>
+                        <h2 style="color:var(--primary);font-size:24px;margin-bottom:8px;">Hasil Sedang Diproses</h2>
+                        <p style="color:var(--text-secondary);font-size:16px;max-width:400px;margin:0 auto;">
+                            Kedua pasangan sudah selesai mengisi. Kami sedang menghitung hasil refleksi Anda.
+                        </p>
+                        <p style="color:var(--text-light);font-size:14px;margin-top:8px;">Mohon tunggu beberapa saat...</p>
+                        <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                            <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
+                            <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // ============================================================
+            //  🔥 CHECK STATUS
+            // ============================================================
+            window.checkResultStatus = async function() {
+                console.log('🔍 Checking status...');
+
+                if (!state.testId) {
+                    alert('Tidak ada sesi tes aktif.');
+                    return;
+                }
+
+                const user = await getCurrentUser();
+                if (!user) {
+                    alert('⚠️ Silakan login terlebih dahulu!');
+                    window.location.href = '/login';
+                    return;
+                }
+
+                try {
+                    const idToken = await user.getIdToken();
+                    const res = await fetch(`${API_BASE}/wellness/test/${state.testId}`, {
+                        headers: { 'Authorization': `Bearer ${idToken}` },
+                        credentials: 'include'
+                    });
+                    const data = await res.json();
+
+                    console.log('📥 Check status response:', data);
+
+                    if (data.success) {
+                        const testData = data.data;
+
+                        if (testData.results) {
+                            console.log('✅ Results found in checkStatus:', testData.results);
+                            state.results = testData.results;
+                            showStep('results');
+                            renderResults(testData.results);
+                            return;
+                        }
+
+                        if (testData.userCompleted && testData.partnerCompleted) {
+                            showWaitingResult();
+                        } else if (testData.userCompleted) {
+                            if (testData.inviteCode) {
+                                state.inviteCode = testData.inviteCode;
+                                showStep('invite-display');
+                                generatedCodeEl.textContent = testData.inviteCode;
+                            } else {
+                                showWaitingPartner();
+                            }
+                        } else if (testData.partnerCompleted) {
+                            alert('👤 Pasangan sudah mengisi. Silakan Anda mengisi sekarang!');
+                            state.testId = testData.testId || state.testId;
+                            state.answers = {};
+                            state.currentQuestion = 0;
+                            state.isPartner = false;
+                            showStep('test');
+                            renderQuestion(0);
+                        } else {
+                            alert('Belum ada yang mengisi. Mulai refleksi sekarang!');
+                            showStep('main');
+                        }
+                    } else {
+                        alert(data.message || 'Terjadi kesalahan.');
+                    }
+                } catch (error) {
+                    console.error('Check status error:', error);
+                    alert('Terjadi kesalahan.');
+                }
+            };
+
+            // ============================================================
+            //  🔥 INVITE CODE ACTIONS
+            // ============================================================
+            window.copyInviteCode = function() {
+                const code = state.inviteCode || generatedCodeEl.textContent;
+                if (!code || code === 'WELL-XXXX-XXXX') {
+                    alert('Kode belum tersedia.');
+                    return;
+                }
+                navigator.clipboard.writeText(code).then(() => {
+                    alert('✅ Kode berhasil disalin!');
+                }).catch(() => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = code;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('✅ Kode berhasil disalin!');
+                });
+            };
+
+            window.shareInviteCode = function() {
+                const code = state.inviteCode || generatedCodeEl.textContent;
+                if (!code || code === 'WELL-XXXX-XXXX') {
+                    alert('Kode belum tersedia.');
+                    return;
+                }
+                const message =
+                    `💚 Hi sayang, aku sudah mengisi Relationship Wellness Check di Relasi. Yuk isi juga pakai kode ini: ${code}\n\nKunjungi: ${window.location.origin}/relationship-check.html`;
+                if (navigator.share) {
+                    navigator.share({ title: 'Kode Invitasi - Relasi', text: message });
+                } else {
+                    navigator.clipboard.writeText(message).then(() => {
+                        alert('✅ Pesan disalin! Bagikan ke pasangan.');
+                    });
+                }
+            };
+
+            // ============================================================
+            //  🔥 RENDER RESULTS
+            // ============================================================
+            function renderResults(results) {
+                console.log('📊 Rendering results:', results);
+
+                if (!results) {
+                    resultsContainer.innerHTML = `
+                        <div style="text-align:center;padding:60px 20px;background:white;border-radius:20px;box-shadow:var(--shadow);">
+                            <div style="font-size:64px;margin-bottom:16px;">🔍</div>
+                            <h2 style="color:var(--primary);font-size:24px;margin-bottom:8px;">Belum Ada Hasil</h2>
+                            <p style="color:var(--text-secondary);font-size:16px;max-width:400px;margin:0 auto;">
+                                Hasil akan muncul setelah kedua pasangan menyelesaikan refleksi.
+                            </p>
+                            <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+                                <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
+                                <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (!results.wellnessScore && results.wellnessScore !== 0) {
+                    resultsContainer.innerHTML = `
+                        <div style="text-align:center;padding:60px 20px;background:white;border-radius:20px;box-shadow:var(--shadow);">
+                            <div style="font-size:64px;margin-bottom:16px;">⏳</div>
+                            <h2 style="color:var(--primary);font-size:24px;margin-bottom:8px;">Hasil Sedang Diproses</h2>
+                            <p style="color:var(--text-secondary);font-size:16px;max-width:400px;margin:0 auto;">
+                                Kami sedang memproses jawaban Anda. Tunggu sebentar...
+                            </p>
+                            <button class="btn-primary" onclick="checkResultStatus()" style="margin-top:20px;">🔄 Cek Status</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const dimLabel = (id) => wellnessDimensions.find(d => d.id === id)?.label || id;
+                const dimIcon = (id) => wellnessDimensions.find(d => d.id === id)?.icon || '📌';
+                const getRec = (id) => wellnessRecommendations[id] || 'Coba diskusikan dengan pasangan untuk memperkuat area ini.';
+
+                let categoryColor = '#4CAF50';
+                let categoryEmoji = '🌟';
+                if (results.category === 'Sangat Kuat') {
+                    categoryColor = '#2E7D32';
+                    categoryEmoji = '💪';
+                } else if (results.category === 'Cukup Sehat') {
+                    categoryColor = '#4CAF50';
+                    categoryEmoji = '🌿';
+                } else if (results.category === 'Perlu Diperkuat') {
+                    categoryColor = '#FF9800';
+                    categoryEmoji = '🔄';
+                } else if (results.category === 'Perlu Perhatian') {
+                    categoryColor = '#E65100';
+                    categoryEmoji = '⚠️';
+                }
+
+                const riskHtml = results.riskDetected?.detected ? `
+                    <div class="risk-alert">
+                        <div class="risk-header">
+                            <span style="font-size:24px;">⚠️</span>
+                            <h3>Perhatian: Keselamatan Anda adalah Prioritas</h3>
+                        </div>
+                        <div style="margin-top:8px;">
+                            <p>Berdasarkan jawaban Anda, kami mendeteksi adanya pola yang mungkin tidak aman.</p>
+                            <ul style="padding-left:20px;margin:8px 0;color:var(--text-secondary);">
+                                <li>Anda tidak wajib membahas hasil ini dengan pasangan jika itu membuat Anda tidak aman.</li>
+                                <li>Hubungi orang tepercaya atau tenaga profesional.</li>
+                            </ul>
+                            <div class="risk-contacts">
+                                <p><strong>📞 Hotline Kesehatan Mental:</strong> 119</p>
+                                <p><strong>📞 Komnas Perempuan:</strong> 08111-2120-100</p>
+                            </div>
+                        </div>
+                    </div>
+                ` : '';
+
+                resultsContainer.innerHTML = `
+                    <div class="result-card" style="background:linear-gradient(135deg, #f8faf9, var(--pink-light));">
+                        <div class="score-display">
+                            <div class="score-circle" style="background:linear-gradient(135deg, var(--primary), ${categoryColor});">
+                                <span class="score-number">${results.wellnessScore || 0}</span>
+                                <span class="score-label">/ 100</span>
+                            </div>
+                            <div class="score-info">
+                                <h2 style="display:flex;align-items:center;gap:8px;">
+                                    ${categoryEmoji} ${results.category || 'Belum Terukur'}
+                                </h2>
+                                <p>Skor ini menggambarkan refleksi jawabanmu saat ini, bukan penilaian klinis atas hubunganmu.</p>
+                                <div style="margin-top:8px;font-size:13px;color:var(--text-light);">
+                                    📊 Berdasarkan ${results.totalUser || 0} jawaban dari Anda dan ${results.totalPartner || 0} dari pasangan
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="disclaimer-box" style="border-left-color:var(--pink);">
+                        <p><strong>⚠️ Disclaimer:</strong> Relationship Wellness Check adalah alat refleksi edukatif, bukan pemeriksaan psikologis, diagnosis, atau terapi.</p>
+                    </div>
+
+                    ${riskHtml}
+
+                    ${results.strengths && results.strengths.length > 0 ? `
+                    <div class="result-card">
+                        <h3 style="font-size:18px;font-weight:700;color:var(--primary);margin-bottom:16px;">🌟 Kekuatan</h3>
+                        <div class="strength-grid">
+                            ${results.strengths.map(s => `
+                                <div class="strength-item">
+                                    <span>${dimIcon(s.dimension)}</span>
+                                    <span>${dimLabel(s.dimension)}</span>
+                                    <span class="score">${s.score}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${results.priorities && results.priorities.length > 0 ? `
+                    <div class="result-card">
+                        <h3 style="font-size:18px;font-weight:700;color:var(--primary);margin-bottom:16px;">💡 Area untuk Diperkuat</h3>
+                        <div class="priority-grid">
+                            ${results.priorities.map(p => `
+                                <div class="priority-item">
+                                    <span>${dimIcon(p.dimension)}</span>
+                                    <span>${dimLabel(p.dimension)}</span>
+                                    <span class="score">${p.score}%</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    ` : ''}
+
+                    ${results.priorities && results.priorities.length > 0 ? `
+                    <div class="result-card">
+                        <h3 style="font-size:18px;font-weight:700;color:var(--primary);margin-bottom:16px;">📋 Rekomendasi</h3>
+                        ${results.priorities.map((p, i) => `
+                            <div class="rec-item">
+                                <div class="rec-number">${i + 1}</div>
+                                <div>
+                                    <div class="rec-dimension">${dimLabel(p.dimension)}</div>
+                                    <p class="rec-text">${getRec(p.dimension)}</p>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    ` : ''}
+
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="saveWellnessResult()">💾 Simpan Hasil</button>
+                        <button class="btn-secondary" onclick="shareWellnessResult()">📤 Bagikan</button>
+                        <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                    </div>
+
+                    <div class="delete-section">
+                        <button class="btn-danger" onclick="deleteWellnessData()">🗑️ Hapus Data Saya</button>
+                    </div>
+                `;
+            }
+
+            window.saveWellnessResult = function() {
+                alert('✅ Hasil berhasil disimpan!');
+            };
+
+            window.shareWellnessResult = function() {
+                const url = window.location.href;
+                if (navigator.share) {
+                    navigator.share({ title: 'Hasil Wellness Check - Relasi', url: url });
+                } else {
+                    navigator.clipboard.writeText(url);
+                    alert('✅ Link disalin! Bagikan ke pasangan.');
+                }
+            };
+
+            window.deleteWellnessData = async function() {
+                if (!confirm('Yakin ingin menghapus semua data Anda? Tindakan ini tidak bisa dibatalkan.')) return;
+                const user = await getCurrentUser();
+                if (!user) {
+                    alert('⚠️ Silakan login terlebih dahulu!');
+                    window.location.href = '/login';
+                    return;
+                }
+                try {
+                    const idToken = await user.getIdToken();
+                    const res = await fetch(`${API_BASE}/profile/delete`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${idToken}` },
+                        credentials: 'include'
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        alert('✅ Data berhasil dihapus.');
+                        window.location.href = '/';
+                    }
+                } catch (error) {
+                    console.error('Delete error:', error);
+                    alert('Terjadi kesalahan.');
+                }
+            };
+
+            // ============================================================
+            //  🔥 AUTO CHECK STATUS
+            // ============================================================
+            let statusInterval = null;
+
+            function startStatusPolling() {
+                if (statusInterval) clearInterval(statusInterval);
+                statusInterval = setInterval(() => {
+                    if ((state.currentStep === 'results' || state.currentStep === 'invite-display') && state.testId) {
+                        checkResultStatus();
+                    }
+                }, 15000);
+            }
+
+            // ============================================================
+            //  🔥 LOGOUT
+            // ============================================================
+            document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try {
+                    await firebase.auth().signOut();
+                    window.location.href = '/login';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                }
+            });
+
+            // ============================================================
+            //  🔥 START
+            // ============================================================
+            showStep('consent');
+            startStatusPolling();
+
+            console.log('✅ App initialized successfully!');
+        }
+    </script>
+
+</body>
+</html>

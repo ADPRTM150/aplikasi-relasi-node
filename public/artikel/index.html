@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Artikel - Relasi</title>
+
+    <!-- ===== CSS ===== -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+</head>
+<body>
+
+    <div class="app">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="logo"><strong>Relasi</strong>🌱</div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="badge">Beta</span>
+                <div class="user-area" id="userArea">
+                    <!-- Akan diisi JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== KONTEN ARTIKEL ===== -->
+        <div class="card">
+            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">📰 Artikel</h1>
+            <p style="color:#5a6f6a;font-size:14px;margin-bottom:16px;">Tips dan informasi seputar hubungan yang sehat</p>
+
+            <div id="artikelContainer">
+                <div class="loading-text">⏳ Memuat artikel...</div>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <div class="bottom-nav">
+            <a href="/">
+                <span class="nav-icon">🏠</span>
+                Beranda
+            </a>
+            <a href="/love-language">
+                <span class="nav-icon">❤️</span>
+                Love
+            </a>
+            <a href="/relationship-check">
+                <span class="nav-icon">💕</span>
+                Health
+            </a>
+            <a href="/artikel" class="active">
+                <span class="nav-icon">📰</span>
+                Artikel
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+
+        // ============================================================
+        //  🔥 INISIALISASI FIRESTORE
+        // ============================================================
+        // const db = firebase.firestore();  // ✅ Tambahkan ini!
+
+        // ============================================================
+        //  FIREBASE AUTH - RENDER USER
+        // ============================================================
+        firebase.auth().onAuthStateChanged((user) => {
+            const userArea = document.getElementById('userArea');
+            if (user) {
+                const foto = user.photoURL || '';
+                const nama = user.displayName || 'Pengguna';
+                userArea.innerHTML = `
+                    <button class="profile-trigger" onclick="toggleDropdown()">
+                        ${foto ? `<img src="${foto}" class="avatar" />` : `<div class="avatar-placeholder">👤</div>`}
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="/profil" class="dropdown-item">👤 Profil</a>
+                        <a href="/hasil" class="dropdown-item">📊 Hasil</a>
+                        <a href="/love-language" class="dropdown-item">❤️ Love Language</a>
+                        <a href="/relationship-check" class="dropdown-item">💕 Health Check</a>
+                        <a href="/artikel" class="dropdown-item">📰 Artikel</a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
+                    </div>
+                `;
+            } else {
+                userArea.innerHTML = `
+                    <button class="profile-trigger" onclick="window.location.href='/login'">
+                        <div class="avatar-placeholder">👤</div>
+                    </button>
+                `;
+            }
+        });
+
+        function toggleDropdown() {
+            const d = document.getElementById('userDropdown');
+            if (d) d.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(e) {
+            const area = document.getElementById('userArea');
+            if (area && !area.contains(e.target)) {
+                const d = document.getElementById('userDropdown');
+                if (d) d.classList.remove('show');
+            }
+        });
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                firebase.auth().signOut().then(() => {
+                    window.location.reload();
+                });
+            }
+        }
+
+        // ============================================================
+        //  🔥 AMBIL ARTIKEL DARI FIRESTORE
+        // ============================================================
+        async function loadArticles() {
+            const container = document.getElementById('artikelContainer');
+
+              try {
+                // 🔥 Filter hanya artikel dengan status "published"
+                const snapshot = await db.collection('articles')
+                    .where('status', '==', 'published')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📭</div>
+                            <p>Belum ada artikel yang dipublikasikan.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const a = doc.data();
+                    const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
+                    html += `
+                        <div class="artikel-card" onclick="bacaArtikel('${doc.id}')">
+                            <div class="thumb">${a.thumb || '📰'}</div>
+                            <span class="kategori">${a.category || 'Lainnya'}</span>
+                            <h3>${a.title}</h3>
+                            <div class="desc">${a.desc || ''}</div>
+                            <div class="meta">📅 ${tanggal}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading articles:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">❌</div>
+                        <p>Gagal memuat artikel. Silakan refresh halaman.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function bacaArtikel(id) {
+            window.location.href = `/artikel/detail?id=${id}`;
+        }
+
+        loadArticles();
+    </script>
+
+</body>
+</html>

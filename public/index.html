@@ -26,7 +26,7 @@
 
         <!-- ===== HEADER ===== -->
         <div class="header">
-            <div class="logo"><strong>Relasi</strong>🌱</div>
+            <div class="logo">🌸<strong>Relasi</strong>🌱</div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <span class="badge">Beta</span>
                 <div class="user-area" id="userArea">
@@ -41,19 +41,19 @@
                 <h1>Hai, <span id="userName">Pengguna</span>!</h1>
                 <p>Setiap hubungan bisa bertumbuh lebih sehat dengan memahami dan merawatnya bersama.</p>
 
-        <div style="margin-top: 6px; margin-bottom: 16px;">
-    <a href="/relationship-check" style="display:inline-flex; align-items:center; gap:10px; background:#3a7d76; color:white; padding:10px 18px; border-radius:50px; font-weight:600; font-size:13px; text-decoration:none; transition:all 0.3s ease;">
-        <span>📋</span>
-        Mulai Relationship Wellness Check
-        <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:11px; transition:all 0.3s ease;">
-            <i class="fas fa-arrow-right"></i>
-        </span>
-    </a>
-    <p style="font-size:11px; color:#5a6f6a; margin-top:4px; margin-bottom:0;">
-        <span>🔐</span>
-        Privat, aman, dan hanya kamu yang bisa melihat hasilnya.
-    </p>
-</div>
+            <div style="margin-top: 6px; margin-bottom: 16px;">
+            <a href="/relationship-check" style="display:inline-flex; align-items:center; gap:10px; background: var(--pink-soft); color: var(--light); padding:10px 18px; border-radius:50px; font-weight:600; font-size:13px; text-decoration:none; transition:all 0.3s ease;">
+                <span>📋</span>
+                Mulai Relationship Wellness Check
+                <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:11px; transition:all 0.3s ease;">
+                    <i class="fas fa-arrow-right"></i>
+                </span>
+            </a>
+            <p style="font-size:11px; color: var(--medium); margin-top:4px; margin-bottom:0;">
+                <span>🔐</span>
+                Privat, aman, dan hanya kamu yang bisa melihat hasilnya.
+            </p>
+            </div>
         </div>
 
         <div class="greeting-image">
@@ -87,7 +87,7 @@
                     <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
                 </a>
 
-                <a href="#" class="fitur-item" onclick="alert('🚧 Segera hadir!')">
+                <a href="/artikel" class="fitur-item">
                     <div class="icon">📖</div>
                     <div class="label">Baca &amp; Belajar</div>
                     <div class="desc">Artikel, ebook, dan tips seputar hubungan yang bertumbuh.</div>
@@ -111,31 +111,16 @@
             </div>
         </div>
 
-        <!-- ===== REKOMENDASI ===== -->
-        <div class="card">
+        <!-- ===== REKOMENDASI (DINAMIS DARI FIRESTORE) ===== -->
+        <div class="card" id="rekomendasiCard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <h4 style="font-size:15px;font-weight:600;color:var(--dark);">📖 Rekomendasi untukmu</h4>
                 <span style="font-size:12px;color:var(--medium);">Artikel & Ebook</span>
             </div>
-            <div class="rekomendasi-list">
-                <a href="#" class="rekomendasi-item" onclick="alert('Baca artikel')">
-                    <span class="thumb">📰</span>
-                    <div class="info">
-                        <div class="title">5 Kebiasaan Kecil yang Bikin Hubungan Makin Dekat</div>
-                        <div class="meta">5 menit baca</div>
-                    </div>
-                    <span class="arrow">→</span>
-                </a>
-                <a href="#" class="rekomendasi-item" onclick="alert('Baca ebook')">
-                    <span class="thumb">📘</span>
-                    <div class="info">
-                        <div class="title">Panduan Komunikasi Sehat untuk Pasangan</div>
-                        <div class="meta">24 halaman</div>
-                    </div>
-                    <span class="arrow">→</span>
-                </a>
+            <div class="rekomendasi-list" id="rekomendasiContainer">
+                <div class="loading-text">⏳ Memuat rekomendasi...</div>
             </div>
-            <button class="btn-lihat-semua" onclick="alert('🚧 Segera hadir!')">Lihat semua →</button>
+            <a href="/artikel" class="btn-lihat-semua">Lihat semua →</a>
         </div>
 
         <!-- ===== BOTTOM NAV ===== -->
@@ -197,6 +182,11 @@
                         <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
                     </div>
                 `;
+                  // 🔥 Tampilkan rekomendasi
+                    loadRecommendations();
+
+                    // Tampilkan riwayat
+                    tampilkanRiwayat();
             } else {
                 userName.textContent = 'Pengguna';
                 userArea.innerHTML = `
@@ -226,6 +216,98 @@
             }
         }
 
+        async function loadRecommendations() {
+            const container = document.getElementById('rekomendasiContainer');
+            
+            try {
+                // Tampilkan loading state yang lebih baik
+                container.innerHTML = `
+                    <div class="loading-skeleton">
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                        <div class="skeleton-item"></div>
+                    </div>
+                `;
+
+                const db = firebase.firestore();
+                const [articlesSnapshot, ebooksSnapshot] = await Promise.all([
+                    db.collection('articles')
+                        .where('status', '==', 'published')
+                        .orderBy('createdAt', 'desc')
+                        .limit(2)
+                        .get(),
+                    db.collection('ebooks')
+                        .where('status', '==', 'published')
+                        .orderBy('createdAt', 'desc')
+                        .limit(2)
+                        .get()
+                ]);
+
+                // Cek apakah ada data
+                if (articlesSnapshot.empty && ebooksSnapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">📚</div>
+                            <p>Belum ada rekomendasi tersedia.</p>
+                            <p style="font-size:12px;color:#999;">Pantau terus untuk konten terbaru!</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Render rekomendasi
+                let html = '<div class="recommendations-grid">';
+                
+                // Tambahkan artikel
+                articlesSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <div class="recommendation-card" onclick="navigateTo('article', '${doc.id}')">
+                            <div class="card-badge">📄 Artikel</div>
+                            <h4>${data.title || 'Judul Artikel'}</h4>
+                            <p>${data.excerpt || ''}</p>
+                            <span class="read-time">${data.readTime || '5 menit'} baca</span>
+                        </div>
+                    `;
+                });
+
+                // Tambahkan ebook
+                ebooksSnapshot.forEach(doc => {
+                    const data = doc.data();
+                    html += `
+                        <div class="recommendation-card" onclick="navigateTo('ebook', '${doc.id}')">
+                            <div class="card-badge">📘 E-Book</div>
+                            <h4>${data.title || 'Judul E-Book'}</h4>
+                            <p>${data.excerpt || ''}</p>
+                            <span class="badge">${data.category || 'Umum'}</span>
+                        </div>
+                    `;
+                });
+
+                html += '</div>';
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error detail:', error);
+                
+                // Tampilkan error dengan lebih informatif
+                container.innerHTML = `
+                    <div class="error-state" style="padding:20px;text-align:center;">
+                        <div class="icon" style="font-size:40px;">⚠️</div>
+                        <p style="font-size:14px;font-weight:600;color:#d32f2f;">
+                            Gagal memuat rekomendasi
+                        </p>
+                        <p style="font-size:12px;color:#666;margin-top:8px;">
+                            ${error.message || 'Terjadi kesalahan teknis'}
+                        </p>
+                        <button onclick="loadRecommendations()" 
+                                style="margin-top:12px;padding:8px 16px;background:#6C63FF;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            Coba Lagi
+                        </button>
+                    </div>
+                `;
+            }
+        }
         // ============================================================
         //  TAMPILKAN RIWAYAT RELATIONSHIP CHECK
         // ============================================================
@@ -263,6 +345,14 @@
             } catch (e) {
                 container.innerHTML = `<p style="color:#8a9e99;font-size:14px;">Data riwayat tidak tersedia.</p>`;
             }
+        }
+
+         // ============================================================
+        //  🔥 KEMBALI KE ARTIKEL (TANPA MENYIMPAN HISTORY)
+        // ============================================================
+        function kembaliKeArtikel(e) {
+            e.preventDefault();
+            window.location.replace('/artikel');
         }
 
         tampilkanRiwayat();
