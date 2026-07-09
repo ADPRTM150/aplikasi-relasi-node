@@ -5,34 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Relationship Wellness Check - Relasi</title>
 
-    <!-- NO CACHE -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
 
-    <!-- ============================================================
-         🔥 1. FIREBASE SDK (HARUS PERTAMA!)
-         ============================================================ -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-    <!-- ============================================================
-         🔥 2. FIREBASE CONFIG (TANPA MODULE)
-         ============================================================ -->
     <script src="/firebase-config.js"></script>
-
-    <!-- ============================================================
-         🔥 3. WELLNESS QUESTIONS (TANPA MODULE)
-         ============================================================ -->
     <script src="/questions/wellness-questions.js"></script>
 
     <style>
-        /* ============================================
-           RESET & ROOT - BRAND RELASI
-           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -48,30 +34,25 @@
             --pink-light: #ffdde6;
             --pink: #f8b4c8;
             --cream: #fdf6f2;
-            --white: #ffe9e9;
+            --white: #ffffff;
             --text-primary: #1d2a26;
             --text-secondary: #5a6f6a;
             --text-light: #8a9a95;
             --shadow: 0 20px 60px rgba(29, 59, 54, 0.08);
-            --shadow-hover: 0 30px 80px rgba(29, 59, 54, 0.15);
             --radius: 20px;
             --radius-sm: 12px;
             --transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        html,
-        body {
+        html, body {
             font-family: var(--font);
-            background: var(--pink-light);
+            background: var(--cream);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
         }
 
-        /* ============================================
-           HEADER
-           ============================================ */
         header {
             background: var(--white);
             border-bottom: 1px solid rgba(29, 59, 54, 0.06);
@@ -109,26 +90,15 @@
         }
 
         @keyframes heartbeat {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            14% {
-                transform: scale(1.15);
-            }
-            28% {
-                transform: scale(1);
-            }
-            42% {
-                transform: scale(1.1);
-            }
-            70% {
-                transform: scale(1);
-            }
+            0%, 100% { transform: scale(1); }
+            14% { transform: scale(1.15); }
+            28% { transform: scale(1); }
+            42% { transform: scale(1.1); }
+            70% { transform: scale(1); }
         }
 
         .logo .logo-text {
-            background: linear-gradient(135deg, var(--primary), var(--pink-light));
+            background: linear-gradient(135deg, var(--primary), var(--pink));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -166,18 +136,15 @@
         }
 
         #logout-link {
-            color: var(--text-secondary);
+            color: var(--text-light);
             font-size: 14px;
         }
 
         #logout-link:hover {
-            color:var(--primary-light);
+            color: #c0392b;
             background: rgba(192, 57, 43, 0.08);
         }
 
-        /* ============================================
-           WELLNESS CONTAINER
-           ============================================ */
         .wellness-container {
             max-width: 820px;
             margin: 0 auto;
@@ -221,9 +188,6 @@
             margin: 0 auto;
         }
 
-        /* ============================================
-           STEP
-           ============================================ */
         .step {
             display: none;
             animation: fadeUp 0.6s ease;
@@ -234,19 +198,10 @@
         }
 
         @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* ============================================
-           CONSENT CARD
-           ============================================ */
         .consent-card {
             background: var(--white);
             padding: 40px;
@@ -348,31 +303,47 @@
             background: var(--pink-light);
         }
 
-        /* ============================================
-           BUTTONS
-           ============================================ */
         .btn-primary {
-            background: var(--primary);
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
             color: var(--white);
             border: none;
-            padding: 16px 40px;
+            padding: 18px 48px;
             border-radius: 50px;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
             font-family: var(--font);
-            min-width: 160px;
+            min-width: 180px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(29, 59, 54, 0.15);
+        }
+
+        .btn-primary::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg) translateX(-100%);
+            transition: 0.6s;
+        }
+
+        .btn-primary:hover::after {
+            transform: rotate(45deg) translateX(100%);
         }
 
         .btn-primary:hover {
-            background: var(--primary-light);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 30px rgba(29, 59, 54, 0.25);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(29, 59, 54, 0.3);
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
         }
 
         .btn-primary:disabled {
@@ -382,23 +353,72 @@
             box-shadow: none;
         }
 
+        .btn-primary .btn-icon {
+            font-size: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover .btn-icon {
+            transform: scale(1.2) rotate(-5deg);
+        }
+
         .btn-secondary {
             background: transparent;
-            color: var(--text-secondary);
-            border: 2px solid var(--pink-light);
-            padding: 14px 32px;
+            color: var(--primary);
+            border: 2px solid var(--pink);
+            padding: 16px 36px;
             border-radius: 50px;
             font-size: 15px;
             font-weight: 500;
             cursor: pointer;
             transition: var(--transition);
             font-family: var(--font);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            min-width: 140px;
         }
 
         .btn-secondary:hover {
-            border-color: var(--pink);
-            color: var(--primary);
             background: var(--pink-light);
+            border-color: var(--pink);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(248, 180, 200, 0.25);
+        }
+
+        .btn-secondary .btn-icon {
+            font-size: 18px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-secondary:hover .btn-icon {
+            transform: scale(1.15);
+        }
+
+        .btn-pink {
+            background: linear-gradient(135deg, var(--pink), #f5a0b8);
+            color: var(--white);
+            border: none;
+            padding: 18px 48px;
+            border-radius: 50px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            font-family: var(--font);
+            min-width: 180px;
+            box-shadow: 0 4px 20px rgba(248, 180, 200, 0.25);
+        }
+
+        .btn-pink:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(248, 180, 200, 0.4);
+            background: linear-gradient(135deg, #f0a0b8, #e88aa8);
         }
 
         .btn-danger {
@@ -417,6 +437,7 @@
         .btn-danger:hover {
             background: #fce4e4;
             border-color: #c0392b;
+            transform: translateY(-2px);
         }
 
         .btn-block {
@@ -424,9 +445,6 @@
             justify-content: center;
         }
 
-        /* ============================================
-           MAIN ACTION
-           ============================================ */
         .main-action {
             text-align: center;
             padding: 20px 0;
@@ -460,9 +478,6 @@
             color: var(--pink);
         }
 
-        /* ============================================
-           INVITE SECTION
-           ============================================ */
         .invite-section {
             background: linear-gradient(135deg, var(--pink-light), #ffe8ef);
             border: 2px dashed var(--pink);
@@ -533,9 +548,6 @@
             display: none;
         }
 
-        /* ============================================
-           QUESTION CARD
-           ============================================ */
         .question-card {
             background: var(--white);
             padding: 40px;
@@ -551,16 +563,9 @@
         }
 
         @keyframes shake {
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-            25% {
-                transform: translateX(-8px);
-            }
-            75% {
-                transform: translateX(8px);
-            }
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
         }
 
         .question-number {
@@ -632,9 +637,6 @@
             flex-shrink: 0;
         }
 
-        /* ============================================
-           PROGRESS
-           ============================================ */
         .progress-section {
             margin-bottom: 28px;
         }
@@ -667,9 +669,6 @@
             color: var(--primary);
         }
 
-        /* ============================================
-           INVITE CODE DISPLAY
-           ============================================ */
         .invite-code-display {
             background: linear-gradient(135deg, var(--pink-light), #ffe8ef);
             border: 2px solid var(--pink);
@@ -717,9 +716,6 @@
             flex-wrap: wrap;
         }
 
-        /* ============================================
-           RESULTS
-           ============================================ */
         .result-card {
             background: var(--white);
             padding: 32px;
@@ -773,15 +769,13 @@
             font-size: 15px;
         }
 
-        .strength-grid,
-        .priority-grid {
+        .strength-grid, .priority-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 12px;
         }
 
-        .strength-item,
-        .priority-item {
+        .strength-item, .priority-item {
             display: flex;
             align-items: center;
             gap: 12px;
@@ -791,14 +785,12 @@
             transition: var(--transition);
         }
 
-        .strength-item:hover,
-        .priority-item:hover {
+        .strength-item:hover, .priority-item:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(29, 59, 54, 0.06);
         }
 
-        .strength-item .score,
-        .priority-item .score {
+        .strength-item .score, .priority-item .score {
             margin-left: auto;
             font-weight: 700;
             color: var(--primary);
@@ -892,13 +884,8 @@
         }
 
         @keyframes pulse {
-            0%,
-            100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.05);
-            }
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
         .waiting-card h2 {
@@ -923,7 +910,8 @@
         }
 
         .action-buttons .btn-primary,
-        .action-buttons .btn-secondary {
+        .action-buttons .btn-secondary,
+        .action-buttons .btn-pink {
             flex: 1;
             min-width: 140px;
             text-align: center;
@@ -936,111 +924,87 @@
             margin-top: 20px;
         }
 
-        /* ============================================
-           RESPONSIVE
-           ============================================ */
         @media (max-width: 768px) {
             header .container {
                 flex-direction: column;
                 gap: 12px;
                 padding: 0 16px;
             }
-
             nav {
                 flex-wrap: wrap;
                 justify-content: center;
                 gap: 4px;
             }
-
             nav a {
                 font-size: 13px;
                 padding: 6px 14px;
             }
-
             .wellness-container {
                 padding: 24px 16px 60px;
             }
-
             .wellness-header h1 {
                 font-size: 30px;
             }
-
             .wellness-header p {
                 font-size: 16px;
             }
-
             .consent-card {
                 padding: 24px;
             }
-
             .question-card {
                 padding: 24px;
             }
-
             .question-text {
                 font-size: 18px;
             }
-
             .scale-options {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
-
             .scale-btn {
                 font-size: 12px;
                 min-height: 48px;
                 padding: 10px 6px;
             }
-
             .score-display {
                 flex-direction: column;
                 text-align: center;
             }
-
             .score-circle {
                 width: 120px;
                 height: 120px;
             }
-
             .score-number {
                 font-size: 40px;
             }
-
-            .strength-grid,
-            .priority-grid {
+            .strength-grid, .priority-grid {
                 grid-template-columns: 1fr 1fr;
             }
-
             .invite-input-group {
                 flex-direction: column;
             }
-
             .invite-code-display {
                 padding: 24px;
             }
-
             .invite-code-display .big-code {
                 font-size: 22px;
                 padding: 12px 16px;
                 letter-spacing: 3px;
             }
-
             .main-action .btn-primary {
                 font-size: 18px;
                 padding: 16px 40px;
                 width: 100%;
             }
-
             .nav-buttons {
                 flex-direction: column;
             }
-
             .nav-buttons .btn-secondary {
                 order: 1;
             }
-
             .action-buttons .btn-primary,
-            .action-buttons .btn-secondary {
+            .action-buttons .btn-secondary,
+            .action-buttons .btn-pink {
                 min-width: 100%;
             }
         }
@@ -1049,56 +1013,44 @@
             .wellness-header h1 {
                 font-size: 24px;
             }
-
-            .strength-grid,
-            .priority-grid {
+            .strength-grid, .priority-grid {
                 grid-template-columns: 1fr;
             }
-
             .scale-options {
                 grid-template-columns: 1fr 1fr;
                 gap: 6px;
             }
-
             .scale-btn {
                 font-size: 11px;
                 min-height: 44px;
                 padding: 8px 4px;
             }
-
             .checkbox-item {
                 font-size: 13px;
                 padding: 12px 14px;
             }
-
             .consent-card {
                 padding: 16px;
             }
-
             .question-card {
                 padding: 16px;
             }
-
             .question-text {
                 font-size: 16px;
             }
-
             .invite-code-display .big-code {
                 font-size: 18px;
                 letter-spacing: 2px;
                 padding: 10px 14px;
             }
-
             .score-circle {
                 width: 100px;
                 height: 100px;
             }
-
             .score-number {
                 font-size: 32px;
             }
-
-            .btn-primary {
+            .btn-primary, .btn-pink {
                 padding: 14px 28px;
                 font-size: 14px;
                 min-width: 120px;
@@ -1108,13 +1060,10 @@
 </head>
 <body>
 
-    <!-- ============================================================
-         HEADER
-         ============================================================ -->
     <header>
         <div class="container">
             <a href="/" class="logo">
-                <span class="heart-icon">💚</span>
+                <span class="heart-icon">❤️</span>
                 <span class="logo-text">Relasi</span>
             </a>
             <nav>
@@ -1127,9 +1076,6 @@
         </div>
     </header>
 
-    <!-- ============================================================
-         MAIN CONTENT
-         ============================================================ -->
     <section class="wellness-container">
         <div class="wellness-header">
             <div class="badge">✨ Refleksi Hubungan</div>
@@ -1145,37 +1091,34 @@
                 <p class="sub-text">Baca dengan saksama sebelum melanjutkan refleksi</p>
 
                 <div class="disclaimer-box">
-                    <p>
-                        <strong>Relationship Wellness Check</strong> adalah alat refleksi edukatif
-                        untuk membantu memahami pola hubungan. Fitur ini <strong>bukan</strong>
-                        pemeriksaan psikologis, diagnosis, terapi, atau penentu kualitas hubungan.
-                    </p>
+                    <p><strong>Relationship Wellness Check</strong> adalah alat refleksi edukatif untuk membantu memahami pola hubungan. Fitur ini <strong>bukan</strong> pemeriksaan psikologis, diagnosis, terapi, atau penentu kualitas hubungan.</p>
                 </div>
 
                 <div class="consent-items">
-                    <label class="checkbox-item" id="consent-label-1">
+                    <label class="checkbox-item">
                         <input type="checkbox" id="consent-1" />
                         <span>Saya memahami bahwa fitur ini adalah refleksi edukatif, bukan diagnosis atau terapi.</span>
                         <span class="required-badge">WAJIB</span>
                     </label>
-                    <label class="checkbox-item" id="consent-label-2">
+                    <label class="checkbox-item">
                         <input type="checkbox" id="consent-2" />
                         <span>Saya setuju jawaban saya diproses untuk menghasilkan hasil pribadi.</span>
                         <span class="required-badge">WAJIB</span>
                     </label>
-                    <label class="checkbox-item" id="consent-label-3">
+                    <label class="checkbox-item">
                         <input type="checkbox" id="consent-3" />
                         <span>Saya telah membaca <a href="#" style="color:var(--primary);font-weight:600;">Kebijakan Privasi</a> dan <a href="#" style="color:var(--primary);font-weight:600;">Ketentuan Penggunaan</a>.</span>
                         <span class="required-badge">WAJIB</span>
                     </label>
-                    <label class="checkbox-item optional" id="consent-label-4">
+                    <label class="checkbox-item optional">
                         <input type="checkbox" id="consent-4" />
                         <span>(Opsional) Saya setuju data saya yang telah dianonimkan digunakan untuk pengembangan fitur.</span>
                     </label>
                 </div>
 
                 <button class="btn-primary btn-block" id="consent-btn" disabled>
-                    Saya Setuju & Lanjutkan →
+                    <span class="btn-icon">✨</span>
+                    Saya Setuju & Lanjutkan
                 </button>
             </div>
         </div>
@@ -1184,7 +1127,8 @@
         <div id="step-main" class="step">
             <div class="main-action">
                 <button class="btn-primary" id="start-test-btn">
-                    🚀 Mulai Refleksi
+                    <span class="btn-icon">🚀</span>
+                    Mulai Refleksi
                 </button>
                 <p class="sub-text">
                     Atau <a id="show-invite-link">masukkan kode invitasi</a> jika pasangan Anda sudah mengisi.
@@ -1197,7 +1141,10 @@
                 <p>Masukkan kode yang diberikan oleh pasangan Anda untuk mengisi tes.</p>
                 <div class="invite-input-group">
                     <input type="text" id="invite-code-input" placeholder="WELL-XXXX-XXXX-XXXX" maxlength="19" />
-                    <button class="btn-primary" id="verify-invite-btn">Verifikasi</button>
+                    <button class="btn-primary" id="verify-invite-btn">
+                        <span class="btn-icon">🔑</span>
+                        Verifikasi
+                    </button>
                 </div>
                 <div id="invite-error" class="invite-error"></div>
             </div>
@@ -1226,8 +1173,14 @@
                     <button class="scale-btn" data-value="5">Sangat Setuju</button>
                 </div>
                 <div class="nav-buttons">
-                    <button class="btn-secondary" id="prev-btn" style="visibility:hidden;">← Kembali</button>
-                    <button class="btn-primary" id="next-btn">Selanjutnya →</button>
+                    <button class="btn-secondary" id="prev-btn" style="visibility:hidden;">
+                        <span class="btn-icon">←</span>
+                        Kembali
+                    </button>
+                    <button class="btn-primary" id="next-btn">
+                        Selanjutnya
+                        <span class="btn-icon">→</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1240,14 +1193,21 @@
                 <p>Bagikan kode ini dengan pasangan Anda agar mereka bisa mengisi secara terpisah.</p>
                 <div class="big-code" id="generated-invite-code">WELL-XXXX-XXXX</div>
                 <div class="btn-group">
-                    <button class="btn-primary" onclick="copyInviteCode()">📋 Salin Kode</button>
-                    <button class="btn-secondary" onclick="shareInviteCode()">📤 Kirim ke Pasangan</button>
+                    <button class="btn-primary" onclick="copyInviteCode()">
+                        <span class="btn-icon">📋</span>
+                        Salin Kode
+                    </button>
+                    <button class="btn-pink" onclick="shareInviteCode()">
+                        <span class="btn-icon">📤</span>
+                        Kirim ke Pasangan
+                    </button>
                 </div>
                 <p style="margin-top:20px;font-size:14px;color:var(--text-light);">
                     Setelah pasangan mengisi, hasil akan digabungkan dan ditampilkan secara otomatis.
                 </p>
                 <button class="btn-secondary" onclick="checkResultStatus()" style="margin-top:12px;">
-                    👀 Cek Status Hasil
+                    <span class="btn-icon">👀</span>
+                    Cek Status Hasil
                 </button>
             </div>
         </div>
@@ -1258,13 +1218,7 @@
         </div>
     </section>
 
-    <!-- ============================================================
-         JAVASCRIPT
-         ============================================================ -->
     <script>
-        // ============================================================
-        //  🔥 TUNGGU FIREBASE SIAP
-        // ============================================================
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🔍 DOM loaded, checking Firebase...');
 
@@ -1300,9 +1254,6 @@
         function initApp() {
             console.log('🔥 initApp() called!');
 
-            // ============================================================
-            //  🔥 AMBIL DARI GLOBAL
-            // ============================================================
             const API_BASE = window.API_BASE || '/api';
             const wellnessQuestions = window.wellnessQuestions || [];
             const wellnessDimensions = window.wellnessDimensions || [];
@@ -1311,9 +1262,6 @@
             console.log('✅ API_BASE:', API_BASE);
             console.log('✅ Jumlah pertanyaan:', wellnessQuestions.length);
 
-            // ============================================================
-            //  🔥 STATE
-            // ============================================================
             const state = {
                 currentStep: 'consent',
                 testId: null,
@@ -1324,9 +1272,6 @@
                 isPartner: false
             };
 
-            // ============================================================
-            //  🔥 DOM REFS
-            // ============================================================
             const steps = {
                 consent: document.getElementById('step-consent'),
                 main: document.getElementById('step-main'),
@@ -1334,8 +1279,6 @@
                 inviteDisplay: document.getElementById('step-invite-display'),
                 results: document.getElementById('step-results')
             };
-
-            console.log('✅ Steps found:', Object.keys(steps).every(k => steps[k] !== null));
 
             const consentBtn = document.getElementById('consent-btn');
             const startTestBtn = document.getElementById('start-test-btn');
@@ -1355,18 +1298,12 @@
             const generatedCodeEl = document.getElementById('generated-invite-code');
             const resultsContainer = document.getElementById('results-container');
 
-            // ============================================================
-            //  🔥 CHECKBOX STYLING
-            // ============================================================
             document.querySelectorAll('.checkbox-item input[type="checkbox"]').forEach(cb => {
                 cb.addEventListener('change', function() {
                     this.closest('.checkbox-item').classList.toggle('checked', this.checked);
                 });
             });
 
-            // ============================================================
-            //  🔥 HELPER: CEK LOGIN
-            // ============================================================
             function getCurrentUser() {
                 return new Promise((resolve) => {
                     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
@@ -1376,9 +1313,6 @@
                 });
             }
 
-            // ============================================================
-            //  🔥 STEP 1: CONSENT
-            // ============================================================
             document.querySelectorAll('#step-consent input[type="checkbox"]').forEach(cb => {
                 cb.addEventListener('change', () => {
                     const required = ['consent-1', 'consent-2', 'consent-3'];
@@ -1391,10 +1325,9 @@
                 showStep('main');
             });
 
-            // ============================================================
-            //  🔥 STEP NAVIGATION
-            // ============================================================
             function showStep(step) {
+                console.log('🔍 showStep called with:', step);
+                
                 Object.keys(steps).forEach(key => {
                     if (steps[key]) {
                         steps[key].classList.toggle('active', key === step);
@@ -1404,9 +1337,6 @@
                 document.querySelector('.wellness-container')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
 
-            // ============================================================
-            //  🔥 STEP 2: MAIN ACTION
-            // ============================================================
             showInviteLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 const isVisible = inviteSection.style.display !== 'none';
@@ -1414,9 +1344,6 @@
                 if (!isVisible) inviteInput.focus();
             });
 
-            // ============================================================
-            //  🔥 START TEST
-            // ============================================================
             startTestBtn.addEventListener('click', async () => {
                 const user = await getCurrentUser();
                 if (!user) {
@@ -1454,9 +1381,6 @@
                 }
             });
 
-            // ============================================================
-            //  🔥 VERIFY INVITE
-            // ============================================================
             verifyInviteBtn.addEventListener('click', verifyInvite);
             inviteInput.addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') verifyInvite();
@@ -1504,7 +1428,10 @@
                         state.testId = data.testId;
                         state.answers = {};
                         state.currentQuestion = 0;
-                        state.isPartner = true;
+
+                        // 🔥 TENTUKAN ROLE BERDASARKAN RESPONSE
+                        state.isPartner = data.role === 'partner';
+                        console.log('✅ Role:', state.isPartner ? 'partner' : 'user');
                         inviteError.style.display = 'none';
                         inviteSection.style.display = 'none';
                         showStep('test');
@@ -1520,9 +1447,6 @@
                 }
             }
 
-            // ============================================================
-            //  🔥 RENDER QUESTION
-            // ============================================================
             function renderQuestion(index) {
                 const q = wellnessQuestions[index];
                 if (!q) {
@@ -1550,9 +1474,6 @@
                 nextBtn.textContent = index === total - 1 ? 'Lihat Hasil ✨' : 'Selanjutnya →';
             }
 
-            // ============================================================
-            //  🔥 SCALE & NAVIGATION
-            // ============================================================
             scaleOptions.addEventListener('click', (e) => {
                 const btn = e.target.closest('.scale-btn');
                 if (!btn) return;
@@ -1600,7 +1521,7 @@
             });
 
             // ============================================================
-            //  🔥 SUBMIT ANSWERS
+            //  🔥 SUBMIT ANSWERS - SUDAH DIPERBAIKI
             // ============================================================
             async function submitAnswers() {
                 const role = state.isPartner ? 'partner' : 'user';
@@ -1666,22 +1587,55 @@
 
                     if (res.ok && data.success) {
                         let inviteCode = data.inviteCode || null;
+                        console.log('📌 inviteCode from response:', inviteCode);
 
                         if (data.isComplete) {
                             state.results = data.results;
                             showStep('results');
                             renderResults(data.results);
                         } else {
+                            // 🔥 TAMPILKAN INVITE CODE - PAKAI KODE YANG SUDAH TERBUKTI BERHASIL
                             if (inviteCode) {
                                 state.inviteCode = inviteCode;
-                                showStep('invite-display');
-                                generatedCodeEl.textContent = inviteCode;
+                                console.log('✅ inviteCode ditemukan:', inviteCode);
+                                
+                                // 🔥 UPDATE ELEMENT
+                                const generatedCodeEl = document.getElementById('generated-invite-code');
+                                if (generatedCodeEl) {
+                                    generatedCodeEl.textContent = inviteCode;
+                                    console.log('✅ Element updated:', generatedCodeEl.textContent);
+                                }
+                                
+                                // 🔥 PINDAH KE STEP INVITE DISPLAY
+                                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                                const target = document.getElementById('step-invite-display');
+                                if (target) {
+                                    target.classList.add('active');
+                                    console.log('✅ Step changed to invite-display');
+                                }
+                                
+                                // 🔥 SIMPAN KE LOCALSTORAGE
+                                const savedData = JSON.parse(localStorage.getItem('wellnessTestData') || '{}');
+                                savedData.inviteCode = inviteCode;
+                                savedData.testId = state.testId;
+                                localStorage.setItem('wellnessTestData', JSON.stringify(savedData));
+                                
+                                state.currentStep = 'invite-display';
+                                
                             } else {
+                                // 🔥 FALLBACK: Coba dari localStorage
                                 const savedData = JSON.parse(localStorage.getItem('wellnessTestData') || '{}');
                                 if (savedData.inviteCode) {
                                     state.inviteCode = savedData.inviteCode;
-                                    showStep('invite-display');
-                                    generatedCodeEl.textContent = savedData.inviteCode;
+                                    const generatedCodeEl = document.getElementById('generated-invite-code');
+                                    if (generatedCodeEl) {
+                                        generatedCodeEl.textContent = savedData.inviteCode;
+                                    }
+                                    document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                                    const target = document.getElementById('step-invite-display');
+                                    if (target) {
+                                        target.classList.add('active');
+                                    }
                                 } else {
                                     showWaitingPartner();
                                 }
@@ -1699,9 +1653,6 @@
                 }
             }
 
-            // ============================================================
-            //  🔥 WAITING PARTNER
-            // ============================================================
             function showWaitingPartner() {
                 showStep('results');
                 resultsContainer.innerHTML = `
@@ -1711,16 +1662,19 @@
                         <p>Jawaban Anda telah tersimpan. Kami menunggu pasangan Anda untuk mengisi.</p>
                         <p style="color:var(--text-light);font-size:14px;margin-top:4px;">Hasil akan muncul otomatis setelah pasangan selesai.</p>
                         <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
-                            <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                            <button class="btn-primary" onclick="checkResultStatus()">
+                                <span class="btn-icon">🔄</span>
+                                Cek Status
+                            </button>
+                            <button class="btn-secondary" onclick="window.location.href='/'">
+                                <span class="btn-icon">🏠</span>
+                                Beranda
+                            </button>
                         </div>
                     </div>
                 `;
             }
 
-            // ============================================================
-            //  🔥 SHOW WAITING RESULT
-            // ============================================================
             function showWaitingResult() {
                 showStep('results');
                 resultsContainer.innerHTML = `
@@ -1732,16 +1686,19 @@
                         </p>
                         <p style="color:var(--text-light);font-size:14px;margin-top:8px;">Mohon tunggu beberapa saat...</p>
                         <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                            <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
-                            <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                            <button class="btn-primary" onclick="checkResultStatus()">
+                                <span class="btn-icon">🔄</span>
+                                Cek Status
+                            </button>
+                            <button class="btn-secondary" onclick="window.location.href='/'">
+                                <span class="btn-icon">🏠</span>
+                                Beranda
+                            </button>
                         </div>
                     </div>
                 `;
             }
 
-            // ============================================================
-            //  🔥 CHECK STATUS
-            // ============================================================
             window.checkResultStatus = async function() {
                 console.log('🔍 Checking status...');
 
@@ -1783,8 +1740,15 @@
                         } else if (testData.userCompleted) {
                             if (testData.inviteCode) {
                                 state.inviteCode = testData.inviteCode;
-                                showStep('invite-display');
-                                generatedCodeEl.textContent = testData.inviteCode;
+                                const generatedCodeEl = document.getElementById('generated-invite-code');
+                                if (generatedCodeEl) {
+                                    generatedCodeEl.textContent = testData.inviteCode;
+                                }
+                                document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+                                const target = document.getElementById('step-invite-display');
+                                if (target) {
+                                    target.classList.add('active');
+                                }
                             } else {
                                 showWaitingPartner();
                             }
@@ -1809,15 +1773,15 @@
                 }
             };
 
-            // ============================================================
-            //  🔥 INVITE CODE ACTIONS
-            // ============================================================
             window.copyInviteCode = function() {
-                const code = state.inviteCode || generatedCodeEl.textContent;
+                const code = state.inviteCode || document.getElementById('generated-invite-code')?.textContent || '';
+                console.log('📋 Copying code:', code);
+                
                 if (!code || code === 'WELL-XXXX-XXXX') {
-                    alert('Kode belum tersedia.');
+                    alert('Kode belum tersedia. Silakan coba lagi nanti.');
                     return;
                 }
+                
                 navigator.clipboard.writeText(code).then(() => {
                     alert('✅ Kode berhasil disalin!');
                 }).catch(() => {
@@ -1832,13 +1796,16 @@
             };
 
             window.shareInviteCode = function() {
-                const code = state.inviteCode || generatedCodeEl.textContent;
+                const code = state.inviteCode || document.getElementById('generated-invite-code')?.textContent || '';
+                console.log('📤 Sharing code:', code);
+                
                 if (!code || code === 'WELL-XXXX-XXXX') {
-                    alert('Kode belum tersedia.');
+                    alert('Kode belum tersedia. Silakan coba lagi nanti.');
                     return;
                 }
-                const message =
-                    `💚 Hi sayang, aku sudah mengisi Relationship Wellness Check di Relasi. Yuk isi juga pakai kode ini: ${code}\n\nKunjungi: ${window.location.origin}/relationship-check.html`;
+                
+                const message = `💚 Hi sayang, aku sudah mengisi Relationship Wellness Check di Relasi. Yuk isi juga pakai kode ini: ${code}\n\nKunjungi: ${window.location.origin}/relationship-check.html`;
+                
                 if (navigator.share) {
                     navigator.share({ title: 'Kode Invitasi - Relasi', text: message });
                 } else {
@@ -1848,9 +1815,6 @@
                 }
             };
 
-            // ============================================================
-            //  🔥 RENDER RESULTS
-            // ============================================================
             function renderResults(results) {
                 console.log('📊 Rendering results:', results);
 
@@ -1863,8 +1827,14 @@
                                 Hasil akan muncul setelah kedua pasangan menyelesaikan refleksi.
                             </p>
                             <div style="margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-                                <button class="btn-primary" onclick="checkResultStatus()">🔄 Cek Status</button>
-                                <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                                <button class="btn-primary" onclick="checkResultStatus()">
+                                    <span class="btn-icon">🔄</span>
+                                    Cek Status
+                                </button>
+                                <button class="btn-secondary" onclick="window.location.href='/'">
+                                    <span class="btn-icon">🏠</span>
+                                    Beranda
+                                </button>
                             </div>
                         </div>
                     `;
@@ -1879,7 +1849,10 @@
                             <p style="color:var(--text-secondary);font-size:16px;max-width:400px;margin:0 auto;">
                                 Kami sedang memproses jawaban Anda. Tunggu sebentar...
                             </p>
-                            <button class="btn-primary" onclick="checkResultStatus()" style="margin-top:20px;">🔄 Cek Status</button>
+                            <button class="btn-primary" onclick="checkResultStatus()" style="margin-top:20px;">
+                                <span class="btn-icon">🔄</span>
+                                Cek Status
+                            </button>
                         </div>
                     `;
                     return;
@@ -1996,9 +1969,18 @@
                     ` : ''}
 
                     <div class="action-buttons">
-                        <button class="btn-primary" onclick="saveWellnessResult()">💾 Simpan Hasil</button>
-                        <button class="btn-secondary" onclick="shareWellnessResult()">📤 Bagikan</button>
-                        <button class="btn-secondary" onclick="window.location.href='/'">🏠 Beranda</button>
+                        <button class="btn-primary" onclick="saveWellnessResult()">
+                            <span class="btn-icon">💾</span>
+                            Simpan Hasil
+                        </button>
+                        <button class="btn-pink" onclick="shareWellnessResult()">
+                            <span class="btn-icon">📤</span>
+                            Bagikan
+                        </button>
+                        <button class="btn-secondary" onclick="window.location.href='/'">
+                            <span class="btn-icon">🏠</span>
+                            Beranda
+                        </button>
                     </div>
 
                     <div class="delete-section">
@@ -2047,9 +2029,6 @@
                 }
             };
 
-            // ============================================================
-            //  🔥 AUTO CHECK STATUS
-            // ============================================================
             let statusInterval = null;
 
             function startStatusPolling() {
@@ -2061,9 +2040,6 @@
                 }, 15000);
             }
 
-            // ============================================================
-            //  🔥 LOGOUT
-            // ============================================================
             document.getElementById('logout-link')?.addEventListener('click', async (e) => {
                 e.preventDefault();
                 try {
@@ -2074,9 +2050,6 @@
                 }
             });
 
-            // ============================================================
-            //  🔥 START
-            // ============================================================
             showStep('consent');
             startStatusPolling();
 

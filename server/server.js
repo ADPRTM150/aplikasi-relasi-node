@@ -529,37 +529,62 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         const doc = snapshot.docs[0];
         const data = doc.data();
 
-        if (data.userId !== userId) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Anda tidak memiliki akses ke test ini' 
-            });
-        }
+        console.log('🔍 Verify invite:');
+        console.log('  userId (current):', userId);
+        console.log('  test owner:', data.userId);
+        console.log('  userCompleted:', data.userCompleted);
+        console.log('  partnerCompleted:', data.partnerCompleted);
 
-        if (data.partnerCompleted) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Pasangan sudah mengisi tes ini' 
-            });
-        }
+        // 🔥 CEK: User ini pemilik test?
+        const isOwner = data.userId === userId;
 
-        if (!data.userCompleted) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Anda harus mengisi tes terlebih dahulu sebelum pasangan' 
-            });
-        }
-
-        res.json({
-            success: true,
-            testId: doc.id,
-            data: {
-                userId: data.userId,
-                userCompleted: data.userCompleted,
-                partnerCompleted: data.partnerCompleted,
-                startedAt: data.startedAt
+        if (isOwner) {
+            // PEMILIK TEST
+            if (data.userCompleted) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Anda sudah mengisi tes ini' 
+                });
             }
-        });
+            // Pemilik bisa mengisi sebagai 'user'
+            return res.json({
+                success: true,
+                testId: doc.id,
+                role: 'user',
+                data: {
+                    userId: data.userId,
+                    userCompleted: data.userCompleted,
+                    partnerCompleted: data.partnerCompleted,
+                    startedAt: data.startedAt
+                }
+            });
+        } else {
+            // BUKAN PEMILIK → BERARTI PARTNER!
+            if (data.partnerCompleted) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Pasangan sudah mengisi tes ini' 
+                });
+            }
+            if (!data.userCompleted) {
+                return res.status(400).json({ 
+                    success: false, 
+                    message: 'Pasangan Anda harus mengisi tes terlebih dahulu' 
+                });
+            }
+            // Partner bisa mengisi sebagai 'partner'
+            return res.json({
+                success: true,
+                testId: doc.id,
+                role: 'partner',  // ← KIRIM ROLE PARTNER!
+                data: {
+                    userId: data.userId,
+                    userCompleted: data.userCompleted,
+                    partnerCompleted: data.partnerCompleted,
+                    startedAt: data.startedAt
+                }
+            });
+        }
 
     } catch (error) {
         console.error('Verify invite error:', error);
