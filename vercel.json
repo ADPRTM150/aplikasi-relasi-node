@@ -12,6 +12,10 @@
   ],
   "routes": [
     {
+      "src": "/css/(.*)",
+      "dest": "/public/css/$1"
+    },
+    {
       "src": "/api/(.*)",
       "dest": "/server/server.js"
     },
