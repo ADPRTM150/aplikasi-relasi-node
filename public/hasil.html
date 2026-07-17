@@ -456,45 +456,47 @@
             var db = firebase.firestore();
 
             // ============================================================
-            //  🔥 LOG ACTIVITY - VIEW RESULTS PAGE
+            //  🔥 LOG ACTIVITY - VIEW RESULTS PAGE (PERBAIKAN)
             // ============================================================
             async function logViewResults() {
                 try {
-                    const user = firebase.auth().currentUser;
+                    var user = firebase.auth().currentUser;
                     if (!user) {
                         console.log('⚠️ User tidak login, skip logging');
                         return;
                     }
 
-                    // Gunakan fungsi dari firebase-config.js
-                    if (window.logActivity) {
-                        await window.logActivity({
-                            type: 'view_results',
-                            icon: '📊',
-                            priority: 'normal',
-                            details: {
-                                page: 'hasil',
-                                timestamp: new Date().toISOString()
-                            }
-                        });
-                        console.log('✅ View results activity logged!');
-                    } else {
-                        // Fallback langsung ke Firestore
-                        await db.collection('activities').add({
-                            userId: user.uid,
-                            userEmail: user.email || '-',
-                            userName: user.displayName || user.email?.split('@')[0] || 'Pengguna',
-                            type: 'view_results',
-                            icon: '📊',
-                            priority: 'normal',
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                            details: {
-                                page: 'hasil',
-                                timestamp: new Date().toISOString()
-                            }
-                        });
-                        console.log('✅ View results activity logged (fallback)!');
+                    // Ambil data user dari Firestore untuk nama lengkap
+                    var userName = 'Pengguna';
+                    try {
+                        var userDoc = await db.collection('users').doc(user.uid).get();
+                        if (userDoc.exists) {
+                            var userData = userDoc.data();
+                            userName = userData.nama || userData.name || user.displayName || user.email?.split('@')[0] || 'Pengguna';
+                        }
+                    } catch (e) {
+                        userName = user.displayName || user.email?.split('@')[0] || 'Pengguna';
                     }
+
+                    // Data aktivitas
+                    var activityData = {
+                        userId: user.uid,
+                        userEmail: user.email || '-',
+                        userName: userName,
+                        type: 'view_results',
+                        icon: '📊',
+                        priority: 'normal',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        details: {
+                            page: 'hasil',
+                            viewedAt: new Date().toISOString()
+                        }
+                    };
+
+                    // Simpan ke Firestore
+                    await db.collection('activities').add(activityData);
+                    console.log('✅ View results activity logged! -', userName);
+
                 } catch (error) {
                     console.error('❌ Error logging view results:', error);
                 }
@@ -982,7 +984,7 @@
                         //  🔥 LOG VIEW RESULTS - DIPANGGIL DI SINI
                         // ============================================
                         logViewResults();
-                        
+
                         setTimeout(function () {
                             tampilkanLoveLanguage();
                             tampilkanWellness();
