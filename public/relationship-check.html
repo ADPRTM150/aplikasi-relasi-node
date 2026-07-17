@@ -2167,6 +2167,30 @@
 
             console.log('✅ App initialized successfully!');
         }
+
+        // ============================================================
+        //  🔥 Test Page (Wellness Check)
+        // ============================================================
+        // Saat test selesai
+        async function saveTestResult(result) {
+            try {
+                // Simpan hasil test
+                await db.collection('wellness_tests').add(result);
+
+                // Log aktivitas test completed
+                if (window.logTestCompleted) {
+                    await window.logTestCompleted({
+                        wellnessScore: result.wellnessScore,
+                        category: result.category,
+                        id: result.id
+                    });
+                }
+
+                alert('Test berhasil disimpan!');
+            } catch (error) {
+                console.error('Error saving test:', error);
+            }
+        }
     </script>
 
 </body>

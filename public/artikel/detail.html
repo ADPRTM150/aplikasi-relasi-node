@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -14,6 +15,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
+
 <body>
 
     <div class="app">
@@ -96,7 +98,7 @@
             if (d) d.classList.toggle('show');
         }
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const area = document.getElementById('userArea');
             if (area && !area.contains(e.target)) {
                 const d = document.getElementById('userDropdown');
@@ -177,7 +179,28 @@
         }
 
         loadArticleDetail();
+        // ============================================================
+        // Artikel Page Trigger Logging
+        // ============================================================
+        // Saat user membaca artikel
+        async function trackArticleRead(articleId) {
+            try {
+                const article = await db.collection('articles').doc(articleId).get();
+                if (article.exists) {
+                    if (window.logArticleRead) {
+                        await window.logArticleRead({
+                            id: articleId,
+                            title: article.data().title,
+                            category: article.data().category
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error tracking article:', error);
+            }
+        }
     </script>
 
 </body>
+
 </html>

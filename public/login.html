@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -12,6 +13,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
+
 <body class="login-page">
     <div class="login-wrapper">
         <div class="login-container" id="loginContainer">
@@ -29,7 +31,8 @@
             </div>
 
             <button class="btn-google" onclick="loginWithGoogle()" id="btnGoogle">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon" />
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
+                    class="google-icon" />
                 Login dengan Google
             </button>
 
@@ -122,6 +125,25 @@
                 loginContainer.classList.add('visible');
             }, 100);
         });
+
+        // ============================================================
+        //  Trigger Logging
+        // ============================================================
+        // login.html
+        document.getElementById('loginForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                // Logging otomatis di handle oleh auth.onAuthStateChanged
+                window.location.href = '/dashboard';
+            } catch (error) {
+                alert('Login gagal: ' + error.message);
+            }
+        });
     </script>
 </body>
+
 </html>

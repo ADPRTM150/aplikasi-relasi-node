@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -31,7 +32,11 @@
             --transition: all 0.3s ease;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -68,8 +73,15 @@
             align-items: center;
             gap: 8px;
         }
-        .logo span:first-child { font-size: 24px; }
-        .logo span:last-child { color: var(--primary); font-weight: 600; }
+
+        .logo span:first-child {
+            font-size: 24px;
+        }
+
+        .logo span:last-child {
+            color: var(--primary);
+            font-weight: 600;
+        }
 
         .admin-info {
             display: flex;
@@ -100,7 +112,11 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-logout:hover { opacity: 0.85; transform: translateY(-1px); }
+
+        .btn-logout:hover {
+            opacity: 0.85;
+            transform: translateY(-1px);
+        }
 
         /* ===== NAVIGATION ===== */
         .admin-nav {
@@ -130,18 +146,43 @@
             align-items: center;
             gap: 6px;
         }
-        .admin-nav button:hover { background: var(--light); color: var(--dark); }
+
+        .admin-nav button:hover {
+            background: var(--light);
+            color: var(--dark);
+        }
+
         .admin-nav button.active {
             background: var(--primary);
             color: white;
             box-shadow: 0 2px 8px rgba(58, 125, 118, 0.3);
         }
-        .admin-nav button.active:hover { background: var(--primary-dark); }
+
+        .admin-nav button.active:hover {
+            background: var(--primary-dark);
+        }
 
         /* ===== PANELS ===== */
-        .panel { display: none; animation: fadeIn 0.3s ease; }
-        .panel.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .panel {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* ===== CONTENT CARDS ===== */
         .content-card {
@@ -168,7 +209,10 @@
             align-items: center;
             gap: 8px;
         }
-        .card-header h3 span:first-child { font-size: 22px; }
+
+        .card-header h3 span:first-child {
+            font-size: 22px;
+        }
 
         /* ===== STATS GRID ===== */
         .stats-grid {
@@ -188,7 +232,11 @@
             gap: 16px;
             transition: var(--transition);
         }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
 
         .stat-icon {
             width: 52px;
@@ -200,17 +248,46 @@
             font-size: 24px;
             flex-shrink: 0;
         }
-        .stat-icon.green { background: var(--primary-light); }
-        .stat-icon.pink { background: #fce4ec; }
-        .stat-icon.purple { background: #ede7f6; }
-        .stat-icon.orange { background: #fff3e0; }
 
-        .stat-info .number { font-size: 24px; font-weight: 700; color: var(--dark); line-height: 1.2; }
-        .stat-info .label { font-size: 13px; color: var(--medium); }
+        .stat-icon.green {
+            background: var(--primary-light);
+        }
+
+        .stat-icon.pink {
+            background: #fce4ec;
+        }
+
+        .stat-icon.purple {
+            background: #ede7f6;
+        }
+
+        .stat-icon.orange {
+            background: #fff3e0;
+        }
+
+        .stat-info .number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--dark);
+            line-height: 1.2;
+        }
+
+        .stat-info .label {
+            font-size: 13px;
+            color: var(--medium);
+        }
 
         /* ===== TABLE ===== */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
         table thead th {
             text-align: left;
             padding: 12px 16px;
@@ -222,13 +299,37 @@
             letter-spacing: 0.5px;
             border-bottom: 2px solid #e8e3de;
         }
-        table tbody td { padding: 12px 16px; border-bottom: 1px solid var(--light); vertical-align: middle; }
-        table tbody tr:hover { background: #faf8f6; }
 
-        .loading-text { text-align: center; color: var(--medium); padding: 40px 0 !important; }
-        .empty-state { text-align: center; padding: 40px 0 !important; color: var(--medium); }
-        .empty-state .icon { font-size: 48px; margin-bottom: 8px; }
-        .empty-state p { margin: 4px 0; }
+        table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--light);
+            vertical-align: middle;
+        }
+
+        table tbody tr:hover {
+            background: #faf8f6;
+        }
+
+        .loading-text {
+            text-align: center;
+            color: var(--medium);
+            padding: 40px 0 !important;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 0 !important;
+            color: var(--medium);
+        }
+
+        .empty-state .icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            margin: 4px 0;
+        }
 
         /* ===== BADGES ===== */
         .badge {
@@ -238,13 +339,39 @@
             font-weight: 500;
             display: inline-block;
         }
-        .badge.active { background: var(--primary-light); color: var(--primary); }
-        .badge.inactive { background: #fdf6f6; color: var(--red); }
-        .badge.pending { background: var(--secondary-light); color: var(--secondary); }
-        .badge.success { background: var(--primary-light); color: var(--primary); }
-        .badge.failed { background: #fdf6f6; color: var(--red); }
 
-        .badge-count { padding: 4px 12px; background: var(--light); border-radius: 20px; font-size: 12px; color: var(--medium); }
+        .badge.active {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge.inactive {
+            background: #fdf6f6;
+            color: var(--red);
+        }
+
+        .badge.pending {
+            background: var(--secondary-light);
+            color: var(--secondary);
+        }
+
+        .badge.success {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .badge.failed {
+            background: #fdf6f6;
+            color: var(--red);
+        }
+
+        .badge-count {
+            padding: 4px 12px;
+            background: var(--light);
+            border-radius: 20px;
+            font-size: 12px;
+            color: var(--medium);
+        }
 
         .love-language-badge {
             display: inline-block;
@@ -273,7 +400,12 @@
             align-items: center;
             gap: 6px;
         }
-        .btn-add:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(58, 125, 118, 0.3); }
+
+        .btn-add:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(58, 125, 118, 0.3);
+        }
 
         .btn-edit {
             padding: 4px 12px;
@@ -288,7 +420,10 @@
             align-items: center;
             gap: 4px;
         }
-        .btn-edit:hover { opacity: 0.8; }
+
+        .btn-edit:hover {
+            opacity: 0.8;
+        }
 
         .btn-delete {
             padding: 4px 12px;
@@ -303,7 +438,10 @@
             align-items: center;
             gap: 4px;
         }
-        .btn-delete:hover { opacity: 0.8; }
+
+        .btn-delete:hover {
+            opacity: 0.8;
+        }
 
         .btn-save {
             padding: 10px 24px;
@@ -319,7 +457,11 @@
             align-items: center;
             gap: 8px;
         }
-        .btn-save:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-save:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
 
         .btn-cancel {
             padding: 10px 24px;
@@ -335,14 +477,34 @@
             align-items: center;
             gap: 8px;
         }
-        .btn-cancel:hover { background: #e8e3de; }
 
-        .btn-group { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+        .btn-cancel:hover {
+            background: #e8e3de;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
 
         /* ===== FORM ===== */
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 4px; color: var(--dark); }
-        .form-group input, .form-group select, .form-group textarea {
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 4px;
+            color: var(--dark);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 10px 14px;
             border: 1px solid #e0dbd6;
@@ -352,12 +514,19 @@
             transition: var(--transition);
             background: var(--white);
         }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
             outline: none;
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(58, 125, 118, 0.15);
         }
-        .form-group textarea { resize: vertical; min-height: 100px; }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
 
         /* ===== MODAL ===== */
         .modal-overlay {
@@ -373,8 +542,23 @@
             justify-content: center;
             padding: 20px;
         }
-        .modal-overlay.show { display: flex; animation: modalIn 0.3s ease; }
-        @keyframes modalIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: modalIn 0.3s ease;
+        }
+
+        @keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
 
         .modal-content {
             background: var(--white);
@@ -387,10 +571,21 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
             position: relative;
         }
-        .modal-content h3 { font-size: 20px; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+
+        .modal-content h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
         /* ===== ACTIVITY STYLES ===== */
-        .activity-timeline { display: flex; flex-direction: column; gap: 10px; }
+        .activity-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
 
         .activity-item {
             display: flex;
@@ -405,22 +600,66 @@
             transform: translateX(-20px);
         }
 
-        .activity-item:nth-child(1) { animation-delay: 0.05s; }
-        .activity-item:nth-child(2) { animation-delay: 0.10s; }
-        .activity-item:nth-child(3) { animation-delay: 0.15s; }
-        .activity-item:nth-child(4) { animation-delay: 0.20s; }
-        .activity-item:nth-child(5) { animation-delay: 0.25s; }
-        .activity-item:nth-child(6) { animation-delay: 0.30s; }
-        .activity-item:nth-child(7) { animation-delay: 0.35s; }
-        .activity-item:nth-child(8) { animation-delay: 0.40s; }
-        .activity-item:nth-child(9) { animation-delay: 0.45s; }
-        .activity-item:nth-child(10) { animation-delay: 0.50s; }
+        .activity-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
 
-        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+        .activity-item:nth-child(2) {
+            animation-delay: 0.10s;
+        }
 
-        .activity-item:hover { background: #ede8e3; transform: translateX(4px); }
-        .activity-item.high { border-left-color: var(--primary); }
-        .activity-item.urgent { border-left-color: var(--red); background: #fdf6f6; }
+        .activity-item:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .activity-item:nth-child(4) {
+            animation-delay: 0.20s;
+        }
+
+        .activity-item:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .activity-item:nth-child(6) {
+            animation-delay: 0.30s;
+        }
+
+        .activity-item:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .activity-item:nth-child(8) {
+            animation-delay: 0.40s;
+        }
+
+        .activity-item:nth-child(9) {
+            animation-delay: 0.45s;
+        }
+
+        .activity-item:nth-child(10) {
+            animation-delay: 0.50s;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .activity-item:hover {
+            background: #ede8e3;
+            transform: translateX(4px);
+        }
+
+        .activity-item.high {
+            border-left-color: var(--primary);
+        }
+
+        .activity-item.urgent {
+            border-left-color: var(--red);
+            background: #fdf6f6;
+        }
 
         .activity-icon {
             font-size: 22px;
@@ -434,7 +673,10 @@
             flex-shrink: 0;
         }
 
-        .activity-content { flex: 1; min-width: 0; }
+        .activity-content {
+            flex: 1;
+            min-width: 0;
+        }
 
         .activity-header {
             display: flex;
@@ -445,52 +687,202 @@
             gap: 4px;
         }
 
-        .activity-user { font-size: 14px; color: var(--dark); }
-        .activity-user strong { color: var(--dark); }
-        .activity-time { font-size: 12px; color: var(--medium); white-space: nowrap; }
-        .activity-detail { font-size: 13px; color: #5a4a3a; line-height: 1.4; }
-        .activity-detail strong { color: var(--dark); }
-        .activity-meta { margin-top: 2px; }
-        .activity-email { font-size: 11px; color: var(--medium); }
+        .activity-user {
+            font-size: 14px;
+            color: var(--dark);
+        }
+
+        .activity-user strong {
+            color: var(--dark);
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: var(--medium);
+            white-space: nowrap;
+        }
+
+        .activity-detail {
+            font-size: 13px;
+            color: #5a4a3a;
+            line-height: 1.4;
+        }
+
+        .activity-detail strong {
+            color: var(--dark);
+        }
+
+        .activity-meta {
+            margin-top: 2px;
+        }
+
+        .activity-email {
+            font-size: 11px;
+            color: var(--medium);
+        }
 
         /* ===== CHART BARS ===== */
-        .chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 120px; padding-top: 8px; }
-        .chart-bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; height: 100%; justify-content: flex-end; }
-        .chart-bar .bar { width: 100%; border-radius: 4px 4px 0 0; min-height: 4px; transition: height 0.5s ease; }
-        .chart-bar .bar-label { font-size: 10px; color: var(--medium); }
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 120px;
+            padding-top: 8px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            transition: height 0.5s ease;
+        }
+
+        .chart-bar .bar-label {
+            font-size: 10px;
+            color: var(--medium);
+        }
 
         /* ===== ALERT ===== */
-        .alert { display: none; padding: 12px 16px; border-radius: var(--radius-sm); margin-bottom: 16px; font-size: 14px; }
-        .alert.show { display: block; }
-        .alert.success { background: var(--primary-light); color: var(--primary); border: 1px solid #b8d9d4; }
-        .alert.error { background: #fdf6f6; color: var(--red); border: 1px solid #f5d0d0; }
+        .alert {
+            display: none;
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+
+        .alert.show {
+            display: block;
+        }
+
+        .alert.success {
+            background: var(--primary-light);
+            color: var(--primary);
+            border: 1px solid #b8d9d4;
+        }
+
+        .alert.error {
+            background: #fdf6f6;
+            color: var(--red);
+            border: 1px solid #f5d0d0;
+        }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 768px) {
-            .admin-container { padding: 12px 16px 24px; }
-            .admin-header { flex-direction: column; align-items: stretch; padding: 16px; }
-            .admin-info { flex-direction: column; align-items: stretch; gap: 8px; }
-            .admin-nav { flex-wrap: nowrap; overflow-x: auto; gap: 2px; padding: 4px; }
-            .admin-nav button { padding: 8px 14px; font-size: 12px; }
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 12px; }
-            .stat-card { padding: 16px; }
-            .stat-info .number { font-size: 20px; }
-            .content-card { padding: 16px; }
-            .modal-content { padding: 20px; margin: 12px; }
-            .card-header { flex-direction: column; align-items: stretch; gap: 8px; }
-            .card-header h3 { font-size: 16px; }
-            table { font-size: 12px; }
-            table thead th, table tbody td { padding: 8px 10px; }
-            .admin-info .email { font-size: 13px; }
+            .admin-container {
+                padding: 12px 16px 24px;
+            }
+
+            .admin-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px;
+            }
+
+            .admin-info {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .admin-nav {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                gap: 2px;
+                padding: 4px;
+            }
+
+            .admin-nav button {
+                padding: 8px 14px;
+                font-size: 12px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 16px;
+            }
+
+            .stat-info .number {
+                font-size: 20px;
+            }
+
+            .content-card {
+                padding: 16px;
+            }
+
+            .modal-content {
+                padding: 20px;
+                margin: 12px;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .card-header h3 {
+                font-size: 16px;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            table thead th,
+            table tbody td {
+                padding: 8px 10px;
+            }
+
+            .admin-info .email {
+                font-size: 13px;
+            }
         }
 
         @media (max-width: 480px) {
-            .stats-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-            .stat-card { padding: 12px; flex-direction: column; text-align: center; }
-            .stat-icon { width: 40px; height: 40px; font-size: 18px; }
-            .stat-info .number { font-size: 18px; }
-            .admin-nav button { padding: 6px 10px; font-size: 11px; }
-            .modal-content { padding: 16px; }
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 12px;
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .stat-icon {
+                width: 40px;
+                height: 40px;
+                font-size: 18px;
+            }
+
+            .stat-info .number {
+                font-size: 18px;
+            }
+
+            .admin-nav button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+
+            .modal-content {
+                padding: 16px;
+            }
         }
     </style>
 
@@ -500,6 +892,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
+
 <body>
 
     <div class="admin-container">
@@ -519,7 +912,8 @@
 
         <!-- ===== NAV ===== -->
         <div class="admin-nav">
-            <button class="active" data-tab="dashboard" onclick="switchTab('dashboard')"><span>📊</span> Dashboard</button>
+            <button class="active" data-tab="dashboard" onclick="switchTab('dashboard')"><span>📊</span>
+                Dashboard</button>
             <button data-tab="users" onclick="switchTab('users')"><span>👥</span> Users</button>
             <button data-tab="articles" onclick="switchTab('articles')"><span>📰</span> Artikel</button>
             <button data-tab="ebooks" onclick="switchTab('ebooks')"><span>📚</span> Ebook</button>
@@ -535,18 +929,48 @@
         <!-- ============================================================ -->
         <div class="panel active" id="panel-dashboard">
             <div class="stats-grid" id="statsGrid">
-                <div class="stat-card"><div class="stat-icon green"><span>👥</span></div><div class="stat-info"><div class="number" id="statUsers">0</div><div class="label">Total User</div></div></div>
-                <div class="stat-card"><div class="stat-icon pink"><span>📰</span></div><div class="stat-info"><div class="number" id="statArticles">0</div><div class="label">Total Artikel</div></div></div>
-                <div class="stat-card"><div class="stat-icon purple"><span>📚</span></div><div class="stat-info"><div class="number" id="statEbooks">0</div><div class="label">Total Ebook</div></div></div>
-                <div class="stat-card"><div class="stat-icon orange"><span>💑</span></div><div class="stat-info"><div class="number" id="statCouples">0</div><div class="label">Pasangan Terhubung</div></div></div>
+                <div class="stat-card">
+                    <div class="stat-icon green"><span>👥</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statUsers">0</div>
+                        <div class="label">Total User</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon pink"><span>📰</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statArticles">0</div>
+                        <div class="label">Total Artikel</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon purple"><span>📚</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statEbooks">0</div>
+                        <div class="label">Total Ebook</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon orange"><span>💑</span></div>
+                    <div class="stat-info">
+                        <div class="number" id="statCouples">0</div>
+                        <div class="label">Pasangan Terhubung</div>
+                    </div>
+                </div>
             </div>
 
             <div class="content-card">
                 <div class="card-header">
                     <h3><span>⏰</span> Aktivitas Terbaru</h3>
-                    <button class="btn-add" onclick="loadRecentActivities()" style="padding:4px 12px;font-size:12px;background:var(--secondary);">🔄 Refresh</button>
+                    <button class="btn-add" onclick="loadRecentActivities()"
+                        style="padding:4px 12px;font-size:12px;background:var(--secondary);">🔄 Refresh</button>
                 </div>
-                <div id="recentActivity"><div class="empty-state"><div class="icon">⏳</div><p>Memuat aktivitas...</p></div></div>
+                <div id="recentActivity">
+                    <div class="empty-state">
+                        <div class="icon">⏳</div>
+                        <p>Memuat aktivitas...</p>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -559,15 +983,34 @@
                     <h3><span>👥</span> Daftar User</h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <span class="badge-count" id="userCount">0 user</span>
-                        <button class="btn-add" onclick="exportLoveLanguage('csv')" style="padding:4px 12px;font-size:12px;background:#fd79a8;color:white;border:none;border-radius:6px;cursor:pointer;">📥 CSV (Love Language)</button>
-                        <button class="btn-add" onclick="exportLoveLanguage('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">📥 JSON (Love Language)</button>
-                        <button class="btn-add" onclick="openUserModal()" style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">➕ Tambah User</button>
+                        <button class="btn-add" onclick="exportLoveLanguage('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#fd79a8;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            CSV (Love Language)</button>
+                        <button class="btn-add" onclick="exportLoveLanguage('json')"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            JSON (Love Language)</button>
+                        <button class="btn-add" onclick="openUserModal()"
+                            style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">➕
+                            Tambah User</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Nama</th><th>Email</th><th>💕 Love Language</th><th>Status</th><th>Bergabung</th><th>Aksi</th></tr></thead>
-                        <tbody id="userTableBody"><tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Nama</th>
+                                <th>Email</th>
+                                <th>💕 Love Language</th>
+                                <th>Status</th>
+                                <th>Bergabung</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="userTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -584,8 +1027,21 @@
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Judul</th><th>Kategori</th><th>Status</th><th>Dibuat Oleh</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-                        <tbody id="articleTableBody"><tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Kategori</th>
+                                <th>Status</th>
+                                <th>Dibuat Oleh</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="articleTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -602,8 +1058,20 @@
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Judul</th><th>Halaman</th><th>Harga</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-                        <tbody id="ebookTableBody"><tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Halaman</th>
+                                <th>Harga</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ebookTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -620,8 +1088,19 @@
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Judul</th><th>Durasi</th><th>Tanggal</th><th>Aksi</th></tr></thead>
-                        <tbody id="videoTableBody"><tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Judul</th>
+                                <th>Durasi</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="videoTableBody">
+                            <tr>
+                                <td colspan="4" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -636,17 +1115,41 @@
                     <h3><span>💑</span> Data Pasangan Terhubung</h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <span class="badge-count" id="coupleCount">0 pasangan</span>
-                        <button class="btn-add" onclick="exportCouples('csv')" style="padding:4px 12px;font-size:12px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">📥 CSV (Lengkap)</button>
-                        <button class="btn-add" onclick="exportCouples('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">📥 JSON (Lengkap)</button>
-                        <button class="btn-add" onclick="exportCouplesRingkas('csv')" style="padding:4px 12px;font-size:12px;background:#d4a373;color:white;border:none;border-radius:6px;cursor:pointer;">📥 CSV (Ringkas)</button>
-                        <button class="btn-add" onclick="exportCouplesRingkas('json')" style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">📥 JSON (Ringkas)</button>
-                        <button class="btn-add" onclick="loadCouples()" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Refresh</button>
+                        <button class="btn-add" onclick="exportCouples('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            CSV (Lengkap)</button>
+                        <button class="btn-add" onclick="exportCouples('json')"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            JSON (Lengkap)</button>
+                        <button class="btn-add" onclick="exportCouplesRingkas('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#d4a373;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            CSV (Ringkas)</button>
+                        <button class="btn-add" onclick="exportCouplesRingkas('json')"
+                            style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">📥
+                            JSON (Ringkas)</button>
+                        <button class="btn-add" onclick="loadCouples()"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">🔄
+                            Refresh</button>
                     </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Kode</th><th>User A</th><th>User B</th><th style="text-align:center;">Skor</th><th style="text-align:center;">Status</th><th style="text-align:center;">Tanggal</th><th style="text-align:center;">Aksi</th></tr></thead>
-                        <tbody id="coupleTableBody"><tr><td colspan="7" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Kode</th>
+                                <th>User A</th>
+                                <th>User B</th>
+                                <th style="text-align:center;">Skor</th>
+                                <th style="text-align:center;">Status</th>
+                                <th style="text-align:center;">Tanggal</th>
+                                <th style="text-align:center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="coupleTableBody">
+                            <tr>
+                                <td colspan="7" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -657,16 +1160,50 @@
         <!-- ============================================================ -->
         <div class="panel" id="panel-sales">
             <div class="content-card">
-                <div class="card-header"><h3><span>💰</span> Data Penjualan Ebook</h3><span class="badge-count" id="salesCount">0 transaksi</span></div>
+                <div class="card-header">
+                    <h3><span>💰</span> Data Penjualan Ebook</h3><span class="badge-count" id="salesCount">0
+                        transaksi</span>
+                </div>
                 <div class="stats-grid" style="margin-bottom:16px;">
-                    <div class="stat-card"><div class="stat-icon green"><span>💳</span></div><div class="stat-info"><div class="number" id="totalSales">Rp 0</div><div class="label">Total Pendapatan</div></div></div>
-                    <div class="stat-card"><div class="stat-icon pink"><span>📚</span></div><div class="stat-info"><div class="number" id="totalEbooksSold">0</div><div class="label">Total Terjual</div></div></div>
-                    <div class="stat-card"><div class="stat-icon purple"><span>👤</span></div><div class="stat-info"><div class="number" id="totalBuyers">0</div><div class="label">Total Pembeli</div></div></div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><span>💳</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalSales">Rp 0</div>
+                            <div class="label">Total Pendapatan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><span>📚</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalEbooksSold">0</div>
+                            <div class="label">Total Terjual</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><span>👤</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="totalBuyers">0</div>
+                            <div class="label">Total Pembeli</div>
+                        </div>
+                    </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Order ID</th><th>Pembeli</th><th>Ebook</th><th>Harga</th><th>Tanggal</th><th>Status</th></tr></thead>
-                        <tbody id="salesTableBody"><tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Pembeli</th>
+                                <th>Ebook</th>
+                                <th>Harga</th>
+                                <th>Tanggal</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="salesTableBody">
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -677,22 +1214,64 @@
         <!-- ============================================================ -->
         <div class="panel" id="panel-adsense">
             <div class="content-card">
-                <div class="card-header"><h3><span>📢</span> Google AdSense Revenue</h3><span style="font-size:12px;color:var(--medium);">Update otomatis</span></div>
+                <div class="card-header">
+                    <h3><span>📢</span> Google AdSense Revenue</h3><span
+                        style="font-size:12px;color:var(--medium);">Update otomatis</span>
+                </div>
                 <div class="stats-grid" style="margin-bottom:16px;">
-                    <div class="stat-card"><div class="stat-icon green"><span>💵</span></div><div class="stat-info"><div class="number" id="adsTotalRevenue">$ 0</div><div class="label">Total Pendapatan</div></div></div>
-                    <div class="stat-card"><div class="stat-icon pink"><span>👁️</span></div><div class="stat-info"><div class="number" id="adsTotalImpressions">0</div><div class="label">Total Tayangan</div></div></div>
-                    <div class="stat-card"><div class="stat-icon purple"><span>🖱️</span></div><div class="stat-info"><div class="number" id="adsTotalClicks">0</div><div class="label">Total Klik</div></div></div>
-                    <div class="stat-card"><div class="stat-icon orange"><span>📈</span></div><div class="stat-info"><div class="number" id="adsCTR">0%</div><div class="label">CTR</div></div></div>
+                    <div class="stat-card">
+                        <div class="stat-icon green"><span>💵</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalRevenue">$ 0</div>
+                            <div class="label">Total Pendapatan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><span>👁️</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalImpressions">0</div>
+                            <div class="label">Total Tayangan</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><span>🖱️</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsTotalClicks">0</div>
+                            <div class="label">Total Klik</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><span>📈</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="adsCTR">0%</div>
+                            <div class="label">CTR</div>
+                        </div>
+                    </div>
                 </div>
                 <div style="background:var(--light);border-radius:var(--radius-sm);padding:16px;margin-bottom:16px;">
-                    <h4 style="font-size:13px;color:var(--dark);margin-bottom:8px;"><span>📊</span> Pendapatan 7 Hari Terakhir</h4>
+                    <h4 style="font-size:13px;color:var(--dark);margin-bottom:8px;"><span>📊</span> Pendapatan 7 Hari
+                        Terakhir</h4>
                     <div class="chart-bars" id="adsChart"></div>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--medium);margin-top:4px;"><span>Hari ini</span><span>7 hari lalu</span></div>
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:10px;color:var(--medium);margin-top:4px;">
+                        <span>Hari ini</span><span>7 hari lalu</span></div>
                 </div>
                 <div class="table-wrapper">
                     <table>
-                        <thead><tr><th>Tanggal</th><th>Tayangan</th><th>Klik</th><th>Pendapatan</th><th>CTR</th></tr></thead>
-                        <tbody id="adsenseTableBody"><tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr></tbody>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Tayangan</th>
+                                <th>Klik</th>
+                                <th>Pendapatan</th>
+                                <th>CTR</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adsenseTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
                     </table>
                 </div>
             </div>
@@ -703,17 +1282,29 @@
         <!-- ============================================================ -->
         <div class="panel" id="panel-settings">
             <div class="content-card">
-                <div class="card-header"><h3><span>⚙️</span> Pengaturan Admin</h3><span style="font-size:12px;color:var(--medium);">Ubah email & password login admin</span></div>
+                <div class="card-header">
+                    <h3><span>⚙️</span> Pengaturan Admin</h3><span style="font-size:12px;color:var(--medium);">Ubah
+                        email & password login admin</span>
+                </div>
                 <div class="alert" id="settingsAlert"></div>
                 <form id="settingsForm" onsubmit="saveSettings(event)">
-                    <div class="form-group"><label><span>📧</span> Email Admin</label><input type="email" id="settingsEmail" required /></div>
-                    <div class="form-group"><label><span>🔑</span> Password Baru</label><input type="text" id="settingsPassword" placeholder="Kosongkan jika tidak ingin mengubah password" /><p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin mengubah password.</p></div>
+                    <div class="form-group"><label><span>📧</span> Email Admin</label><input type="email"
+                            id="settingsEmail" required /></div>
+                    <div class="form-group"><label><span>🔑</span> Password Baru</label><input type="text"
+                            id="settingsPassword" placeholder="Kosongkan jika tidak ingin mengubah password" />
+                        <p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin
+                            mengubah password.</p>
+                    </div>
                     <div class="btn-group">
                         <button type="submit" class="btn-save"><span>💾</span> Simpan Pengaturan</button>
-                        <button type="button" class="btn-cancel" onclick="resetSettings()" style="color:var(--red);border-color:var(--red);"><span>🔄</span> Reset ke Default</button>
+                        <button type="button" class="btn-cancel" onclick="resetSettings()"
+                            style="color:var(--red);border-color:var(--red);"><span>🔄</span> Reset ke Default</button>
                     </div>
                 </form>
-                <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--light);"><p style="font-size:12px;color:var(--medium);"><span>ℹ️</span> Data login admin disimpan di Firestore.</p></div>
+                <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--light);">
+                    <p style="font-size:12px;color:var(--medium);"><span>ℹ️</span> Data login admin disimpan di
+                        Firestore.</p>
+                </div>
             </div>
         </div>
 
@@ -729,14 +1320,34 @@
             <h3><span>👤</span> <span id="userModalTitle">Tambah User</span></h3>
             <form id="userForm">
                 <input type="hidden" id="userEditId" />
-                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="userName" placeholder="Nama lengkap" required /></div>
-                <div class="form-group"><label>Email</label><input type="email" id="userEmail" placeholder="email@example.com" required /></div>
-                <div class="form-group"><label>Status</label><select id="userStatus"><option value="active">✅ Aktif</option><option value="inactive">⏸️ Tidak Aktif</option></select></div>
-                <div class="form-group"><label>💕 Love Language Primary</label><select id="userLoveLanguagePrimary"><option value="Words of Affirmation">Words of Affirmation 💬</option><option value="Acts of Service">Acts of Service 🤝</option><option value="Quality Time">Quality Time ⏰</option><option value="Physical Touch">Physical Touch 🫂</option><option value="Receiving Gifts">Receiving Gifts 🎁</option></select></div>
-                <div class="form-group"><label>💕 Love Language Secondary</label><select id="userLoveLanguageSecondary"><option value="Words of Affirmation">Words of Affirmation 💬</option><option value="Acts of Service">Acts of Service 🤝</option><option value="Quality Time">Quality Time ⏰</option><option value="Physical Touch">Physical Touch 🫂</option><option value="Receiving Gifts">Receiving Gifts 🎁</option></select></div>
-                <div class="form-group"><label>Skor Primary (0-100)</label><input type="number" id="userPrimaryScore" placeholder="80" min="0" max="100" value="80" /></div>
-                <div class="form-group"><label>Skor Secondary (0-100)</label><input type="number" id="userSecondaryScore" placeholder="60" min="0" max="100" value="60" /></div>
-                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button type="button" class="btn-cancel" onclick="closeModal('userModal')">Batal</button></div>
+                <div class="form-group"><label>Nama Lengkap</label><input type="text" id="userName"
+                        placeholder="Nama lengkap" required /></div>
+                <div class="form-group"><label>Email</label><input type="email" id="userEmail"
+                        placeholder="email@example.com" required /></div>
+                <div class="form-group"><label>Status</label><select id="userStatus">
+                        <option value="active">✅ Aktif</option>
+                        <option value="inactive">⏸️ Tidak Aktif</option>
+                    </select></div>
+                <div class="form-group"><label>💕 Love Language Primary</label><select id="userLoveLanguagePrimary">
+                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
+                        <option value="Acts of Service">Acts of Service 🤝</option>
+                        <option value="Quality Time">Quality Time ⏰</option>
+                        <option value="Physical Touch">Physical Touch 🫂</option>
+                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
+                    </select></div>
+                <div class="form-group"><label>💕 Love Language Secondary</label><select id="userLoveLanguageSecondary">
+                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
+                        <option value="Acts of Service">Acts of Service 🤝</option>
+                        <option value="Quality Time">Quality Time ⏰</option>
+                        <option value="Physical Touch">Physical Touch 🫂</option>
+                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
+                    </select></div>
+                <div class="form-group"><label>Skor Primary (0-100)</label><input type="number" id="userPrimaryScore"
+                        placeholder="80" min="0" max="100" value="80" /></div>
+                <div class="form-group"><label>Skor Secondary (0-100)</label><input type="number"
+                        id="userSecondaryScore" placeholder="60" min="0" max="100" value="60" /></div>
+                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button
+                        type="button" class="btn-cancel" onclick="closeModal('userModal')">Batal</button></div>
             </form>
         </div>
     </div>
@@ -747,13 +1358,28 @@
             <h3><span>📰</span> <span id="articleModalTitle">Tambah Artikel</span></h3>
             <form id="articleForm">
                 <input type="hidden" id="articleEditId" />
-                <div class="form-group"><label>Judul</label><input type="text" id="articleTitle" placeholder="Judul artikel" required /></div>
-                <div class="form-group"><label>Kategori</label><select id="articleCategory"><option value="Komunikasi">Komunikasi</option><option value="Konflik">Konflik</option><option value="Keuangan">Keuangan</option><option value="Keintiman">Keintiman</option><option value="Parenting">Parenting</option><option value="Lainnya">Lainnya</option></select></div>
-                <div class="form-group"><label>📌 Status</label><select id="articleStatus"><option value="draft">⏳ Draft (belum tampil di publik)</option><option value="published">✅ Published (tampil di publik)</option></select></div>
-                <div class="form-group"><label>Deskripsi</label><input type="text" id="articleDesc" placeholder="Deskripsi singkat" required /></div>
-                <div class="form-group"><label>Konten</label><textarea id="articleContent" rows="4" placeholder="Isi artikel..."></textarea></div>
-                <div class="form-group"><label>Thumbnail URL</label><input type="text" id="articleThumb" placeholder="https://example.com/gambar.jpg" /></div>
-                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button type="button" class="btn-cancel" onclick="closeModal('articleModal')">Batal</button></div>
+                <div class="form-group"><label>Judul</label><input type="text" id="articleTitle"
+                        placeholder="Judul artikel" required /></div>
+                <div class="form-group"><label>Kategori</label><select id="articleCategory">
+                        <option value="Komunikasi">Komunikasi</option>
+                        <option value="Konflik">Konflik</option>
+                        <option value="Keuangan">Keuangan</option>
+                        <option value="Keintiman">Keintiman</option>
+                        <option value="Parenting">Parenting</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select></div>
+                <div class="form-group"><label>📌 Status</label><select id="articleStatus">
+                        <option value="draft">⏳ Draft (belum tampil di publik)</option>
+                        <option value="published">✅ Published (tampil di publik)</option>
+                    </select></div>
+                <div class="form-group"><label>Deskripsi</label><input type="text" id="articleDesc"
+                        placeholder="Deskripsi singkat" required /></div>
+                <div class="form-group"><label>Konten</label><textarea id="articleContent" rows="4"
+                        placeholder="Isi artikel..."></textarea></div>
+                <div class="form-group"><label>Thumbnail URL</label><input type="text" id="articleThumb"
+                        placeholder="https://example.com/gambar.jpg" /></div>
+                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button
+                        type="button" class="btn-cancel" onclick="closeModal('articleModal')">Batal</button></div>
             </form>
         </div>
     </div>
@@ -764,12 +1390,22 @@
             <h3><span>📚</span> <span id="ebookModalTitle">Tambah Ebook</span></h3>
             <form id="ebookForm">
                 <input type="hidden" id="ebookEditId" />
-                <div class="form-group"><label>Judul</label><input type="text" id="ebookTitle" placeholder="Judul ebook" required /></div>
-                <div class="form-group"><label>Jumlah Halaman</label><input type="number" id="ebookPages" placeholder="24" required /></div>
-                <div class="form-group"><label>Harga (Rp) <span style="font-size:11px;color:#8a9e99;">Kosongkan jika gratis</span></label><input type="number" id="ebookPrice" placeholder="50000" min="0" step="1000" /><p style="font-size:11px;color:#8a9e99;margin-top:4px;">Isi dengan angka tanpa titik/koma. Contoh: 50000</p></div>
-                <div class="form-group"><label>Deskripsi</label><input type="text" id="ebookDesc" placeholder="Deskripsi ebook" /></div>
-                <div class="form-group"><label>Thumbnail URL</label><input type="text" id="ebookThumb" placeholder="https://example.com/cover.jpg" /></div>
-                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button type="button" class="btn-cancel" onclick="closeModal('ebookModal')">Batal</button></div>
+                <div class="form-group"><label>Judul</label><input type="text" id="ebookTitle" placeholder="Judul ebook"
+                        required /></div>
+                <div class="form-group"><label>Jumlah Halaman</label><input type="number" id="ebookPages"
+                        placeholder="24" required /></div>
+                <div class="form-group"><label>Harga (Rp) <span style="font-size:11px;color:#8a9e99;">Kosongkan jika
+                            gratis</span></label><input type="number" id="ebookPrice" placeholder="50000" min="0"
+                        step="1000" />
+                    <p style="font-size:11px;color:#8a9e99;margin-top:4px;">Isi dengan angka tanpa titik/koma. Contoh:
+                        50000</p>
+                </div>
+                <div class="form-group"><label>Deskripsi</label><input type="text" id="ebookDesc"
+                        placeholder="Deskripsi ebook" /></div>
+                <div class="form-group"><label>Thumbnail URL</label><input type="text" id="ebookThumb"
+                        placeholder="https://example.com/cover.jpg" /></div>
+                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button
+                        type="button" class="btn-cancel" onclick="closeModal('ebookModal')">Batal</button></div>
             </form>
         </div>
     </div>
@@ -780,11 +1416,16 @@
             <h3><span>🎥</span> <span id="videoModalTitle">Tambah Video</span></h3>
             <form id="videoForm">
                 <input type="hidden" id="videoEditId" />
-                <div class="form-group"><label>Judul</label><input type="text" id="videoTitle" placeholder="Judul video" required /></div>
-                <div class="form-group"><label>Durasi</label><input type="text" id="videoDuration" placeholder="5:30" required /></div>
-                <div class="form-group"><label>Deskripsi</label><input type="text" id="videoDesc" placeholder="Deskripsi video" /></div>
-                <div class="form-group"><label>URL Video (YouTube)</label><input type="text" id="videoUrl" placeholder="https://youtube.com/embed/..." /></div>
-                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button type="button" class="btn-cancel" onclick="closeModal('videoModal')">Batal</button></div>
+                <div class="form-group"><label>Judul</label><input type="text" id="videoTitle" placeholder="Judul video"
+                        required /></div>
+                <div class="form-group"><label>Durasi</label><input type="text" id="videoDuration" placeholder="5:30"
+                        required /></div>
+                <div class="form-group"><label>Deskripsi</label><input type="text" id="videoDesc"
+                        placeholder="Deskripsi video" /></div>
+                <div class="form-group"><label>URL Video (YouTube)</label><input type="text" id="videoUrl"
+                        placeholder="https://youtube.com/embed/..." /></div>
+                <div class="btn-group"><button type="submit" class="btn-save"><span>💾</span> Simpan</button><button
+                        type="button" class="btn-cancel" onclick="closeModal('videoModal')">Batal</button></div>
             </form>
         </div>
     </div>
@@ -801,7 +1442,8 @@
             window.location.href = '/admin/login.html';
         }
 
-        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') ||
+            'admin@relasi.com';
         document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
 
         // ============================================================
@@ -906,7 +1548,7 @@
         async function logAdminAction(action, target, targetName) {
             const adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
             const adminName = localStorage.getItem('adminName') || 'Admin';
-            
+
             await logActivity({
                 type: 'admin_action',
                 userId: 'admin_' + Date.now(),
@@ -933,41 +1575,58 @@
             const diffMin = Math.floor(diffSec / 60);
             const diffHour = Math.floor(diffMin / 60);
             const diffDay = Math.floor(diffHour / 24);
-            
+
             if (diffSec < 60) return 'Baru saja';
             if (diffMin < 60) return diffMin + ' menit yang lalu';
             if (diffHour < 24) return diffHour + ' jam yang lalu';
             if (diffDay < 7) return diffDay + ' hari yang lalu';
-            return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
         }
 
         function formatActivityDetails(activity) {
             const type = activity.type;
             const details = activity.details || {};
-            
-            switch(type) {
-                case 'user_login': return 'login ke aplikasi';
-                case 'test_completed': return 'menyelesaikan Wellness Test - Skor: <strong>' + (details.score || 0) + '%</strong>';
-                case 'couple_connected': return 'terhubung dengan <strong>' + (details.partnerName || 'Pasangan') + '</strong> sebagai pasangan';
-                case 'article_read': return 'membaca artikel "<strong>' + (details.articleTitle || 'Artikel') + '</strong>"';
-                case 'ebook_purchased': return 'membeli ebook "<strong>' + (details.ebookTitle || 'Ebook') + '</strong>" - Rp ' + ((details.price || 0).toLocaleString());
+
+            switch (type) {
+                case 'user_login':
+                    return 'login ke aplikasi';
+                case 'test_completed':
+                    return 'menyelesaikan Wellness Test - Skor: <strong>' + (details.score || 0) + '%</strong>';
+                case 'couple_connected':
+                    return 'terhubung dengan <strong>' + (details.partnerName || 'Pasangan') +
+                        '</strong> sebagai pasangan';
+                case 'article_read':
+                    return 'membaca artikel "<strong>' + (details.articleTitle || 'Artikel') + '</strong>"';
+                case 'ebook_purchased':
+                    return 'membeli ebook "<strong>' + (details.ebookTitle || 'Ebook') + '</strong>" - Rp ' + ((details
+                        .price || 0).toLocaleString());
                 case 'admin_action': {
-                    const actionMap = { create: 'menambahkan', update: 'mengupdate', delete: 'menghapus' };
-                    return (actionMap[details.action] || 'memodifikasi') + ' <strong>' + (details.target || 'konten') + '</strong> "' + (details.targetName || 'N/A') + '"';
+                    const actionMap = {
+                        create: 'menambahkan',
+                        update: 'mengupdate',
+                        delete: 'menghapus'
+                    };
+                    return (actionMap[details.action] || 'memodifikasi') + ' <strong>' + (details.target || 'konten') +
+                        '</strong> "' + (details.targetName || 'N/A') + '"';
                 }
-                default: return JSON.stringify(details);
+                default:
+                    return JSON.stringify(details);
             }
         }
 
         async function loadRecentActivities() {
             const container = document.getElementById('recentActivity');
-            
+
             try {
                 const snapshot = await db.collection('activities')
                     .orderBy('timestamp', 'desc')
                     .limit(10)
                     .get();
-                
+
                 if (snapshot.empty) {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -978,15 +1637,21 @@
                     `;
                     return;
                 }
-                
+
                 let html = '<div class="activity-timeline">';
-                
-                snapshot.forEach(function(doc) {
+
+                snapshot.forEach(function (doc) {
                     const activity = doc.data();
                     const time = activity.timestamp?.toDate?.() || new Date();
                     const timeAgo = getTimeAgo(time);
                     const detailText = formatActivityDetails(activity);
-                    
+                    // Tampilkan nama user dengan benar
+            let userName = activity.userName || 'Pengguna';
+            // Jika admin action, tampilkan "admin" dengan icon berbeda
+            if (activity.type === 'admin_action') {
+                userName = '👑 ' + userName;
+            }
+
                     html += `
                         <div class="activity-item ${activity.priority || 'normal'}">
                             <div class="activity-icon">${activity.icon || '📌'}</div>
@@ -1003,9 +1668,9 @@
                         </div>
                     `;
                 });
-                
+
                 html += '</div>';
-                
+
                 html += `
                     <div style="text-align:center;margin-top:16px;">
                         <button onclick="loadRecentActivities()" style="padding:6px 20px;background:var(--light);border:none;border-radius:6px;cursor:pointer;font-size:13px;color:var(--primary);">
@@ -1013,9 +1678,9 @@
                         </button>
                     </div>
                 `;
-                
+
                 container.innerHTML = html;
-                
+
             } catch (error) {
                 console.error('Error loading activities:', error);
                 container.innerHTML = `
@@ -1039,14 +1704,18 @@
                 if (loveLang.primary && loveLang.secondary) {
                     const p = loveLang.primary;
                     const s = loveLang.secondary;
-                    return (p.key || p.label || 'N/A') + ' ' + (p.score || 0) + '% (Primary) | ' + (s.key || s.label || 'N/A') + ' ' + (s.score || 0) + '% (Secondary)';
+                    return (p.key || p.label || 'N/A') + ' ' + (p.score || 0) + '% (Primary) | ' + (s.key || s.label ||
+                        'N/A') + ' ' + (s.score || 0) + '% (Secondary)';
                 }
                 if (Array.isArray(loveLang) && loveLang.length > 0) {
                     const sorted = loveLang.sort((a, b) => (b.score || 0) - (a.score || 0));
-                    return sorted.slice(0, 2).map(l => (l.key || l.label || 'N/A') + ' ' + (l.score || 0) + '%').join(' | ');
+                    return sorted.slice(0, 2).map(l => (l.key || l.label || 'N/A') + ' ' + (l.score || 0) + '%').join(
+                        ' | ');
                 }
                 return JSON.stringify(loveLang);
-            } catch(e) { return '-'; }
+            } catch (e) {
+                return '-';
+            }
         }
 
         function getPrimaryLoveLanguage(loveLang) {
@@ -1062,20 +1731,23 @@
                     return (top.key || top.label || 'N/A') + ' ' + (top.score || 0) + '%';
                 }
                 return '-';
-            } catch(e) { return '-'; }
+            } catch (e) {
+                return '-';
+            }
         }
 
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
             try {
                 const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
-                
+
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">👥</div><p>Belum ada user terdaftar.</p><button onclick="openUserModal()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">➕ Tambah User</button></td></tr>`;
+                    tbody.innerHTML =
+                        `<tr><td colspan="6" class="empty-state"><div class="icon">👥</div><p>Belum ada user terdaftar.</p><button onclick="openUserModal()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">➕ Tambah User</button></td></tr>`;
                     document.getElementById('userCount').textContent = '0 user';
                     return;
                 }
-                
+
                 let html = '';
                 snapshot.forEach(doc => {
                     const u = doc.data();
@@ -1088,12 +1760,20 @@
                     let joinDate = '-';
                     if (u.createdAt) {
                         if (u.createdAt.toDate) {
-                            joinDate = new Date(u.createdAt.toDate()).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                            joinDate = new Date(u.createdAt.toDate()).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
                         } else if (u.createdAt instanceof Date) {
-                            joinDate = u.createdAt.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+                            joinDate = u.createdAt.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
                         }
                     }
-                    
+
                     html += `<tr>
                         <td><strong>${u.nama || u.name || 'Pengguna'}</strong></td>
                         <td>${u.email || '-'}</td>
@@ -1106,14 +1786,15 @@
                         </td>
                     </tr>`;
                 });
-                
+
                 tbody.innerHTML = html;
                 document.getElementById('userCount').textContent = snapshot.size + ' user';
                 document.getElementById('statUsers').textContent = snapshot.size;
-                
+
             } catch (error) {
                 console.error('Error loading users:', error);
-                tbody.innerHTML = `<tr><td colspan="6" class="empty-state"><div class="icon">❌</div><p>Gagal memuat data user.</p><p style="font-size:13px;color:#8a9e99;">${error.message}</p><button onclick="loadUsers()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button></td></tr>`;
+                tbody.innerHTML =
+                    `<tr><td colspan="6" class="empty-state"><div class="icon">❌</div><p>Gagal memuat data user.</p><p style="font-size:13px;color:#8a9e99;">${error.message}</p><button onclick="loadUsers()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button></td></tr>`;
             }
         }
 
@@ -1122,16 +1803,19 @@
             document.getElementById('userEditId').value = data ? data.id : '';
             document.getElementById('userName').value = data ? (data.nama || data.name || '') : '';
             document.getElementById('userEmail').value = data ? (data.email || '') : '';
-            document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') : 'active';
-            
+            document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') :
+                'active';
+
             if (data && data.loveLanguage) {
                 const loveLang = data.loveLanguage;
                 if (loveLang.primary) {
-                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary.label || 'Words of Affirmation';
+                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary
+                        .label || 'Words of Affirmation';
                     document.getElementById('userPrimaryScore').value = loveLang.primary.score || 80;
                 }
                 if (loveLang.secondary) {
-                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang.secondary.label || 'Acts of Service';
+                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang
+                        .secondary.label || 'Acts of Service';
                     document.getElementById('userSecondaryScore').value = loveLang.secondary.score || 60;
                 }
             } else {
@@ -1140,7 +1824,7 @@
                 document.getElementById('userPrimaryScore').value = 80;
                 document.getElementById('userSecondaryScore').value = 60;
             }
-            
+
             openModal('userModal');
         }
 
@@ -1148,7 +1832,10 @@
             try {
                 const doc = await db.collection('users').doc(userId).get();
                 if (doc.exists) {
-                    openUserModal({ id: userId, ...doc.data() });
+                    openUserModal({
+                        id: userId,
+                        ...doc.data()
+                    });
                 } else {
                     alert('Data user tidak ditemukan!');
                 }
@@ -1160,17 +1847,17 @@
 
         async function deleteUser(userId) {
             if (!confirm('Yakin ingin menghapus user ini? Data tidak bisa dikembalikan!')) return;
-            
+
             try {
                 // Ambil data user sebelum dihapus untuk log
                 const doc = await db.collection('users').doc(userId).get();
                 const userData = doc.data();
-                
+
                 await db.collection('users').doc(userId).delete();
-                
+
                 // Log aktivitas admin delete user
                 await logAdminAction('delete', 'user', userData.nama || userData.name || 'Pengguna');
-                
+
                 alert('✅ User berhasil dihapus!');
                 loadUsers();
                 updateStats();
@@ -1181,9 +1868,9 @@
             }
         }
 
-        document.getElementById('userForm').addEventListener('submit', async function(e) {
+        document.getElementById('userForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const id = document.getElementById('userEditId').value;
             const name = document.getElementById('userName').value.trim();
             const email = document.getElementById('userEmail').value.trim();
@@ -1192,17 +1879,17 @@
             const loveSecondary = document.getElementById('userLoveLanguageSecondary').value;
             const primaryScore = parseInt(document.getElementById('userPrimaryScore').value) || 80;
             const secondaryScore = parseInt(document.getElementById('userSecondaryScore').value) || 60;
-            
+
             if (!name || !email) {
                 alert('❌ Nama dan Email harus diisi!');
                 return;
             }
-            
+
             if (!email.includes('@') || !email.includes('.')) {
                 alert('❌ Email tidak valid!');
                 return;
             }
-            
+
             const data = {
                 nama: name,
                 name: name,
@@ -1211,11 +1898,19 @@
                 lastLogin: status === 'active',
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
                 loveLanguage: {
-                    primary: { key: lovePrimary, label: lovePrimary, score: primaryScore },
-                    secondary: { key: loveSecondary, label: loveSecondary, score: secondaryScore }
+                    primary: {
+                        key: lovePrimary,
+                        label: lovePrimary,
+                        score: primaryScore
+                    },
+                    secondary: {
+                        key: loveSecondary,
+                        label: loveSecondary,
+                        score: secondaryScore
+                    }
                 }
             };
-            
+
             try {
                 if (id) {
                     await db.collection('users').doc(id).update(data);
@@ -1228,13 +1923,13 @@
                     await logAdminAction('create', 'user', name);
                     alert('✅ User berhasil ditambahkan!');
                 }
-                
+
                 closeModal('userModal');
                 this.reset();
                 loadUsers();
                 updateStats();
                 loadRecentActivities();
-                
+
             } catch (error) {
                 console.error('Error saving user:', error);
                 alert('❌ Gagal menyimpan user: ' + error.message);
@@ -1254,8 +1949,14 @@
                         id: doc.id,
                         nama: data.nama || data.name || 'Pengguna',
                         email: data.email || '-',
-                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' : 'Tidak Aktif',
-                        joinDate: data.createdAt ? (data.createdAt.toDate ? new Date(data.createdAt.toDate()).toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'}) : '-') : '-',
+                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' :
+                            'Tidak Aktif',
+                        joinDate: data.createdAt ? (data.createdAt.toDate ? new Date(data.createdAt
+                            .toDate()).toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric'
+                        }) : '-') : '-',
                         loveLanguage: data.loveLanguage || null
                     });
                 });
@@ -1269,14 +1970,16 @@
         async function exportLoveLanguage(format) {
             try {
                 const users = await fetchAllUsersWithLoveLanguage();
-                
+
                 if (users.length === 0) {
                     alert('Tidak ada data user untuk diexport!');
                     return;
                 }
-                
+
                 const exportData = users.map(user => {
-                    let primary = '-', secondary = '-', allLove = '-';
+                    let primary = '-',
+                        secondary = '-',
+                        allLove = '-';
                     if (user.loveLanguage) {
                         if (user.loveLanguage.primary) {
                             const p = user.loveLanguage.primary;
@@ -1300,31 +2003,36 @@
                         'TANGGAL BERGABUNG': user.joinDate
                     };
                 });
-                
+
                 if (format === 'csv') {
                     const headers = Object.keys(exportData[0]);
                     let csv = headers.join(';') + '\n';
                     exportData.forEach(row => {
                         csv += headers.map(h => {
                             let val = row[h] || '';
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
-                    
-                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+
+                    const blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'love_language_users_' + new Date().toISOString().split('T')[0] + '.csv';
                     link.click();
                     URL.revokeObjectURL(link.href);
                     alert('✅ Export CSV berhasil! ' + users.length + ' user.');
-                    
+
                 } else if (format === 'json') {
                     const json = JSON.stringify(exportData, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
+                    const blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'love_language_users_' + new Date().toISOString().split('T')[0] + '.json';
@@ -1332,7 +2040,7 @@
                     URL.revokeObjectURL(link.href);
                     alert('✅ Export JSON berhasil! ' + users.length + ' user.');
                 }
-                
+
             } catch (error) {
                 console.error('Export error:', error);
                 alert('❌ Gagal export data: ' + error.message);
@@ -1347,15 +2055,18 @@
             try {
                 const snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>';
                     return;
                 }
                 let html = '';
                 snapshot.forEach(doc => {
                     const a = doc.data();
                     const id = doc.id;
-                    const statusBadge = a.status === 'published' ? '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>' : '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
-                    const createdBy = a.createdBy?.name || a.createdBy?.email || 'Admin';
+                    const statusBadge = a.status === 'published' ?
+                        '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>' :
+                        '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
+                    const createdBy = a.createdBy ? .name || a.createdBy ? .email || 'Admin';
                     html += `<tr>
                         <td><strong>${a.title}</strong></td>
                         <td><span class="badge active">${a.category || 'Lainnya'}</span></td>
@@ -1372,7 +2083,8 @@
                 document.getElementById('statArticles').textContent = snapshot.size;
             } catch (error) {
                 console.error('Error loading articles:', error);
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>';
             }
         }
 
@@ -1388,14 +2100,14 @@
             openModal('articleModal');
         }
 
-        document.getElementById('articleForm').addEventListener('submit', async function(e) {
+        document.getElementById('articleForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             const id = document.getElementById('articleEditId').value;
             const adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
             const adminName = localStorage.getItem('adminName') || 'Admin';
             const title = document.getElementById('articleTitle').value;
-            
+
             const data = {
                 title: title,
                 category: document.getElementById('articleCategory').value,
@@ -1412,7 +2124,11 @@
                     await logAdminAction('update', 'article', title);
                 } else {
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    data.createdBy = { email: adminEmail, name: adminName, uid: localStorage.getItem('adminUid') || '' };
+                    data.createdBy = {
+                        email: adminEmail,
+                        name: adminName,
+                        uid: localStorage.getItem('adminUid') || ''
+                    };
                     await db.collection('articles').add(data);
                     await logAdminAction('create', 'article', title);
                 }
@@ -1431,7 +2147,10 @@
             try {
                 const doc = await db.collection('articles').doc(id).get();
                 if (doc.exists) {
-                    openArticleModal({ id: id, ...doc.data() });
+                    openArticleModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading article:', error);
@@ -1443,7 +2162,7 @@
             if (confirm('Yakin hapus artikel ini?')) {
                 try {
                     const doc = await db.collection('articles').doc(id).get();
-                    const title = doc.data()?.title || 'Artikel';
+                    const title = doc.data() ? .title || 'Artikel';
                     await db.collection('articles').doc(id).delete();
                     await logAdminAction('delete', 'article', title);
                     loadArticles();
@@ -1464,7 +2183,8 @@
             try {
                 const snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
                     return;
                 }
                 let html = '';
@@ -1487,7 +2207,8 @@
                 document.getElementById('statEbooks').textContent = snapshot.size;
             } catch (error) {
                 console.error('Error loading ebooks:', error);
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
             }
         }
 
@@ -1502,7 +2223,7 @@
             openModal('ebookModal');
         }
 
-        document.getElementById('ebookForm').addEventListener('submit', async function(e) {
+        document.getElementById('ebookForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             const priceInput = document.getElementById('ebookPrice').value;
@@ -1518,7 +2239,7 @@
 
             const id = document.getElementById('ebookEditId').value;
             const title = document.getElementById('ebookTitle').value;
-            
+
             const data = {
                 title: title,
                 pages: parseInt(document.getElementById('ebookPages').value) || 0,
@@ -1552,7 +2273,10 @@
             try {
                 const doc = await db.collection('ebooks').doc(id).get();
                 if (doc.exists) {
-                    openEbookModal({ id: id, ...doc.data() });
+                    openEbookModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading ebook:', error);
@@ -1564,7 +2288,7 @@
             if (confirm('Yakin hapus ebook ini?')) {
                 try {
                     const doc = await db.collection('ebooks').doc(id).get();
-                    const title = doc.data()?.title || 'Ebook';
+                    const title = doc.data() ? .title || 'Ebook';
                     await db.collection('ebooks').doc(id).delete();
                     await logAdminAction('delete', 'ebook', title);
                     loadEbooks();
@@ -1585,7 +2309,8 @@
             try {
                 const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>';
                     return;
                 }
                 let html = '';
@@ -1605,7 +2330,8 @@
                 tbody.innerHTML = html;
             } catch (error) {
                 console.error('Error loading videos:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data video.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data video.</td></tr>';
             }
         }
 
@@ -1619,7 +2345,7 @@
             openModal('videoModal');
         }
 
-        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+        document.getElementById('videoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             const id = document.getElementById('videoEditId').value;
             const title = document.getElementById('videoTitle').value;
@@ -1654,7 +2380,10 @@
             try {
                 const doc = await db.collection('videos').doc(id).get();
                 if (doc.exists) {
-                    openVideoModal({ id: id, ...doc.data() });
+                    openVideoModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading video:', error);
@@ -1666,7 +2395,7 @@
             if (confirm('Yakin hapus video ini?')) {
                 try {
                     const doc = await db.collection('videos').doc(id).get();
-                    const title = doc.data()?.title || 'Video';
+                    const title = doc.data() ? .title || 'Video';
                     await db.collection('videos').doc(id).delete();
                     await logAdminAction('delete', 'video', title);
                     loadVideos();
@@ -1693,7 +2422,8 @@
                     .get();
 
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">💑</div><p>Belum ada pasangan terhubung.</p><p style="font-size:13px;color:#8a9e99;">Pasangan akan muncul setelah dua orang mengerjakan Wellness Check bersama.</p></td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="7" class="empty-state"><div class="icon">💑</div><p>Belum ada pasangan terhubung.</p><p style="font-size:13px;color:#8a9e99;">Pasangan akan muncul setelah dua orang mengerjakan Wellness Check bersama.</p></td></tr>';
                     document.getElementById('coupleCount').textContent = '0 pasangan';
                     document.getElementById('statCouples').textContent = '0';
                     return;
@@ -1729,10 +2459,17 @@
                         userBName = data.partnerName;
                     }
 
-                    const skor = data.results?.wellnessScore || '-';
-                    const statusBadge = data.results ? '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>' : '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
-                    const tanggal = data.completedAt?.toDate?.() || data.startedAt?.toDate?.() || new Date();
-                    const tanggalStr = tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                    const skor = data.results ? .wellnessScore || '-';
+                    const statusBadge = data.results ?
+                        '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>' :
+                        '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
+                    const tanggal = data.completedAt ? .toDate ? .() || data.startedAt ? .toDate ? .() ||
+                new Date();
+                    const tanggalStr = tanggal.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
 
                     html += `<tr>
                         <td><code style="background:#f5f0eb;padding:2px 8px;border-radius:4px;font-size:12px;">${data.inviteCode || '-'}</code></td>
@@ -1755,7 +2492,10 @@
 
             } catch (error) {
                 console.error('Error loading couples:', error);
-                tbody.innerHTML = '<tr><td colspan="7" class="empty-state"><div class="icon">❌</div><p>Gagal memuat data pasangan.</p><p style="font-size:13px;color:#8a9e99;">' + error.message + '</p><button onclick="loadCouples()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button></td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="7" class="empty-state"><div class="icon">❌</div><p>Gagal memuat data pasangan.</p><p style="font-size:13px;color:#8a9e99;">' +
+                    error.message +
+                    '</p><button onclick="loadCouples()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button></td></tr>';
             }
         }
 
@@ -1805,7 +2545,7 @@
                 `;
 
                 document.body.insertAdjacentHTML('beforeend', detailHtml);
-                document.getElementById(modalId).addEventListener('click', function(e) {
+                document.getElementById(modalId).addEventListener('click', function (e) {
                     if (e.target === this) closeModalById(modalId);
                 });
 
@@ -1820,7 +2560,9 @@
             if (modal) {
                 modal.style.opacity = '0';
                 modal.style.transition = 'opacity 0.3s ease';
-                setTimeout(() => { if (modal.parentNode) modal.parentNode.removeChild(modal); }, 300);
+                setTimeout(() => {
+                    if (modal.parentNode) modal.parentNode.removeChild(modal);
+                }, 300);
             }
         }
 
@@ -1856,7 +2598,8 @@
             for (const doc of snapshot.docs) {
                 const data = doc.data();
 
-                let userAName = 'Unknown', userAEmail = 'Unknown';
+                let userAName = 'Unknown',
+                    userAEmail = 'Unknown';
                 if (data.userId) {
                     try {
                         const userDoc = await db.collection('users').doc(data.userId).get();
@@ -1867,7 +2610,8 @@
                     } catch (e) {}
                 }
 
-                let userBName = 'Unknown', userBEmail = 'Unknown';
+                let userBName = 'Unknown',
+                    userBEmail = 'Unknown';
                 if (data.partnerUserId) {
                     try {
                         const userDoc = await db.collection('users').doc(data.partnerUserId).get();
@@ -1882,7 +2626,7 @@
                 }
 
                 const resultsData = data.results || {};
-                const tanggal = data.completedAt?.toDate?.() || data.startedAt?.toDate?.() || new Date();
+                const tanggal = data.completedAt ? .toDate ? .() || data.startedAt ? .toDate ? .() || new Date();
 
                 results.push({
                     id: doc.id,
@@ -1938,10 +2682,18 @@
                         const row = [
                             p.inviteCode, p.userA, p.userAEmail, p.userB, p.userBEmail,
                             p.skor, p.category, p.status,
-                            p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                            p.tanggal.toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })
                         ];
 
-                        const dims = ['komunikasi', 'kepercayaan', 'resolusi_konflik', 'dukungan_emosional', 'waktu_berkualitas', 'komitmen', 'penghargaan', 'keuangan'];
+                        const dims = ['komunikasi', 'kepercayaan', 'resolusi_konflik', 'dukungan_emosional',
+                            'waktu_berkualitas', 'komitmen', 'penghargaan', 'keuangan'
+                        ];
                         dims.forEach(dim => row.push(p.dimensionScores[dim] || '-'));
 
                         for (let i = 0; i < 3; i++) {
@@ -1965,14 +2717,17 @@
                     let csv = headers.join(';') + '\n';
                     rows.forEach(row => {
                         csv += row.map(val => {
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
 
-                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'wellness_data_lengkap_' + new Date().toISOString().split('T')[0] + '.csv';
@@ -1982,7 +2737,9 @@
 
                 } else if (format === 'json') {
                     const json = JSON.stringify(data, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
+                    const blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'wellness_data_lengkap_' + new Date().toISOString().split('T')[0] + '.json';
@@ -2015,7 +2772,11 @@
                     'Skor': p.skor,
                     'Kategori': p.category,
                     'Status': p.status,
-                    'Tanggal': p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                    'Tanggal': p.tanggal.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    })
                 }));
 
                 if (format === 'csv') {
@@ -2024,14 +2785,17 @@
                     ringkasData.forEach(row => {
                         csv += headers.map(h => {
                             let val = row[h] || '';
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
 
-                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'data_pasangan_ringkas_' + new Date().toISOString().split('T')[0] + '.csv';
@@ -2041,7 +2805,9 @@
 
                 } else if (format === 'json') {
                     const json = JSON.stringify(ringkasData, null, 2);
-                    const blob = new Blob([json], { type: 'application/json' });
+                    const blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     const link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'data_pasangan_ringkas_' + new Date().toISOString().split('T')[0] + '.json';
@@ -2064,12 +2830,18 @@
                     return;
                 }
 
-                const data = { id: doc.id, ...doc.data() };
+                const data = {
+                    id: doc.id,
+                    ...doc.data()
+                };
                 const json = JSON.stringify(data, null, 2);
-                const blob = new Blob([json], { type: 'application/json' });
+                const blob = new Blob([json], {
+                    type: 'application/json'
+                });
                 const link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = 'pasangan_' + (data.inviteCode || testId) + '_' + new Date().toISOString().split('T')[0] + '.json';
+                link.download = 'pasangan_' + (data.inviteCode || testId) + '_' + new Date().toISOString().split(
+                    'T')[0] + '.json';
                 link.click();
                 URL.revokeObjectURL(link.href);
                 alert('✅ Export berhasil!');
@@ -2090,11 +2862,22 @@
         var adsenseData = [];
 
         function generateSalesData() {
-            const ebooks = [
-                { name: 'Panduan Komunikasi Sehat', price: 45000 },
-                { name: 'Love Language untuk Pasangan', price: 35000 },
-                { name: 'Mengelola Konflik', price: 0 },
-                { name: 'Keuangan Rumah Tangga', price: 25000 }
+            const ebooks = [{
+                    name: 'Panduan Komunikasi Sehat',
+                    price: 45000
+                },
+                {
+                    name: 'Love Language untuk Pasangan',
+                    price: 35000
+                },
+                {
+                    name: 'Mengelola Konflik',
+                    price: 0
+                },
+                {
+                    name: 'Keuangan Rumah Tangga',
+                    price: 25000
+                }
             ];
             const buyers = ['Monica', 'Budi', 'Siti', 'Andi', 'Rina', 'Dewi', 'Agus', 'Nina'];
             const statuses = ['success', 'pending', 'success', 'success', 'failed', 'success', 'success'];
@@ -2145,11 +2928,16 @@
             document.getElementById('salesCount').textContent = salesData.length + ' transaksi';
 
             if (salesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">💰</div>Belum ada transaksi penjualan.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="6" class="empty-state"><div class="icon">💰</div>Belum ada transaksi penjualan.</td></tr>';
                 return;
             }
 
-            const statusMap = { success: '✅ Berhasil', pending: '⏳ Pending', failed: '❌ Gagal' };
+            const statusMap = {
+                success: '✅ Berhasil',
+                pending: '⏳ Pending',
+                failed: '❌ Gagal'
+            };
 
             tbody.innerHTML = salesData.map(s => `
                 <tr>
@@ -2185,7 +2973,8 @@
             `).join('');
 
             if (adsenseData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">📢</div>Belum ada data iklan.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="5" class="empty-state"><div class="icon">📢</div>Belum ada data iklan.</td></tr>';
                 return;
             }
 
@@ -2212,7 +3001,7 @@
                     .where('userCompleted', '==', true)
                     .where('partnerCompleted', '==', true)
                     .get();
-                    
+
                 document.getElementById('statUsers').textContent = usersSnap.size;
                 document.getElementById('statArticles').textContent = articlesSnap.size;
                 document.getElementById('statEbooks').textContent = ebooksSnap.size;
@@ -2225,7 +3014,10 @@
         // ============================================================
         //  SETTINGS ADMIN
         // ============================================================
-        const DEFAULT_ADMIN = { email: 'admin@relasi.com', password: 'admin123' };
+        const DEFAULT_ADMIN = {
+            email: 'admin@relasi.com',
+            password: 'admin123'
+        };
 
         async function loadSettings() {
             try {
@@ -2273,7 +3065,9 @@
             }
 
             try {
-                await db.collection('admin').doc('settings').set(data, { merge: true });
+                await db.collection('admin').doc('settings').set(data, {
+                    merge: true
+                });
 
                 document.getElementById('adminEmailDisplay').textContent = email;
                 localStorage.setItem('adminEmail', email);
@@ -2351,11 +3145,16 @@
         // ============================================================
         //  MODAL
         // ============================================================
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+        function openModal(id) {
+            document.getElementById(id).classList.add('show');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('show');
+        }
 
         document.querySelectorAll('.modal-overlay').forEach(modal => {
-            modal.addEventListener('click', function(e) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === this) this.classList.remove('show');
             });
         });
@@ -2376,7 +3175,7 @@
             generateAdsenseData();
             renderSales();
             renderAdsense();
-            
+
             // Log admin login
             const adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
             const adminName = localStorage.getItem('adminName') || 'Admin';
@@ -2397,6 +3196,44 @@
 
         init();
 
+        // ============================================================
+        // Format Activity Details
+        // ============================================================
+        function formatActivityDetails(activity) {
+            const type = activity.type;
+            const details = activity.details || {};
+
+            switch (type) {
+                case 'user_login':
+                    return 'login ke aplikasi';
+                case 'user_logout':
+                    return 'logout dari aplikasi';
+                case 'test_completed':
+                    return 'menyelesaikan Wellness Test - Skor: <strong>' + (details.score || 0) + '%</strong>';
+                case 'couple_connected':
+                    return 'terhubung dengan <strong>' + (details.partnerName || 'Pasangan') +
+                        '</strong> sebagai pasangan';
+                case 'article_read':
+                    return 'membaca artikel "<strong>' + (details.articleTitle || 'Artikel') + '</strong>"';
+                case 'ebook_purchased':
+                    return 'membeli ebook "<strong>' + (details.ebookTitle || 'Ebook') + '</strong>" - Rp ' + ((details
+                        .price || 0).toLocaleString());
+                case 'admin_action': {
+                    const actionMap = {
+                        create: 'menambahkan',
+                        update: 'mengupdate',
+                        delete: 'menghapus',
+                        login: 'login ke dashboard',
+                        logout: 'logout dari dashboard'
+                    };
+                    return (actionMap[details.action] || 'memodifikasi') + ' <strong>' + (details.target || 'admin') +
+                        '</strong> "' + (details.targetName || 'N/A') + '"';
+                }
+                default:
+                    return JSON.stringify(details);
+            }
+        }
+
         // Auto refresh setiap 30 detik
         setInterval(() => {
             loadUsers();
@@ -2410,4 +3247,5 @@
     </script>
 
 </body>
+
 </html>
