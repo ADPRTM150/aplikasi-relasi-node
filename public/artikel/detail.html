@@ -65,11 +65,11 @@
         // ============================================================
         //  FIREBASE AUTH - RENDER USER
         // ============================================================
-        firebase.auth().onAuthStateChanged((user) => {
-            const userArea = document.getElementById('userArea');
+        firebase.auth().onAuthStateChanged(function(user) {
+            var userArea = document.getElementById('userArea');
             if (user) {
-                const foto = user.photoURL || '';
-                const nama = user.displayName || 'Pengguna';
+                var foto = user.photoURL || '';
+                var nama = user.displayName || 'Pengguna';
                 userArea.innerHTML = `
                     <button class="profile-trigger" onclick="toggleDropdown()">
                         ${foto ? `<img src="${foto}" class="avatar" />` : `<div class="avatar-placeholder">👤</div>`}
@@ -94,23 +94,38 @@
         });
 
         function toggleDropdown() {
-            const d = document.getElementById('userDropdown');
+            var d = document.getElementById('userDropdown');
             if (d) d.classList.toggle('show');
         }
 
-        document.addEventListener('click', function (e) {
-            const area = document.getElementById('userArea');
+        document.addEventListener('click', function(e) {
+            var area = document.getElementById('userArea');
             if (area && !area.contains(e.target)) {
-                const d = document.getElementById('userDropdown');
+                var d = document.getElementById('userDropdown');
                 if (d) d.classList.remove('show');
             }
         });
 
         function logout() {
             if (confirm('Yakin ingin logout?')) {
-                firebase.auth().signOut().then(() => {
-                    window.location.reload();
-                });
+                // ============================================
+                //  🔥 LOG LOGOUT SEBELUM SIGNOUT
+                // ============================================
+                if (window.logUserLogout) {
+                    window.logUserLogout().then(function() {
+                        firebase.auth().signOut().then(function() {
+                            window.location.reload();
+                        });
+                    }).catch(function() {
+                        firebase.auth().signOut().then(function() {
+                            window.location.reload();
+                        });
+                    });
+                } else {
+                    firebase.auth().signOut().then(function() {
+                        window.location.reload();
+                    });
+                }
             }
         }
 
@@ -126,12 +141,12 @@
         //  🔥 AMBIL DETAIL ARTIKEL DARI FIRESTORE
         // ============================================================
         async function loadArticleDetail() {
-            const container = document.getElementById('artikelContent');
+            var container = document.getElementById('artikelContent');
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const id = urlParams.get('id');
+            var urlParams = new URLSearchParams(window.location.search);
+            var articleId = urlParams.get('id');
 
-            if (!id) {
+            if (!articleId) {
                 container.innerHTML = `
                     <div class="error-state">
                         <div class="icon">⚠️</div>
@@ -142,7 +157,7 @@
             }
 
             try {
-                const doc = await db.collection('articles').doc(id).get();
+                var doc = await db.collection('articles').doc(articleId).get();
 
                 if (!doc.exists) {
                     container.innerHTML = `
@@ -154,8 +169,12 @@
                     return;
                 }
 
-                const a = doc.data();
-                const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
+                var a = doc.data();
+                var tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                }) : '-';
 
                 container.innerHTML = `
                     <div class="thumb">${a.thumb || '📰'}</div>
@@ -165,7 +184,7 @@
                     <div class="content">${a.content || 'Konten belum tersedia.'}</div>
                 `;
 
-                document.title = `${a.title} - Relasi`;
+                document.title = a.title + ' - Relasi';
 
                 // ============================================================
                 //  🔥 LOG AKTIVITAS BACA ARTIKEL - DIPANGGIL DI SINI!
@@ -183,48 +202,50 @@
             }
         }
 
-        loadArticleDetail();
         // ============================================================
         //  🔥 FUNGSI TRACK ARTICLE READ - DENGAN LOGGING
         // ============================================================
         async function trackArticleRead(articleId, articleTitle, category) {
             try {
                 // Cek apakah user login
-                const user = firebase.auth().currentUser;
+                var user = firebase.auth().currentUser;
                 if (!user) {
                     console.log('⚠️ User tidak login, skip logging');
                     return;
                 }
 
-                // Gunakan fungsi dari firebase-config.js
-                if (window.logArticleRead) {
-                    await window.logArticleRead({
-                        id: articleId,
-                        title: articleTitle || 'Artikel',
-                        category: category || 'Lainnya'
-                    });
-                    console.log('✅ Article read activity logged!');
-                } else {
-                    // Fallback jika fungsi tidak tersedia
-                    console.warn('⚠️ logArticleRead tidak tersedia, menggunakan fallback');
-
-                    // Simpan langsung ke Firestore
-                    await db.collection('activities').add({
-                        userId: user.uid,
-                        userEmail: user.email || '-',
-                        userName: user.displayName || user.email ? .split('@')[0] || 'Pengguna',
-                        type: 'article_read',
-                        icon: '📖',
-                        priority: 'normal',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        details: {
-                            articleId: articleId || 'unknown',
-                            articleTitle: articleTitle || 'Artikel',
-                            category: category || 'Lainnya'
-                        }
-                    });
-                    console.log('✅ Article read activity logged (fallback)!');
+                // Ambil nama user dari Firestore
+                var userName = 'Pengguna';
+                try {
+                    var userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        var userData = userDoc.data();
+                        userName = userData.nama || userData.name || user.displayName || 'Pengguna';
+                    }
+                } catch (e) {
+                    userName = user.displayName || user.email || 'Pengguna';
                 }
+
+                // Data aktivitas
+                var activityData = {
+                    userId: user.uid,
+                    userEmail: user.email || '-',
+                    userName: userName,
+                    type: 'article_read',
+                    icon: '📖',
+                    priority: 'normal',
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    details: {
+                        articleId: articleId || 'unknown',
+                        articleTitle: articleTitle || 'Artikel',
+                        category: category || 'Lainnya'
+                    }
+                };
+
+                // Simpan ke Firestore
+                await db.collection('activities').add(activityData);
+                console.log('✅ Article read activity logged! -', userName);
+
             } catch (error) {
                 console.error('❌ Error tracking article:', error);
             }
