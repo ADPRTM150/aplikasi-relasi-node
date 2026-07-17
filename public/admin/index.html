@@ -1642,15 +1642,15 @@
 
                 snapshot.forEach(function (doc) {
                     const activity = doc.data();
-                    const time = activity.timestamp?.toDate?.() || new Date();
+                    const time = activity.timestamp ? .toDate ? .() || new Date();
                     const timeAgo = getTimeAgo(time);
                     const detailText = formatActivityDetails(activity);
                     // Tampilkan nama user dengan benar
-            let userName = activity.userName || 'Pengguna';
-            // Jika admin action, tampilkan "admin" dengan icon berbeda
-            if (activity.type === 'admin_action') {
-                userName = '👑 ' + userName;
-            }
+                    let userName = activity.userName || 'Pengguna';
+                    // Jika admin action, tampilkan "admin" dengan icon berbeda
+                    if (activity.type === 'admin_action') {
+                        userName = '👑 ' + userName;
+                    }
 
                     html += `
                         <div class="activity-item ${activity.priority || 'normal'}">
@@ -2464,7 +2464,7 @@
                         '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>' :
                         '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
                     const tanggal = data.completedAt ? .toDate ? .() || data.startedAt ? .toDate ? .() ||
-                new Date();
+                        new Date();
                     const tanggalStr = tanggal.toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'short',
