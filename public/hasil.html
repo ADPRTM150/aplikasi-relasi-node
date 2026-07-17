@@ -440,14 +440,11 @@
         // ============================================================
         document.addEventListener('DOMContentLoaded', function () {
             if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
-                // // console.log('✅ Firebase sudah siap!');
                 initApp();
             } else {
-                // // console.log('⏳ Menunggu Firebase siap...');
                 var checkFirebase = setInterval(function () {
                     if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
                         clearInterval(checkFirebase);
-                        // // // console.log('✅ Firebase siap!');
                         initApp();
                     }
                 }, 100);
@@ -456,8 +453,52 @@
 
         function initApp() {
             var API_BASE = window.API_BASE || '/api';
-            // // console.log('✅ API_BASE:', API_BASE);
             var db = firebase.firestore();
+
+            // ============================================================
+            //  🔥 LOG ACTIVITY - VIEW RESULTS PAGE
+            // ============================================================
+            async function logViewResults() {
+                try {
+                    const user = firebase.auth().currentUser;
+                    if (!user) {
+                        console.log('⚠️ User tidak login, skip logging');
+                        return;
+                    }
+
+                    // Gunakan fungsi dari firebase-config.js
+                    if (window.logActivity) {
+                        await window.logActivity({
+                            type: 'view_results',
+                            icon: '📊',
+                            priority: 'normal',
+                            details: {
+                                page: 'hasil',
+                                timestamp: new Date().toISOString()
+                            }
+                        });
+                        console.log('✅ View results activity logged!');
+                    } else {
+                        // Fallback langsung ke Firestore
+                        await db.collection('activities').add({
+                            userId: user.uid,
+                            userEmail: user.email || '-',
+                            userName: user.displayName || user.email?.split('@')[0] || 'Pengguna',
+                            type: 'view_results',
+                            icon: '📊',
+                            priority: 'normal',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            details: {
+                                page: 'hasil',
+                                timestamp: new Date().toISOString()
+                            }
+                        });
+                        console.log('✅ View results activity logged (fallback)!');
+                    }
+                } catch (error) {
+                    console.error('❌ Error logging view results:', error);
+                }
+            }
 
             // ============================================================
             //  🔥 TAB NAVIGATION
@@ -500,8 +541,6 @@
                 var userName = getUserName();
                 var user = firebase.auth().currentUser;
 
-                // // console.log('🔍 tampilkanLoveLanguage - user:', user ? user.uid : 'TIDAK ADA');
-
                 if (!user) {
                     container.innerHTML =
                         '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🔑</span></div><h3>Silakan Login Dulu</h3><p>Login untuk melihat hasil Love Language-mu.</p><a href="/login.html" class="btn-primary">🔑 Login</a></div>';
@@ -513,8 +552,6 @@
 
                 db.collection('users').doc(user.uid).get()
                     .then(function (docSnap) {
-                        // // console.log('📄 Love Language document exists:', docSnap.exists);
-
                         if (!docSnap.exists) {
                             container.innerHTML =
                                 '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">💌</span><div class="empty-emoji-cloud"><span>❤️</span><span>💕</span><span>✨</span></div></div><h3>Hai, ' +
@@ -534,7 +571,6 @@
                                 var item = loveLanguageData.all[i];
                                 data[item.label] = item.score;
                             }
-                            // // console.log('📊 Data dari all array:', data);
                         } else if (loveLanguageData && typeof loveLanguageData === 'object') {
                             var possibleKeys = ['Words of Affirmation', 'Acts of Service', 'Quality Time',
                                 'Physical Touch', 'Receiving Gifts'
@@ -547,7 +583,6 @@
                                 }
                             }
                             if (!found) data = loveLanguageData;
-                            // // console.log('📊 Data dari object:', data);
                         }
 
                         // Fallback primary/secondary
@@ -560,7 +595,6 @@
                                 var label2 = userData.secondary.label || userData.secondary.key || 'Secondary';
                                 data[label2] = userData.secondary.score || 40;
                             }
-                            // // console.log('📊 Data dari primary/secondary:', data);
                         }
 
                         // Fallback localStorage
@@ -571,7 +605,6 @@
                                     var parsed = JSON.parse(raw);
                                     if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
                                         data = parsed;
-                                        // // console.log('📊 Data dari localStorage:', data);
                                     }
                                 }
                             } catch (e) {}
@@ -644,27 +677,21 @@
                             topKey] + '%</small></div>';
                         html += '</div>';
 
-                        // 🔥 ACTION BUTTONS YANG ESTETIK
+                        // 🔥 ACTION BUTTONS
                         html +=
                             '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
 
-                        // Tombol Tes Ulang - Gradient Pink
                         html +=
-                            '  <a href="/love-language.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 20px rgba(233,30,99,0.30);position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                            '  <a href="/love-language.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;box-shadow:0 4px 20px rgba(233,30,99,0.30);display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
                             '    <span style="font-size:18px;">🔄</span> Tes Ulang' +
-                            '    <span class="shimmer"></span>' +
                             '  </a>';
 
-                        // Tombol Beranda - Outline Pink
                         html +=
-                            '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;">' +
+                            '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
                             '    <span style="font-size:18px;">🏠</span> Beranda' +
-                            '    <span class="shimmer"></span>' +
                             '  </a>';
 
                         html += '</div>';
-
-                        container.innerHTML = html;
 
                         container.innerHTML = html;
 
@@ -686,14 +713,12 @@
             }
 
             // ============================================================
-            //  🔥 TAMPILKAN WELLNESS RESULT - TANPA getCurrentUser()
+            //  🔥 TAMPILKAN WELLNESS RESULT
             // ============================================================
             function tampilkanWellness() {
                 var container = document.getElementById('wellnessContainer');
                 var userName = getUserName();
                 var user = firebase.auth().currentUser;
-
-                // // console.log('🔍 tampilkanWellness - user:', user ? user.uid : 'TIDAK ADA');
 
                 if (!user) {
                     container.innerHTML =
@@ -705,7 +730,6 @@
                     '<div style="text-align:center;padding:30px;"><div style="font-size:32px;animation:float 1s ease-in-out infinite;">⏳</div><p style="color:#7a6a70;margin-top:12px;">Memuat data wellness...</p></div>';
 
                 var uid = user.uid;
-                // // console.log('🔍 Mencari wellness test untuk UID:', uid);
 
                 // 🔥 CARI SEBAGAI USER A (PEMILIK)
                 db.collection('wellness_tests')
@@ -715,20 +739,14 @@
                     .limit(1)
                     .get()
                     .then(function (snapshot) {
-                        // // console.log('🔍 Query userId - empty:', snapshot.empty);
-                        // // console.log('🔍 Query userId - size:', snapshot.size);
-
                         if (!snapshot.empty) {
                             var doc = snapshot.docs[0];
                             var docData = doc.data();
                             var role = 'user';
-                            // // console.log('✅ Ditemukan sebagai User A, testId:', doc.id);
-                            // // console.log('📦 Results:', docData.results);
                             processWellnessData(docData, role, container, userName);
                             return null;
                         } else {
                             // 🔥 COBA CARI SEBAGAI PARTNER
-                            // // console.log('🔍 Tidak ditemukan sebagai User A, coba sebagai Partner...');
                             return db.collection('wellness_tests')
                                 .where('partnerUserId', '==', uid)
                                 .where('userCompleted', '==', true)
@@ -742,19 +760,15 @@
                             var doc = snapshot.docs[0];
                             var docData = doc.data();
                             var role = 'partner';
-                            // // console.log('✅ Ditemukan sebagai Partner, testId:', doc.id);
-                            // // console.log('📦 Results:', docData.results);
                             processWellnessData(docData, role, container, userName);
                             return null;
                         }
 
                         if (snapshot === null) {
-                            // Sudah diproses di atas
                             return null;
                         }
 
-                        // 🔥 TIDAK ADA DATA - TAMPILKAN EMPTY STATE
-                        // // console.log('❌ Tidak ada wellness test');
+                        // 🔥 TIDAK ADA DATA
                         container.innerHTML =
                             '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🧠</span><div class="empty-emoji-cloud"><span>💪</span><span>❤️</span><span>✨</span></div></div><h3>Hai, ' +
                             userName +
@@ -774,9 +788,6 @@
             //  🔥 PROCESS WELLNESS DATA
             // ============================================================
             function processWellnessData(docData, role, container, userName) {
-                // // console.log('🔍 processWellnessData dipanggil');
-                // // console.log('📦 docData.results:', docData ? docData.results : 'UNDEFINED');
-
                 if (!docData.results) {
                     var statusMessage = '';
                     if (role === 'user' && docData.userCompleted && !docData.partnerCompleted) {
@@ -797,7 +808,6 @@
                 }
 
                 var results = docData.results;
-                // // console.log('✅ Results ditemukan:', results);
 
                 // 🔥 Helper functions
                 function getDimLabel(id) {
@@ -933,29 +943,24 @@
                 }
 
                 // ============================================================
-                //  ACTION BUTTONS - ESTETIK
+                //  ACTION BUTTONS
                 // ============================================================
                 html +=
                     '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
 
-                // Tombol Ulangi Tes - Gradient Pink
                 html +=
-                    '  <a href="/relationship-check.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 20px rgba(233,30,99,0.30);position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                    '  <a href="/relationship-check.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;box-shadow:0 4px 20px rgba(233,30,99,0.30);display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
                     '    <span style="font-size:18px;">🔄</span> Ulangi Tes' +
-                    '    <span style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left 0.6s ease;"></span>' +
                     '  </a>';
 
-                // Tombol Beranda - Outline Pink
                 html +=
-                    '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;">' +
+                    '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
                     '    <span style="font-size:18px;">🏠</span> Beranda' +
-                    '    <span style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(233,30,99,0.06),transparent);transition:left 0.6s ease;"></span>' +
                     '  </a>';
 
                 html += '</div>';
 
                 container.innerHTML = html;
-                // // console.log('✅ Wellness data berhasil ditampilkan!');
             }
 
             // ============================================================
@@ -970,12 +975,14 @@
 
             // 🔥 AUTH STATE LISTENER
             firebase.auth().onAuthStateChanged(function (user) {
-                // // console.log('👤 onAuthStateChanged:', user ? 'LOGIN - ' + user.uid : 'LOGOUT');
-
                 if (user) {
-                    // // console.log('✅ User terdeteksi di onAuthStateChanged!');
                     if (!sudahLoad) {
                         sudahLoad = true;
+                        // ============================================
+                        //  🔥 LOG VIEW RESULTS - DIPANGGIL DI SINI
+                        // ============================================
+                        logViewResults();
+                        
                         setTimeout(function () {
                             tampilkanLoveLanguage();
                             tampilkanWellness();
@@ -985,7 +992,6 @@
                         tampilkanWellness();
                     }
                 } else {
-                    // // console.log('🚪 User tidak terdeteksi');
                     var loginHtml =
                         '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🔑</span></div><h3>Silakan Login Dulu</h3><p>Login untuk melihat hasil Anda.</p><a href="/login.html" class="btn-primary">🔑 Login</a></div>';
                     document.getElementById('loveLanguageContainer').innerHTML = loginHtml;
@@ -997,17 +1003,15 @@
             // 🔥 FALLBACK: Cek langsung
             setTimeout(function () {
                 var user = firebase.auth().currentUser;
-                // // console.log('🔍 Cek langsung (fallback):', user ? 'LOGIN - ' + user.uid : 'TIDAK ADA');
-
                 if (user && !sudahLoad) {
-                    // // console.log('✅ User ditemukan di fallback!');
                     sudahLoad = true;
+                    logViewResults();
                     tampilkanLoveLanguage();
                     tampilkanWellness();
                 }
             }, 1500);
 
-            // // console.log('✅ Hasil page loaded!');
+            console.log('✅ Hasil page loaded with activity logging!');
         }
     </script>
 

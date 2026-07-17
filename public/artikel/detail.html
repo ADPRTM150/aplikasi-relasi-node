@@ -167,6 +167,11 @@
 
                 document.title = `${a.title} - Relasi`;
 
+                // ============================================================
+                //  🔥 LOG AKTIVITAS BACA ARTIKEL - DIPANGGIL DI SINI!
+                // ============================================================
+                await trackArticleRead(articleId, a.title, a.category);
+
             } catch (error) {
                 console.error('Error loading article detail:', error);
                 container.innerHTML = `
@@ -180,25 +185,57 @@
 
         loadArticleDetail();
         // ============================================================
-        // Artikel Page Trigger Logging
+        //  🔥 FUNGSI TRACK ARTICLE READ - DENGAN LOGGING
         // ============================================================
-        // Saat user membaca artikel
-        async function trackArticleRead(articleId) {
+        async function trackArticleRead(articleId, articleTitle, category) {
             try {
-                const article = await db.collection('articles').doc(articleId).get();
-                if (article.exists) {
-                    if (window.logArticleRead) {
-                        await window.logArticleRead({
-                            id: articleId,
-                            title: article.data().title,
-                            category: article.data().category
-                        });
-                    }
+                // Cek apakah user login
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.log('⚠️ User tidak login, skip logging');
+                    return;
+                }
+
+                // Gunakan fungsi dari firebase-config.js
+                if (window.logArticleRead) {
+                    await window.logArticleRead({
+                        id: articleId,
+                        title: articleTitle || 'Artikel',
+                        category: category || 'Lainnya'
+                    });
+                    console.log('✅ Article read activity logged!');
+                } else {
+                    // Fallback jika fungsi tidak tersedia
+                    console.warn('⚠️ logArticleRead tidak tersedia, menggunakan fallback');
+
+                    // Simpan langsung ke Firestore
+                    await db.collection('activities').add({
+                        userId: user.uid,
+                        userEmail: user.email || '-',
+                        userName: user.displayName || user.email ? .split('@')[0] || 'Pengguna',
+                        type: 'article_read',
+                        icon: '📖',
+                        priority: 'normal',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        details: {
+                            articleId: articleId || 'unknown',
+                            articleTitle: articleTitle || 'Artikel',
+                            category: category || 'Lainnya'
+                        }
+                    });
+                    console.log('✅ Article read activity logged (fallback)!');
                 }
             } catch (error) {
-                console.error('Error tracking article:', error);
+                console.error('❌ Error tracking article:', error);
             }
         }
+
+        // ============================================================
+        //  🔥 INIT - LOAD ARTICLE
+        // ============================================================
+        loadArticleDetail();
+
+        console.log('✅ Article detail page loaded with activity logging!');
     </script>
 
 </body>

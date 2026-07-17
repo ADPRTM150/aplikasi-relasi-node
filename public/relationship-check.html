@@ -2167,30 +2167,97 @@
 
             console.log('✅ App initialized successfully!');
         }
+        // ============================================================
+        //  🔥 LOGGING AKTIVITAS - WELLNESS TEST
+        // ============================================================
 
-        // ============================================================
-        //  🔥 Test Page (Wellness Check)
-        // ============================================================
-        // Saat test selesai
-        async function saveTestResult(result) {
+        // Fungsi untuk log wellness test selesai
+        async function logWellnessTestCompleted(testData) {
             try {
-                // Simpan hasil test
-                await db.collection('wellness_tests').add(result);
+                const user = firebase.auth().currentUser;
+                if (!user) {
+                    console.warn('⚠️ Tidak ada user login');
+                    return;
+                }
 
-                // Log aktivitas test completed
+                // Gunakan fungsi dari firebase-config.js
                 if (window.logTestCompleted) {
                     await window.logTestCompleted({
-                        wellnessScore: result.wellnessScore,
-                        category: result.category,
-                        id: result.id
+                        wellnessScore: testData.wellnessScore || 0,
+                        category: testData.category || 'N/A',
+                        id: testData.id || 'wt_' + Date.now()
+                    });
+                    console.log('✅ Wellness test activity logged!');
+                } else {
+                    // Fallback jika fungsi tidak tersedia
+                    await db.collection('activities').add({
+                        userId: user.uid,
+                        userEmail: user.email || '-',
+                        userName: user.displayName || user.email ? .split('@')[0] || 'Pengguna',
+                        type: 'test_completed',
+                        icon: '📝',
+                        priority: 'high',
+                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                        details: {
+                            score: testData.wellnessScore || 0,
+                            category: testData.category || 'N/A',
+                            testId: testData.id || 'wt_' + Date.now()
+                        }
+                    });
+                    console.log('✅ Wellness test activity logged (fallback)!');
+                }
+            } catch (error) {
+                console.error('❌ Error logging wellness test:', error);
+            }
+        }
+
+        // ============================================================
+        //  🔥 OVERRIDE FUNGSI SUBMIT - TAMBAHKAN LOGGING
+        // ============================================================
+
+        // Simpan referensi fungsi submit asli
+        const originalSubmitAnswers = window.submitAnswers || function () {};
+
+        // Override untuk menambahkan logging
+        window.submitAnswers = async function () {
+            try {
+                // Panggil fungsi submit asli
+                const result = await originalSubmitAnswers();
+
+                // Jika submit berhasil dan ada hasil
+                if (result && result.success) {
+                    // Log aktivitas
+                    await logWellnessTestCompleted({
+                        wellnessScore: result.wellnessScore || 0,
+                        category: result.category || 'N/A',
+                        id: result.testId || 'wt_' + Date.now()
                     });
                 }
 
-                alert('Test berhasil disimpan!');
+                return result;
             } catch (error) {
-                console.error('Error saving test:', error);
+                console.error('Error in submitAnswers:', error);
+                throw error;
             }
-        }
+        };
+
+        // ============================================================
+        //  🔥 FUNGSI LOGIN ACTIVITY - PASTIKAN TEREKAM
+        // ============================================================
+
+        // Cek apakah user sudah login dan log aktivitas
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                console.log('👤 User logged in (wellness page):', user.email);
+
+                // Log user login jika belum di-log oleh firebase-config.js
+                if (window.logUserLogin) {
+                    await window.logUserLogin();
+                }
+            }
+        });
+
+        console.log('✅ Wellness page activity logger initialized!');
     </script>
 
 </body>
