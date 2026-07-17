@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Relasi - Grow Closer, Love Better</title>
 
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <!-- Google Fonts: Poppins & Montserrat -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
 
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
@@ -20,13 +23,18 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
+
 <body>
 
     <div class="app">
 
         <!-- ===== HEADER ===== -->
         <div class="header">
-            <div class="logo">🌸<strong>Relasi</strong>🌱</div>
+            <div class="logo">
+                <span class="bunga">🌸</span>
+                <span class="logo-text">Relasi</span>
+                <span class="tumbuhan">🌱</span>
+            </div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <span class="badge">Beta</span>
                 <div class="user-area" id="userArea">
@@ -35,36 +43,39 @@
             </div>
         </div>
 
-<!-- ===== GREETING + IMAGE ===== -->
+        <!-- ===== GREETING + IMAGE ===== -->
         <div class="greeting-wrapper">
             <div class="greeting-text">
                 <h1>Hai, <span id="userName">Pengguna</span>!</h1>
                 <p>Setiap hubungan bisa bertumbuh lebih sehat dengan memahami dan merawatnya bersama.</p>
 
-            <div style="margin-top: 6px; margin-bottom: 16px;">
-            <a href="/relationship-check" style="display:inline-flex; align-items:center; gap:10px; background: var(--pink-soft); color: var(--light); padding:10px 18px; border-radius:50px; font-weight:600; font-size:13px; text-decoration:none; transition:all 0.3s ease;">
-                <span>📋</span>
-                Mulai Relationship Wellness Check
-                <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:11px; transition:all 0.3s ease;">
-                    <i class="fas fa-arrow-right"></i>
-                </span>
-            </a>
-            <p style="font-size:11px; color: var(--medium); margin-top:4px; margin-bottom:0;">
-                <span>🔐</span>
-                Privat, aman, dan hanya kamu yang bisa melihat hasilnya.
-            </p>
+                <div style="margin-top: 6px; margin-bottom: 16px;">
+                    <a href="/relationship-check"
+                        style="display:inline-flex; align-items:center; gap:10px; background: var(--pink-soft); color: var(--light); padding:10px 18px; border-radius:50px; font-weight:600; font-size:13px; text-decoration:none; transition:all 0.3s ease;">
+                        <span>📋</span>
+                        Mulai Relationship Wellness Check
+                        <span
+                            style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; background:rgba(255,255,255,0.2); border-radius:50%; font-size:11px; transition:all 0.3s ease;">
+                            <i class="fas fa-arrow-right"></i>
+                        </span>
+                    </a>
+                    <p style="font-size:11px; color: var(--medium); margin-top:4px; margin-bottom:0;">
+                        <span>🔐</span>
+                        Privat, aman, dan hanya kamu yang bisa melihat hasilnya.
+                    </p>
+                </div>
+            </div>
+
+            <div class="greeting-image">
+                <img src="img/Asset 1.svg" alt="Ilustrasi" />
             </div>
         </div>
-
-        <div class="greeting-image">
-            <img src="img/Asset 1.svg" alt="Ilustrasi" />
-        </div>
-    </div>
 
 
         <!-- ===== GRID 4 FITUR ===== -->
         <div class="card">
-            <h4 style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:16px;">Pilih yang ingin kamu lakukan hari ini</h4>
+            <h4 style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:16px;">Pilih yang ingin kamu
+                lakukan hari ini</h4>
             <div class="fitur-grid">
                 <a href="/love-language" class="fitur-item">
                     <div class="icon">❤️</div>
@@ -83,7 +94,8 @@
                 <a href="#" class="fitur-item" onclick="alert('🚧 Segera hadir!')">
                     <div class="icon">🎬</div>
                     <div class="label">Video E-Course</div>
-                    <div class="desc">Video pembelajaran praktis tentang komunikasi, konflik, keintiman, dan banyak lagi.</div>
+                    <div class="desc">Video pembelajaran praktis tentang komunikasi, konflik, keintiman, dan banyak
+                        lagi.</div>
                     <div class="arrow-circle"><span><i class="fa fa-arrow-right"></i></span></div>
                 </a>
 
@@ -105,12 +117,15 @@
 
         <!-- ===== RIWAYAT TES ===== -->
         <div class="card" id="riwayatCard">
-            <h4 style="font-size:15px;font-weight:600;color:var(--dark);margin-bottom:8px;">📊 Perjalanan Relasimu</h4>
+            <div class="riwayat-title">
+                <span class="title-icon">📊</span>
+                <h4>Perjalanan Relasimu</h4>
+                <span class="title-badge" id="riwayatCount">0</span>
+            </div>
             <div id="riwayatContainer">
                 <!-- Akan diisi JavaScript -->
             </div>
         </div>
-
         <!-- ===== REKOMENDASI (DINAMIS DARI FIRESTORE) ===== -->
         <div class="card" id="rekomendasiCard">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
@@ -142,8 +157,8 @@
                 Hasil
             </a>
             <a href="/profil">
-            <span class="nav-icon">👤</span>
-            Profil
+                <span class="nav-icon">👤</span>
+                Profil
             </a>
         </div>
 
@@ -182,11 +197,11 @@
                         <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
                     </div>
                 `;
-                  // 🔥 Tampilkan rekomendasi
-                    loadRecommendations();
+                // 🔥 Tampilkan rekomendasi
+                loadRecommendations();
 
-                    // Tampilkan riwayat
-                    tampilkanRiwayat();
+                // 🔥 Tampilkan perjalanan relasi
+                tampilkanRiwayat();
             } else {
                 userName.textContent = 'Pengguna';
                 userArea.innerHTML = `
@@ -202,7 +217,7 @@
             if (d) d.classList.toggle('show');
         }
 
-        document.addEventListener('click', function(e) {
+        document.addEventListener('click', function (e) {
             const area = document.getElementById('userArea');
             if (area && !area.contains(e.target)) {
                 const d = document.getElementById('userDropdown');
@@ -218,9 +233,8 @@
 
         async function loadRecommendations() {
             const container = document.getElementById('rekomendasiContainer');
-            
+
             try {
-                // Tampilkan loading state yang lebih baik
                 container.innerHTML = `
                     <div class="loading-skeleton">
                         <div class="skeleton-item"></div>
@@ -232,18 +246,17 @@
                 const db = firebase.firestore();
                 const [articlesSnapshot, ebooksSnapshot] = await Promise.all([
                     db.collection('articles')
-                        .where('status', '==', 'published')
-                        .orderBy('createdAt', 'desc')
-                        .limit(2)
-                        .get(),
+                    .where('status', '==', 'published')
+                    .orderBy('createdAt', 'desc')
+                    .limit(2)
+                    .get(),
                     db.collection('ebooks')
-                        .where('status', '==', 'published')
-                        .orderBy('createdAt', 'desc')
-                        .limit(2)
-                        .get()
+                    .where('status', '==', 'published')
+                    .orderBy('createdAt', 'desc')
+                    .limit(2)
+                    .get()
                 ]);
 
-                // Cek apakah ada data
                 if (articlesSnapshot.empty && ebooksSnapshot.empty) {
                     container.innerHTML = `
                         <div class="empty-state">
@@ -255,10 +268,8 @@
                     return;
                 }
 
-                // Render rekomendasi
                 let html = '<div class="recommendations-grid">';
-                
-                // Tambahkan artikel
+
                 articlesSnapshot.forEach(doc => {
                     const data = doc.data();
                     html += `
@@ -271,7 +282,6 @@
                     `;
                 });
 
-                // Tambahkan ebook
                 ebooksSnapshot.forEach(doc => {
                     const data = doc.data();
                     html += `
@@ -289,8 +299,6 @@
 
             } catch (error) {
                 console.error('Error detail:', error);
-                
-                // Tampilkan error dengan lebih informatif
                 container.innerHTML = `
                     <div class="error-state" style="padding:20px;text-align:center;">
                         <div class="icon" style="font-size:40px;">⚠️</div>
@@ -308,55 +316,261 @@
                 `;
             }
         }
-        // ============================================================
-        //  TAMPILKAN RIWAYAT RELATIONSHIP CHECK
-        // ============================================================
-        function tampilkanRiwayat() {
-            const container = document.getElementById('riwayatContainer');
-            const rawData = localStorage.getItem('wellnessResult');
 
-            if (!rawData) {
-                container.innerHTML = `
-                    <p style="color:#8a9e99;font-size:14px;padding:8px 0;">Belum ada hasil Relationship Check.</p>
-                `;
-                return;
-            }
+// ============================================================
+//  🔥 TAMPILKAN PERJALANAN RELASI (DARI FIRESTORE)
+// ============================================================
+async function tampilkanRiwayat() {
+    const container = document.getElementById('riwayatContainer');
+    if (!container) return;
 
-            try {
-                const data = JSON.parse(rawData);
-                const tanggal = data.tanggal ? new Date(data.tanggal) : new Date();
-                const skor = data.skor || '--';
+    try {
+        const user = firebase.auth().currentUser;
+        if (!user) {
+            container.innerHTML = `
+                <div class="riwayat-empty">
+                    <div class="icon">🔒</div>
+                    <p style="color:#8a9e99;font-size:14px;">Login untuk melihat perjalanan relasimu.</p>
+                    <a href="/login" class="btn-small primary" style="display:inline-block;margin-top:8px;">Login</a>
+                </div>
+            `;
+            return;
+        }
 
-                container.innerHTML = `
-                    <div class="riwayat-item">
-                        <div class="left">
-                            <div class="date">📅 ${tanggal.toLocaleDateString('id-ID')}</div>
-                            <div class="desc">Skor: ${skor}% · ${data.mode ? 'Jawaban ' + data.mode : 'Refleksi'}</div>
-                        </div>
-                        <div class="right">
-                            <a href="/hasil" class="btn-small primary">Lihat Hasil</a>
-                            <a href="/relationship-check" class="btn-small outline">Ulangi Check</a>
-                        </div>
-                    </div>
-                    <div style="margin-top:8px;font-size:13px;color:var(--medium);">
-                        Terus pertahankan hal-hal baik, dan yuk perkuat area yang bisa ditingkatkan!
-                    </div>
-                `;
-            } catch (e) {
-                container.innerHTML = `<p style="color:#8a9e99;font-size:14px;">Data riwayat tidak tersedia.</p>`;
+        const uid = user.uid;
+
+        // 🔥 CARI DATA WELLNESS CHECK - PAKAI userCompleted SAJA
+        let snapshot = await db.collection('wellness_tests')
+            .where('userCompleted', '==', true)
+            .orderBy('completedAt', 'desc')
+            .get();
+
+        // 🔥 FILTER DI JAVASCRIPT
+        let userDocs = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter(doc => doc.userId === uid);
+
+        let role = 'user';
+        let data = null;
+        let testId = null;
+
+        if (userDocs.length > 0) {
+            data = userDocs[0];
+            testId = data.id;
+            role = 'user';
+        } else {
+            // 🔥 CARI SEBAGAI PARTNER (USER B)
+            snapshot = await db.collection('wellness_tests')
+                .where('partnerCompleted', '==', true)
+                .where('userCompleted', '==', true)
+                .orderBy('completedAt', 'desc')
+                .limit(1)
+                .get();
+
+            if (!snapshot.empty) {
+                const doc = snapshot.docs[0];
+                data = { id: doc.id, ...doc.data() };
+                testId = doc.id;
+                role = 'partner';
             }
         }
 
-         // ============================================================
-        //  🔥 KEMBALI KE ARTIKEL (TANPA MENYIMPAN HISTORY)
+        if (!data) {
+            container.innerHTML = `
+                <div class="riwayat-empty">
+                    <div class="icon">📭</div>
+                    <p style="color:#8a9e99;font-size:14px;">Belum ada hasil Relationship Check.</p>
+                    <p style="font-size:12px;color:#b0c2bd;margin-top:4px;">Refleksi edukatif untuk memahami kekuatan hubungan.</p>
+                    <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap;justify-content:center;">
+                        <span style="font-size:12px;color:#b0c2bd;">⏱️ 10 menit</span>
+                        <span style="font-size:12px;color:#b0c2bd;">📋 64 pertanyaan</span>
+                    </div>
+                    <a href="/relationship-check" class="btn-start" style="display:inline-block;margin-top:10px;">
+                        🚀 Mulai Wellness Check
+                    </a>
+                </div>
+            `;
+            return;
+        }
+
+        const results = data.results || {};
+        // ✅ DEKLARASI isComplete DI SINI!
+        const isComplete = data.results && data.completedAt;
+
+        // 🔥 AMBIL NAMA USER
+        let userAName = 'Anda';
+        let userBName = 'Pasangan';
+
+        if (data.userId) {
+            try {
+                const userDoc = await db.collection('users').doc(data.userId).get();
+                if (userDoc.exists) {
+                    const u = userDoc.data();
+                    if (role === 'user') {
+                        userAName = u.nama || u.name || 'Anda';
+                    } else {
+                        userAName = u.nama || u.name || 'Pasangan';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        if (data.partnerUserId) {
+            try {
+                const userDoc = await db.collection('users').doc(data.partnerUserId).get();
+                if (userDoc.exists) {
+                    const u = userDoc.data();
+                    if (role === 'partner') {
+                        userBName = u.nama || u.name || 'Anda';
+                    } else {
+                        userBName = u.nama || u.name || 'Pasangan';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // 🔥 TANGGAL
+        let tanggal = new Date();
+        if (data.completedAt && typeof data.completedAt.toDate === 'function') {
+            tanggal = data.completedAt.toDate();
+        } else if (data.startedAt && typeof data.startedAt.toDate === 'function') {
+            tanggal = data.startedAt.toDate();
+        }
+
+        const tanggalStr = tanggal.toLocaleDateString('id-ID', {
+            day: 'numeric',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        // 🔥 STATUS PASANGAN
+        let statusPartner = '⏳ Menunggu pasangan';
+        if (data.partnerCompleted && data.userCompleted) {
+            statusPartner = '✅ Pasangan sudah mengisi';
+        } else if (data.partnerCompleted) {
+            statusPartner = '✅ Pasangan sudah mengisi, Anda belum';
+        } else if (data.userCompleted) {
+            statusPartner = '⏳ Menunggu pasangan mengisi';
+        }
+
+        // ============================================================
+        //  🔥 RENDER - DENGAN CLASS BARU
+        // ============================================================
+        if (isComplete) {
+            const strengths = results.strengths || [];
+            const priorities = results.priorities || [];
+            const dimLabels = {
+                komunikasi: 'Komunikasi',
+                kepercayaan: 'Kepercayaan',
+                resolusi_konflik: 'Resolusi Konflik',
+                dukungan_emosional: 'Dukungan Emosional',
+                waktu_berkualitas: 'Waktu Berkualitas',
+                komitmen: 'Komitmen',
+                penghargaan: 'Penghargaan',
+                keuangan: 'Keuangan'
+            };
+
+            let html = `
+                <div class="riwayat-card">
+                    <div class="riwayat-header">
+                        <div class="left">
+                            <span class="badge-wellness">🧠 Wellness</span>
+                            <span class="tanggal">${tanggalStr}</span>
+                        </div>
+                        <span style="font-size:12px;color:#b0c2bd;">${statusPartner}</span>
+                    </div>
+
+                    <div class="riwayat-score">
+                        <span class="number">${results.wellnessScore || 0}</span>
+                        <span class="label">%</span>
+                        <span class="category">${results.category || 'Belum Terukur'}</span>
+                    </div>
+
+                    <div class="riwayat-partner">
+                        <span>👤 ${userAName} & ${userBName}</span>
+                    </div>
+
+                    <div class="riwayat-tags">
+                        ${strengths.slice(0, 3).map(s => `
+                            <span class="tag-strength">🌟 ${dimLabels[s.dimension] || s.dimension} ${s.score}%</span>
+                        `).join('')}
+                        ${priorities.slice(0, 3).map(p => `
+                            <span class="tag-priority">💡 ${dimLabels[p.dimension] || p.dimension} ${p.score}%</span>
+                        `).join('')}
+                    </div>
+
+                    <div class="riwayat-actions">
+                        <a href="/hasil?testId=${testId}" class="btn-riwayat primary">📊 Detail</a>
+                        <a href="/relationship-check" class="btn-riwayat outline">🔄 Ulangi</a>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = html;
+            document.getElementById('riwayatCount').textContent = '1';
+
+        } else {
+            // BELUM SELESAI
+            container.innerHTML = `
+                <div class="riwayat-card" style="border-left:4px solid #d4a373;">
+                    <div class="riwayat-header">
+                        <div class="left">
+                            <span class="badge-progress">⏳ Progres</span>
+                            <span class="tanggal">${tanggalStr}</span>
+                        </div>
+                        <span style="font-size:12px;color:#b0c2bd;">${statusPartner}</span>
+                    </div>
+
+                    <div style="font-size:16px;font-weight:600;color:#1d3b36;margin:4px 0;">
+                        ${statusPartner}
+                    </div>
+
+                    <div style="font-size:13px;color:#5a6f6a;">
+                        ${userAName} sudah mengisi, ${userBName} belum
+                    </div>
+
+                    <div class="riwayat-actions" style="margin-top:10px;">
+                        <a href="/relationship-check" class="btn-riwayat primary">📝 Lanjutkan</a>
+                    </div>
+                </div>
+            `;
+            document.getElementById('riwayatCount').textContent = '1';
+        }
+
+    } catch (error) {
+        console.error('Error tampilkanRiwayat:', error);
+        container.innerHTML = `
+            <div class="riwayat-empty">
+                <div class="icon">⚠️</div>
+                <p style="color:#8a9e99;font-size:14px;">Gagal memuat data.</p>
+                <button onclick="tampilkanRiwayat()" class="btn-small outline" style="margin-top:6px;">🔄 Coba Lagi</button>
+            </div>
+        `;
+    }
+}
+        // ============================================================
+        //  🔥 NAVIGASI
+        // ============================================================
+        function navigateTo(type, id) {
+            if (type === 'article') {
+                window.location.href = `/artikel/detail?id=${id}`;
+            } else {
+                window.location.href = `/ebook/detail?id=${id}`;
+            }
+        }
+
+        // ============================================================
+        //  🔥 KEMBALI KE ARTIKEL
         // ============================================================
         function kembaliKeArtikel(e) {
             e.preventDefault();
             window.location.replace('/artikel');
         }
 
-        tampilkanRiwayat();
+        // ❌ HAPUS PEMANGGILAN INI (SUDAH DI ATAS)
+        // tampilkanRiwayat();
     </script>
 
 </body>
+
 </html>

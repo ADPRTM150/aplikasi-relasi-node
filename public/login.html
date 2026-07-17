@@ -12,10 +12,10 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
-<body>
-    <div style="display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;">
-        <div class="login-container">
-            <div class="logo">💬</div>
+<body class="login-page">
+    <div class="login-wrapper">
+        <div class="login-container" id="loginContainer">
+            <span class="logo">💬</span>
             <h1><strong>Relasi</strong>🌱</h1>
             <p class="subtitle">Grow Closer. Love Better.</p>
 
@@ -25,11 +25,11 @@
 
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p style="margin-top:8px;color:#5a6f6a;font-size:14px;">Memproses login...</p>
+                <p class="loading-text">Memproses login...</p>
             </div>
 
             <button class="btn-google" onclick="loginWithGoogle()" id="btnGoogle">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" style="width:20px;height:20px;" />
+                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" class="google-icon" />
                 Login dengan Google
             </button>
 
@@ -44,8 +44,8 @@
                 <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> kami.
             </div>
 
-            <div style="margin-top:16px;font-size:13px;color:#b0c2bd;">
-                Belum punya akun? <a href="#" style="color:#3a7d76;font-weight:600;">Daftar di sini</a>
+            <div class="register-link">
+                Belum punya akun? <a href="#">Daftar di sini</a>
             </div>
         </div>
     </div>
@@ -60,12 +60,19 @@
             }
         });
 
+        // ============================================================
+        //  ELEMENTS
+        // ============================================================
         const errorMessage = document.getElementById('errorMessage');
         const errorText = document.getElementById('errorText');
         const loading = document.getElementById('loading');
         const btnGoogle = document.getElementById('btnGoogle');
         const btnEmail = document.getElementById('btnEmail');
+        const loginContainer = document.getElementById('loginContainer');
 
+        // ============================================================
+        //  FUNCTIONS
+        // ============================================================
         function showError(msg) {
             errorText.textContent = msg;
             errorMessage.classList.add('show');
@@ -100,18 +107,19 @@
                         msg = 'Popup login ditutup. Silakan coba lagi.';
                     } else if (error.code === 'auth/network-request-failed') {
                         msg = 'Koneksi internet bermasalah. Periksa koneksi kamu.';
+                    } else if (error.code === 'auth/account-exists-with-different-credential') {
+                        msg = 'Akun sudah terdaftar dengan metode lain.';
                     }
                     showError(msg);
                 });
         }
 
+        // ============================================================
+        //  ANIMASI FADE-IN
+        // ============================================================
         document.addEventListener('DOMContentLoaded', () => {
-            document.querySelector('.login-container').style.opacity = '0';
-            document.querySelector('.login-container').style.transform = 'translateY(20px)';
             setTimeout(() => {
-                document.querySelector('.login-container').style.transition = 'all 0.6s ease';
-                document.querySelector('.login-container').style.opacity = '1';
-                document.querySelector('.login-container').style.transform = 'translateY(0)';
+                loginContainer.classList.add('visible');
             }, 100);
         });
     </script>

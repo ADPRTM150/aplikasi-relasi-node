@@ -118,13 +118,24 @@
         </div>
 
         <!-- ============================================================ -->
-        <!--  PANEL USERS                                                 -->
+        <!--  PANEL USERS - DENGAN LOVE LANGUAGE                          -->
         <!-- ============================================================ -->
         <div class="panel" id="panel-users">
             <div class="content-card">
                 <div class="card-header">
                     <h3><span>👥</span> Daftar User</h3>
-                    <span class="badge-count" id="userCount">0 user</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <span class="badge-count" id="userCount">0 user</span>
+                        <button class="btn-add" onclick="exportLoveLanguage('csv')" style="padding:4px 12px;font-size:12px;background:#fd79a8;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 CSV (Love Language)
+                        </button>
+                        <button class="btn-add" onclick="exportLoveLanguage('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 JSON (Love Language)
+                        </button>
+                        <button class="btn-add" onclick="openUserModal()" style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            ➕ Tambah User
+                        </button>
+                    </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -132,12 +143,14 @@
                             <tr>
                                 <th>Nama</th>
                                 <th>Email</th>
+                                <th>💕 Love Language</th>
                                 <th>Status</th>
                                 <th>Bergabung</th>
+                                <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -161,14 +174,14 @@
                             <tr>
                                 <th>Judul</th>
                                 <th>Kategori</th>
-                                <th>Status</th>       <!-- 🔥 Kolom Baru -->
-                                <th>Dibuat Oleh</th>  <!-- 🔥 Kolom Baru -->
+                                <th>Status</th>
+                                <th>Dibuat Oleh</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="articleTableBody">
-                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -241,7 +254,24 @@
             <div class="content-card">
                 <div class="card-header">
                     <h3><span>💑</span> Data Pasangan Terhubung</h3>
-                    <span class="badge-count" id="coupleCount">0 pasangan</span>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <span class="badge-count" id="coupleCount">0 pasangan</span>
+                        <button class="btn-add" onclick="exportCouples('csv')" style="padding:4px 12px;font-size:12px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 CSV (Lengkap)
+                        </button>
+                        <button class="btn-add" onclick="exportCouples('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 JSON (Lengkap)
+                        </button>
+                        <button class="btn-add" onclick="exportCouplesRingkas('csv')" style="padding:4px 12px;font-size:12px;background:#d4a373;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 CSV (Ringkas)
+                        </button>
+                        <button class="btn-add" onclick="exportCouplesRingkas('json')" style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 JSON (Ringkas)
+                        </button>
+                        <button class="btn-add" onclick="loadCouples()" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            🔄 Refresh
+                        </button>
+                    </div>
                 </div>
                 <div class="table-wrapper">
                     <table>
@@ -250,12 +280,14 @@
                                 <th>Kode</th>
                                 <th>User A</th>
                                 <th>User B</th>
-                                <th>Status</th>
-                                <th>Aksi</th>
+                                <th style="text-align:center;">Skor</th>
+                                <th style="text-align:center;">Status</th>
+                                <th style="text-align:center;">Tanggal</th>
+                                <th style="text-align:center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="coupleTableBody">
-                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr><td colspan="7" class="loading-text">⏳ Memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -430,7 +462,72 @@
     <!--  MODALS                                                       -->
     <!-- ============================================================ -->
 
-        <!-- ===== MODAL ARTIKEL ===== -->
+    <!-- ===== MODAL USER ===== -->
+    <div class="modal-overlay" id="userModal">
+        <div class="modal-content">
+            <h3><span>👤</span> <span id="userModalTitle">Tambah User</span></h3>
+            <form id="userForm">
+                <input type="hidden" id="userEditId" />
+                
+                <div class="form-group">
+                    <label>Nama Lengkap</label>
+                    <input type="text" id="userName" placeholder="Nama lengkap" required />
+                </div>
+                
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="userEmail" placeholder="email@example.com" required />
+                </div>
+                
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="userStatus">
+                        <option value="active">✅ Aktif</option>
+                        <option value="inactive">⏸️ Tidak Aktif</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>💕 Love Language Primary</label>
+                    <select id="userLoveLanguagePrimary">
+                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
+                        <option value="Acts of Service">Acts of Service 🤝</option>
+                        <option value="Quality Time">Quality Time ⏰</option>
+                        <option value="Physical Touch">Physical Touch 🫂</option>
+                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>💕 Love Language Secondary</label>
+                    <select id="userLoveLanguageSecondary">
+                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
+                        <option value="Acts of Service">Acts of Service 🤝</option>
+                        <option value="Quality Time">Quality Time ⏰</option>
+                        <option value="Physical Touch">Physical Touch 🫂</option>
+                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Skor Primary (0-100)</label>
+                    <input type="number" id="userPrimaryScore" placeholder="80" min="0" max="100" value="80" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Skor Secondary (0-100)</label>
+                    <input type="number" id="userSecondaryScore" placeholder="60" min="0" max="100" value="60" />
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
+                    <button type="button" class="btn-cancel" onclick="closeModal('userModal')">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL ARTIKEL ===== -->
     <div class="modal-overlay" id="articleModal">
         <div class="modal-content">
             <h3><span>📰</span> <span id="articleModalTitle">Tambah Artikel</span></h3>
@@ -454,7 +551,6 @@
                     </select>
                 </div>
                 
-                <!-- 🔥 FIELD STATUS -->
                 <div class="form-group">
                     <label>📌 Status</label>
                     <select id="articleStatus">
@@ -485,6 +581,7 @@
             </form>
         </div>
     </div>
+
     <!-- Modal Ebook -->
     <div class="modal-overlay" id="ebookModal">
         <div class="modal-content">
@@ -566,10 +663,9 @@
         document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
 
         // ============================================================
-        //  REFERENSI FIRESTORE (PAKAI DARI firebase-config.js)
+        //  REFERENSI FIRESTORE
         // ============================================================
-        // ✅ db sudah tersedia dari firebase-config.js
-        // Tidak perlu deklarasi ulang!
+        // db sudah tersedia dari firebase-config.js
 
         // ============================================================
         //  LOGOUT
@@ -610,61 +706,406 @@
         });
 
         // ============================================================
-        //  FUNGSI CRUD - USERS
+        //  FUNGSI CRUD - USERS DENGAN LOVE LANGUAGE
         // ============================================================
+
+        // Fungsi untuk memformat love language
+        function formatLoveLanguage(loveLang) {
+            if (!loveLang) return '-';
+            
+            try {
+                if (loveLang.primary && loveLang.secondary) {
+                    const primary = loveLang.primary;
+                    const secondary = loveLang.secondary;
+                    const primaryLabel = primary.key || primary.label || 'N/A';
+                    const primaryScore = primary.score || 0;
+                    const secondaryLabel = secondary.key || secondary.label || 'N/A';
+                    const secondaryScore = secondary.score || 0;
+                    return `${primaryLabel} ${primaryScore}% (Primary) | ${secondaryLabel} ${secondaryScore}% (Secondary)`;
+                }
+                
+                if (Array.isArray(loveLang) && loveLang.length > 0) {
+                    const sorted = loveLang.sort((a, b) => (b.score || 0) - (a.score || 0));
+                    const top = sorted.slice(0, 2);
+                    return top.map(l => `${l.key || l.label || 'N/A'} ${l.score || 0}%`).join(' | ');
+                }
+                
+                return JSON.stringify(loveLang);
+            } catch(e) {
+                return '-';
+            }
+        }
+
+        // Fungsi untuk get primary love language
+        function getPrimaryLoveLanguage(loveLang) {
+            if (!loveLang) return '-';
+            
+            try {
+                if (loveLang.primary) {
+                    const primary = loveLang.primary;
+                    const label = primary.key || primary.label || 'N/A';
+                    const score = primary.score || 0;
+                    return `${label} ${score}%`;
+                }
+                
+                if (Array.isArray(loveLang) && loveLang.length > 0) {
+                    const sorted = loveLang.sort((a, b) => (b.score || 0) - (a.score || 0));
+                    const top = sorted[0];
+                    return `${top.key || top.label || 'N/A'} ${top.score || 0}%`;
+                }
+                
+                return '-';
+            } catch(e) {
+                return '-';
+            }
+        }
+
+        // Load users dari Firestore
         async function loadUsers() {
             const tbody = document.getElementById('userTableBody');
             try {
-                const snapshot = await db.collection('users').orderBy('createdAt', 'desc').get();
+                const snapshot = await db.collection('users')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
                 if (snapshot.empty) {
-                    // Data dummy
-                    const dummyUsers = [
-                        { nama: 'Monica (demo)', email: 'monica@gmail.com', lastLogin: true, createdAt: { toDate: () =>
-                            new Date('2026-07-01') } },
-                        { nama: 'Budi (demo)', email: 'budi@gmail.com', lastLogin: true, createdAt: { toDate: () =>
-                            new Date('2026-07-02') } },
-                        { nama: 'Siti (demo)', email: 'siti@gmail.com', lastLogin: false, createdAt: { toDate: () =>
-                            new Date('2026-06-28') } }
-                    ];
-                    let html = '';
-                    dummyUsers.forEach(u => {
-                        html += `
-                            <tr>
-                                <td><strong>${u.nama}</strong></td>
-                                <td>${u.email}</td>
-                                <td><span class="badge ${u.lastLogin ? 'active' : 'inactive'}">${u.lastLogin ? '✅ Aktif' : '⏸️ Tidak Aktif'}</span></td>
-                                <td>${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
-                            </tr>
-                        `;
-                    });
-                    tbody.innerHTML = html;
-                    document.getElementById('userCount').textContent = dummyUsers.length + ' user (demo)';
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="empty-state">
+                                <div class="icon">👥</div>
+                                <p>Belum ada user terdaftar.</p>
+                                <button onclick="openUserModal()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">
+                                    ➕ Tambah User
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    document.getElementById('userCount').textContent = '0 user';
                     return;
                 }
+                
                 let html = '';
                 snapshot.forEach(doc => {
                     const u = doc.data();
+                    const userId = doc.id;
+                    
+                    const primaryLove = getPrimaryLoveLanguage(u.loveLanguage);
+                    const fullLove = formatLoveLanguage(u.loveLanguage);
+                    
+                    // Status
+                    const isActive = u.status === 'active' || u.lastLogin === true;
+                    const statusClass = isActive ? 'active' : 'inactive';
+                    const statusText = isActive ? '✅ Aktif' : '⏸️ Tidak Aktif';
+                    
+                    // Tanggal bergabung
+                    let joinDate = '-';
+                    if (u.createdAt) {
+                        if (u.createdAt.toDate) {
+                            joinDate = new Date(u.createdAt.toDate()).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        } else if (u.createdAt instanceof Date) {
+                            joinDate = u.createdAt.toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            });
+                        }
+                    }
+                    
                     html += `
                         <tr>
-                            <td><strong>${u.nama || 'Pengguna'}</strong></td>
+                            <td><strong>${u.nama || u.name || 'Pengguna'}</strong></td>
                             <td>${u.email || '-'}</td>
-                            <td><span class="badge ${u.lastLogin ? 'active' : 'inactive'}">${u.lastLogin ? '✅ Aktif' : '⏸️ Tidak Aktif'}</span></td>
-                            <td>${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>
+                                <span class="love-language-badge" title="${fullLove}">
+                                    ${primaryLove}
+                                </span>
+                            </td>
+                            <td><span class="badge ${statusClass}">${statusText}</span></td>
+                            <td>${joinDate}</td>
+                            <td>
+                                <button class="btn-edit" onclick="editUser('${userId}')">
+                                    <span>✏️</span> Edit
+                                </button>
+                                <button class="btn-delete" onclick="deleteUser('${userId}')">
+                                    <span>🗑️</span> Hapus
+                                </button>
+                            </td>
                         </tr>
                     `;
                 });
+                
                 tbody.innerHTML = html;
                 document.getElementById('userCount').textContent = snapshot.size + ' user';
+                document.getElementById('statUsers').textContent = snapshot.size;
+                
             } catch (error) {
                 console.error('Error loading users:', error);
-                tbody.innerHTML = `<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data user.</td></tr>`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty-state">
+                            <div class="icon">❌</div>
+                            <p>Gagal memuat data user.</p>
+                            <p style="font-size:13px;color:#8a9e99;">${error.message}</p>
+                            <button onclick="loadUsers()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">
+                                🔄 Coba Lagi
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        // Open user modal untuk tambah/edit
+        function openUserModal(data) {
+            document.getElementById('userModalTitle').textContent = data ? '✏️ Edit User' : '👤 Tambah User';
+            document.getElementById('userEditId').value = data ? data.id : '';
+            document.getElementById('userName').value = data ? (data.nama || data.name || '') : '';
+            document.getElementById('userEmail').value = data ? (data.email || '') : '';
+            document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') : 'active';
+            
+            if (data && data.loveLanguage) {
+                const loveLang = data.loveLanguage;
+                if (loveLang.primary) {
+                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary.label || 'Words of Affirmation';
+                    document.getElementById('userPrimaryScore').value = loveLang.primary.score || 80;
+                }
+                if (loveLang.secondary) {
+                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang.secondary.label || 'Acts of Service';
+                    document.getElementById('userSecondaryScore').value = loveLang.secondary.score || 60;
+                }
+            } else {
+                document.getElementById('userLoveLanguagePrimary').value = 'Words of Affirmation';
+                document.getElementById('userLoveLanguageSecondary').value = 'Acts of Service';
+                document.getElementById('userPrimaryScore').value = 80;
+                document.getElementById('userSecondaryScore').value = 60;
+            }
+            
+            openModal('userModal');
+        }
+
+        // Edit user
+        async function editUser(userId) {
+            try {
+                const doc = await db.collection('users').doc(userId).get();
+                if (doc.exists) {
+                    openUserModal({ id: userId, ...doc.data() });
+                } else {
+                    alert('Data user tidak ditemukan!');
+                }
+            } catch (error) {
+                console.error('Error loading user:', error);
+                alert('❌ Gagal memuat data user: ' + error.message);
+            }
+        }
+
+        // Delete user
+        async function deleteUser(userId) {
+            if (!confirm('Yakin ingin menghapus user ini? Data tidak bisa dikembalikan!')) return;
+            
+            try {
+                await db.collection('users').doc(userId).delete();
+                alert('✅ User berhasil dihapus!');
+                loadUsers();
+                updateStats();
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('❌ Gagal menghapus user: ' + error.message);
+            }
+        }
+
+        // Submit form user
+        document.getElementById('userForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('userEditId').value;
+            const name = document.getElementById('userName').value.trim();
+            const email = document.getElementById('userEmail').value.trim();
+            const status = document.getElementById('userStatus').value;
+            const lovePrimary = document.getElementById('userLoveLanguagePrimary').value;
+            const loveSecondary = document.getElementById('userLoveLanguageSecondary').value;
+            const primaryScore = parseInt(document.getElementById('userPrimaryScore').value) || 80;
+            const secondaryScore = parseInt(document.getElementById('userSecondaryScore').value) || 60;
+            
+            // Validasi
+            if (!name || !email) {
+                alert('❌ Nama dan Email harus diisi!');
+                return;
+            }
+            
+            if (!email.includes('@') || !email.includes('.')) {
+                alert('❌ Email tidak valid!');
+                return;
+            }
+            
+            const data = {
+                nama: name,
+                name: name,
+                email: email,
+                status: status,
+                lastLogin: status === 'active',
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                loveLanguage: {
+                    primary: {
+                        key: lovePrimary,
+                        label: lovePrimary,
+                        score: primaryScore
+                    },
+                    secondary: {
+                        key: loveSecondary,
+                        label: loveSecondary,
+                        score: secondaryScore
+                    }
+                }
+            };
+            
+            try {
+                if (id) {
+                    // Edit
+                    await db.collection('users').doc(id).update(data);
+                    alert('✅ User berhasil diupdate!');
+                } else {
+                    // Tambah baru
+                    data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
+                    data.uid = 'user_' + Date.now();
+                    await db.collection('users').add(data);
+                    alert('✅ User berhasil ditambahkan!');
+                }
+                
+                closeModal('userModal');
+                this.reset();
+                loadUsers();
+                updateStats();
+                
+            } catch (error) {
+                console.error('Error saving user:', error);
+                alert('❌ Gagal menyimpan user: ' + error.message);
+            }
+        });
+
+        // ============================================================
+        //  EXPORT LOVE LANGUAGE (CSV & JSON)
+        // ============================================================
+        async function fetchAllUsersWithLoveLanguage() {
+            try {
+                const snapshot = await db.collection('users')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+                
+                const users = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    users.push({
+                        id: doc.id,
+                        nama: data.nama || data.name || 'Pengguna',
+                        email: data.email || '-',
+                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' : 'Tidak Aktif',
+                        joinDate: data.createdAt ? 
+                            (data.createdAt.toDate ? 
+                                new Date(data.createdAt.toDate()).toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'}) : 
+                                '-') : '-',
+                        loveLanguage: data.loveLanguage || null
+                    });
+                });
+                
+                return users;
+            } catch (error) {
+                console.error('Error fetching users:', error);
+                throw error;
+            }
+        }
+
+        async function exportLoveLanguage(format) {
+            try {
+                const users = await fetchAllUsersWithLoveLanguage();
+                
+                if (users.length === 0) {
+                    alert('Tidak ada data user untuk diexport!');
+                    return;
+                }
+                
+                // Format data untuk export
+                const exportData = users.map(user => {
+                    let primary = '-';
+                    let secondary = '-';
+                    let allLove = '-';
+                    
+                    if (user.loveLanguage) {
+                        if (user.loveLanguage.primary) {
+                            const p = user.loveLanguage.primary;
+                            primary = `${p.key || p.label || 'N/A'} ${p.score || 0}%`;
+                        }
+                        if (user.loveLanguage.secondary) {
+                            const s = user.loveLanguage.secondary;
+                            secondary = `${s.key || s.label || 'N/A'} ${s.score || 0}%`;
+                        }
+                        if (user.loveLanguage.primary && user.loveLanguage.secondary) {
+                            allLove = `Primary: ${primary}, Secondary: ${secondary}`;
+                        } else if (user.loveLanguage.all && Array.isArray(user.loveLanguage.all)) {
+                            allLove = user.loveLanguage.all
+                                .sort((a, b) => (b.score || 0) - (a.score || 0))
+                                .map(l => `${l.key || l.label || 'N/A'}: ${l.score || 0}%`)
+                                .join('; ');
+                        }
+                    }
+                    
+                    return {
+                        'NAMA': user.nama,
+                        'EMAIL': user.email,
+                        'LOVE LANGUAGE PRIMARY': primary,
+                        'LOVE LANGUAGE SECONDARY': secondary,
+                        'ALL LOVE LANGUAGES': allLove,
+                        'STATUS': user.status,
+                        'TANGGAL BERGABUNG': user.joinDate
+                    };
+                });
+                
+                if (format === 'csv') {
+                    // Export CSV
+                    const headers = Object.keys(exportData[0]);
+                    let csv = headers.join(';') + '\n';
+                    exportData.forEach(row => {
+                        csv += headers.map(h => {
+                            let val = row[h] || '';
+                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                                return `"${val.replace(/"/g, '""')}"`;
+                            }
+                            return val;
+                        }).join(';') + '\n';
+                    });
+                    
+                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `love_language_users_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export CSV berhasil! ${users.length} user.`);
+                    
+                } else if (format === 'json') {
+                    // Export JSON
+                    const json = JSON.stringify(exportData, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `love_language_users_${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export JSON berhasil! ${users.length} user.`);
+                }
+                
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('❌ Gagal export data: ' + error.message);
             }
         }
 
         // ============================================================
-        //  FUNGSI CRUD - ARTICLES (DENGAN STATUS + createdBy)
+        //  FUNGSI CRUD - ARTICLES
         // ============================================================
-
         async function loadArticles() {
             const tbody = document.getElementById('articleTableBody');
             try {
@@ -678,12 +1119,10 @@
                     const a = doc.data();
                     const id = doc.id;
                     
-                    // 🔥 Status badge
                     const statusBadge = a.status === 'published' 
                         ? '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>'
                         : '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
                     
-                    // 🔥 Nama pembuat
                     const createdBy = a.createdBy?.name || a.createdBy?.email || 'Admin';
                     
                     html += `
@@ -713,7 +1152,7 @@
             document.getElementById('articleEditId').value = data ? data.id : '';
             document.getElementById('articleTitle').value = data ? data.title : '';
             document.getElementById('articleCategory').value = data ? data.category : 'Komunikasi';
-            document.getElementById('articleStatus').value = data ? data.status : 'draft'; // 🔥 Tambahkan ini
+            document.getElementById('articleStatus').value = data ? data.status : 'draft';
             document.getElementById('articleDesc').value = data ? data.desc : '';
             document.getElementById('articleContent').value = data ? data.content : '';
             document.getElementById('articleThumb').value = data ? data.thumb : '';
@@ -724,15 +1163,13 @@
             e.preventDefault();
             
             const id = document.getElementById('articleEditId').value;
-            
-            // 🔥 Ambil data admin dari localStorage
             const adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
             const adminName = localStorage.getItem('adminName') || 'Admin';
             
             const data = {
                 title: document.getElementById('articleTitle').value,
                 category: document.getElementById('articleCategory').value,
-                status: document.getElementById('articleStatus').value, // 🔥 Status
+                status: document.getElementById('articleStatus').value,
                 desc: document.getElementById('articleDesc').value,
                 content: document.getElementById('articleContent').value,
                 thumb: document.getElementById('articleThumb').value || '📰',
@@ -741,10 +1178,8 @@
 
             try {
                 if (id) {
-                    // 🔥 Saat edit, update tanpa mengubah createdBy
                     await db.collection('articles').doc(id).update(data);
                 } else {
-                    // 🔥 Saat tambah, tambahkan createdBy
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     data.createdBy = {
                         email: adminEmail,
@@ -789,7 +1224,7 @@
         }
 
         // ============================================================
-        //  FUNGSI CRUD - EBOOKS (DENGAN HARGA & VALIDASI)
+        //  FUNGSI CRUD - EBOOKS
         // ============================================================
         async function loadEbooks() {
             const tbody = document.getElementById('ebookTableBody');
@@ -839,7 +1274,6 @@
         document.getElementById('ebookForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // 🔥 Validasi Harga
             const priceInput = document.getElementById('ebookPrice').value;
             let price = parseInt(priceInput);
             if (priceInput && (isNaN(price) || price < 0)) {
@@ -1003,36 +1437,465 @@
         // ============================================================
         async function loadCouples() {
             const tbody = document.getElementById('coupleTableBody');
+            tbody.innerHTML = `<tr><td colspan="7" class="loading-text">⏳ Memuat data pasangan...</td></tr>`;
+
             try {
-                const snapshot = await db.collection('couples').orderBy('createdAt', 'desc').get();
+                const snapshot = await db.collection('wellness_tests')
+                    .where('userCompleted', '==', true)
+                    .where('partnerCompleted', '==', true)
+                    .orderBy('completedAt', 'desc')
+                    .get();
+
                 if (snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">💑</div>Belum ada pasangan terhubung.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+                        <div class="icon">💑</div>
+                        <p>Belum ada pasangan terhubung.</p>
+                        <p style="font-size:13px;color:#8a9e99;">Pasangan akan muncul setelah dua orang mengerjakan Wellness Check bersama.</p>
+                    </td></tr>`;
+                    document.getElementById('coupleCount').textContent = '0 pasangan';
+                    document.getElementById('statCouples').textContent = '0';
                     return;
                 }
+
                 let html = '';
-                snapshot.forEach(doc => {
-                    const c = doc.data();
-                    const statusMap = {
-                        pending: '⏳ Menunggu',
-                        partial: '🔄 Sebagian',
-                        completed: '✅ Selesai'
-                    };
+                let totalCouples = 0;
+
+                for (const doc of snapshot.docs) {
+                    const data = doc.data();
+                    const testId = doc.id;
+
+                    let userAName = 'Unknown';
+                    if (data.userId) {
+                        try {
+                            const userDoc = await db.collection('users').doc(data.userId).get();
+                            if (userDoc.exists) {
+                                userAName = userDoc.data().nama || userDoc.data().name || 'Unknown';
+                            }
+                        } catch (e) {}
+                    }
+
+                    let userBName = 'Unknown';
+                    if (data.partnerUserId) {
+                        try {
+                            const userDoc = await db.collection('users').doc(data.partnerUserId).get();
+                            if (userDoc.exists) {
+                                userBName = userDoc.data().nama || userDoc.data().name || 'Unknown';
+                            }
+                        } catch (e) {}
+                    }
+                    if (userBName === 'Unknown' && data.partnerName) {
+                        userBName = data.partnerName;
+                    }
+
+                    const skor = data.results?.wellnessScore || '-';
+                    const statusBadge = data.results
+                        ? '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>'
+                        : '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
+
+                    const tanggal = data.completedAt?.toDate?.() || data.startedAt?.toDate?.() || new Date();
+                    const tanggalStr = tanggal.toLocaleDateString('id-ID', {
+                        day: 'numeric',
+                        month: 'short',
+                        year: 'numeric'
+                    });
+
                     html += `
                         <tr>
-                            <td><code>${c.code || '-'}</code></td>
-                            <td>${c.userAName || '-'}</td>
-                            <td>${c.userBName || '⏳ Menunggu'}</td>
-                            <td><span class="badge ${c.status || 'pending'}">${statusMap[c.status] || '⏳ Menunggu'}</span></td>
-                            <td><button class="btn-edit" onclick="alert('Detail pasangan: ${c.code}')"><span>👁️</span> Detail</button></td>
+                            <td><code style="background:#f5f0eb;padding:2px 8px;border-radius:4px;font-size:12px;">${data.inviteCode || '-'}</code></td>
+                            <td><strong>${userAName}</strong></td>
+                            <td><strong>${userBName}</strong></td>
+                            <td style="text-align:center;font-weight:700;color:${skor >= 70 ? '#3a7d76' : skor >= 55 ? '#d4a373' : '#d46a6a'};">${skor !== '-' ? skor + '%' : '-'}</td>
+                            <td>${statusBadge}</td>
+                            <td style="font-size:13px;color:#8a9e99;">${tanggalStr}</td>
+                            <td>
+                                <button class="btn-edit" onclick="viewCoupleDetail('${testId}')" style="padding:4px 10px;font-size:12px;">
+                                    <span>👁️</span> Detail
+                                </button>
+                                <button class="btn-delete" onclick="deleteCouple('${testId}')" style="padding:4px 10px;font-size:12px;">
+                                    <span>🗑️</span>
+                                </button>
+                            </td>
                         </tr>
                     `;
-                });
+                    totalCouples++;
+                }
+
                 tbody.innerHTML = html;
-                document.getElementById('coupleCount').textContent = snapshot.size + ' pasangan';
-                document.getElementById('statCouples').textContent = snapshot.size;
+                document.getElementById('coupleCount').textContent = totalCouples + ' pasangan';
+                document.getElementById('statCouples').textContent = totalCouples;
+
             } catch (error) {
                 console.error('Error loading couples:', error);
-                tbody.innerHTML = `<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data pasangan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" class="empty-state">
+                    <div class="icon">❌</div>
+                    <p>Gagal memuat data pasangan.</p>
+                    <p style="font-size:13px;color:#8a9e99;">${error.message}</p>
+                    <button onclick="loadCouples()" style="margin-top:8px;padding:6px 16px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button>
+                </td></tr>`;
+            }
+        }
+
+        // ============================================================
+        //  VIEW COUPLE DETAIL
+        // ============================================================
+        async function viewCoupleDetail(testId) {
+            try {
+                const doc = await db.collection('wellness_tests').doc(testId).get();
+                if (!doc.exists) {
+                    alert('Data tidak ditemukan!');
+                    return;
+                }
+
+                const data = doc.data();
+                const results = data.results || {};
+                const modalId = 'modal-' + Date.now();
+
+                const detailHtml = `
+                    <div id="${modalId}" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;">
+                        <div style="background:white;border-radius:16px;max-width:600px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.2);position:relative;">
+                            
+                            <button onclick="closeModalById('${modalId}')" 
+                                    style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:28px;cursor:pointer;color:#999;transition:color 0.2s;"
+                                    onmouseover="this.style.color='#333'" 
+                                    onmouseout="this.style.color='#999'">
+                                ✕
+                            </button>
+
+                            <h3 style="font-size:20px;margin:0 0 16px 0;">💑 Detail Pasangan</h3>
+                            
+                            <div style="background:#f8f5f2;border-radius:12px;padding:16px;margin-bottom:16px;">
+                                <p><strong>Kode Invitasi:</strong> <code>${data.inviteCode || '-'}</code></p>
+                                <p><strong>Skor Wellness:</strong> <span style="font-weight:700;color:${results.wellnessScore >= 70 ? '#3a7d76' : results.wellnessScore >= 55 ? '#d4a373' : '#d46a6a'};">${results.wellnessScore || '-'}%</span></p>
+                                <p><strong>Kategori:</strong> ${results.category || '-'}</p>
+                                <p><strong>Tanggal Selesai:</strong> ${data.completedAt ? new Date(data.completedAt.toDate()).toLocaleDateString('id-ID', {day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'}</p>
+                            </div>
+
+                            ${results.dimensionScores ? `
+                            <div style="margin-bottom:16px;">
+                                <h4 style="font-size:14px;margin-bottom:8px;">📊 Skor per Dimensi</h4>
+                                ${Object.entries(results.dimensionScores).map(([dim, score]) => `
+                                    <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0ebe7;font-size:14px;">
+                                        <span>${dim}</span>
+                                        <span style="font-weight:600;">${score}%</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            ` : ''}
+
+                            <div style="display:flex;gap:8px;margin-top:16px;">
+                                <button onclick="closeModalById('${modalId}')" 
+                                        style="padding:8px 20px;background:#3a7d76;color:white;border:none;border-radius:8px;cursor:pointer;">
+                                    Tutup
+                                </button>
+                                <button onclick="exportSingleCouple('${testId}')" 
+                                        style="padding:8px 20px;background:#d4a373;color:white;border:none;border-radius:8px;cursor:pointer;">
+                                    📥 Export JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                document.body.insertAdjacentHTML('beforeend', detailHtml);
+
+                document.getElementById(modalId).addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closeModalById(modalId);
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error viewing couple:', error);
+                alert('❌ Gagal memuat detail: ' + error.message);
+            }
+        }
+
+        function closeModalById(modalId) {
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.opacity = '0';
+                modal.style.transition = 'opacity 0.3s ease';
+                setTimeout(() => {
+                    if (modal.parentNode) {
+                        modal.parentNode.removeChild(modal);
+                    }
+                }, 300);
+            }
+        }
+
+        async function deleteCouple(testId) {
+            if (!confirm('Yakin ingin menghapus data pasangan ini? Data tidak bisa dikembalikan!')) return;
+
+            try {
+                await db.collection('wellness_tests').doc(testId).delete();
+                alert('✅ Data pasangan berhasil dihapus!');
+                loadCouples();
+                updateStats();
+            } catch (error) {
+                console.error('Error deleting couple:', error);
+                alert('❌ Gagal menghapus data: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        //  EXPORT COUPLES (LENGKAP & RINGKAS)
+        // ============================================================
+        let cachedCouplesData = [];
+
+        async function fetchAllCouplesData() {
+            const snapshot = await db.collection('wellness_tests')
+                .where('userCompleted', '==', true)
+                .where('partnerCompleted', '==', true)
+                .orderBy('completedAt', 'desc')
+                .get();
+
+            const results = [];
+            for (const doc of snapshot.docs) {
+                const data = doc.data();
+
+                let userAName = 'Unknown';
+                let userAEmail = 'Unknown';
+                if (data.userId) {
+                    try {
+                        const userDoc = await db.collection('users').doc(data.userId).get();
+                        if (userDoc.exists) {
+                            userAName = userDoc.data().nama || userDoc.data().name || 'Unknown';
+                            userAEmail = userDoc.data().email || 'Unknown';
+                        }
+                    } catch (e) {}
+                }
+
+                let userBName = 'Unknown';
+                let userBEmail = 'Unknown';
+                if (data.partnerUserId) {
+                    try {
+                        const userDoc = await db.collection('users').doc(data.partnerUserId).get();
+                        if (userDoc.exists) {
+                            userBName = userDoc.data().nama || userDoc.data().name || 'Unknown';
+                            userBEmail = userDoc.data().email || 'Unknown';
+                        }
+                    } catch (e) {}
+                }
+                if (userBName === 'Unknown' && data.partnerName) {
+                    userBName = data.partnerName;
+                }
+
+                const resultsData = data.results || {};
+                const tanggal = data.completedAt?.toDate?.() || data.startedAt?.toDate?.() || new Date();
+
+                results.push({
+                    id: doc.id,
+                    inviteCode: data.inviteCode || '-',
+                    userA: userAName,
+                    userAEmail: userAEmail,
+                    userB: userBName,
+                    userBEmail: userBEmail,
+                    skor: resultsData.wellnessScore || '-',
+                    category: resultsData.category || '-',
+                    status: resultsData.wellnessScore ? 'Selesai' : 'Menunggu',
+                    tanggal: tanggal,
+                    dimensionScores: resultsData.dimensionScores || {},
+                    strengths: resultsData.strengths || [],
+                    priorities: resultsData.priorities || [],
+                    userAnswers: data.userAnswers || {},
+                    partnerAnswers: data.partnerAnswers || {},
+                    userId: data.userId || '',
+                    partnerUserId: data.partnerUserId || ''
+                });
+            }
+            cachedCouplesData = results;
+            return results;
+        }
+
+        async function exportCouples(format) {
+            try {
+                const data = await fetchAllCouplesData();
+
+                if (data.length === 0) {
+                    alert('Belum ada data pasangan untuk diexport!');
+                    return;
+                }
+
+                if (format === 'csv') {
+                    const headers = [
+                        'Kode Invitasi', 'User A', 'User A - Email', 'User B', 'User B - Email',
+                        'Skor', 'Kategori', 'Status', 'Tanggal',
+                        'Komunikasi', 'Kepercayaan', 'Resolusi Konflik', 'Dukungan Emosional',
+                        'Waktu Berkualitas', 'Komitmen', 'Penghargaan', 'Keuangan',
+                        'Kekuatan 1', 'Kekuatan 1 - Skor',
+                        'Kekuatan 2', 'Kekuatan 2 - Skor',
+                        'Kekuatan 3', 'Kekuatan 3 - Skor',
+                        'Prioritas 1', 'Prioritas 1 - Skor',
+                        'Prioritas 2', 'Prioritas 2 - Skor',
+                        'Prioritas 3', 'Prioritas 3 - Skor'
+                    ];
+
+                    for (let i = 1; i <= 64; i++) {
+                        headers.push(`User A - Q${i}`);
+                    }
+                    for (let i = 1; i <= 64; i++) {
+                        headers.push(`User B - Q${i}`);
+                    }
+
+                    const rows = data.map(p => {
+                        const row = [
+                            p.inviteCode,
+                            p.userA,
+                            p.userAEmail,
+                            p.userB,
+                            p.userBEmail,
+                            p.skor,
+                            p.category,
+                            p.status,
+                            p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                        ];
+
+                        const dims = ['komunikasi', 'kepercayaan', 'resolusi_konflik', 'dukungan_emosional', 'waktu_berkualitas', 'komitmen', 'penghargaan', 'keuangan'];
+                        dims.forEach(dim => {
+                            row.push(p.dimensionScores[dim] || '-');
+                        });
+
+                        for (let i = 0; i < 3; i++) {
+                            const s = p.strengths[i] || {};
+                            row.push(s.dimension || '-');
+                            row.push(s.score || '-');
+                        }
+
+                        for (let i = 0; i < 3; i++) {
+                            const pItem = p.priorities[i] || {};
+                            row.push(pItem.dimension || '-');
+                            row.push(pItem.score || '-');
+                        }
+
+                        for (let i = 1; i <= 64; i++) {
+                            row.push(p.userAnswers[i] || '-');
+                        }
+
+                        for (let i = 1; i <= 64; i++) {
+                            row.push(p.partnerAnswers[i] || '-');
+                        }
+
+                        return row;
+                    });
+
+                    let csv = headers.join(';') + '\n';
+                    rows.forEach(row => {
+                        csv += row.map(val => {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                                return `"${val.replace(/"/g, '""')}"`;
+                            }
+                            return val;
+                        }).join(';') + '\n';
+                    });
+
+                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `wellness_data_lengkap_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export CSV lengkap berhasil! ${data.length} pasangan.`);
+
+                } else if (format === 'json') {
+                    const json = JSON.stringify(data, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `wellness_data_lengkap_${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export JSON lengkap berhasil! ${data.length} pasangan.`);
+                }
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('❌ Gagal export data: ' + error.message);
+            }
+        }
+
+        async function exportCouplesRingkas(format) {
+            try {
+                const data = await fetchAllCouplesData();
+
+                if (data.length === 0) {
+                    alert('Belum ada data pasangan untuk diexport!');
+                    return;
+                }
+
+                const ringkasData = data.map(p => ({
+                    'Kode Invitasi': p.inviteCode,
+                    'User A': p.userA,
+                    'User A - Email': p.userAEmail,
+                    'User B': p.userB,
+                    'User B - Email': p.userBEmail,
+                    'Skor': p.skor,
+                    'Kategori': p.category,
+                    'Status': p.status,
+                    'Tanggal': p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                }));
+
+                if (format === 'csv') {
+                    const headers = Object.keys(ringkasData[0]);
+                    let csv = headers.join(';') + '\n';
+                    ringkasData.forEach(row => {
+                        csv += headers.map(h => {
+                            let val = row[h] || '';
+                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                                return `"${val.replace(/"/g, '""')}"`;
+                            }
+                            return val;
+                        }).join(';') + '\n';
+                    });
+
+                    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `data_pasangan_ringkas_${new Date().toISOString().split('T')[0]}.csv`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export CSV ringkas berhasil! ${data.length} pasangan.`);
+
+                } else if (format === 'json') {
+                    const json = JSON.stringify(ringkasData, null, 2);
+                    const blob = new Blob([json], { type: 'application/json' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = `data_pasangan_ringkas_${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    URL.revokeObjectURL(link.href);
+                    alert(`✅ Export JSON ringkas berhasil! ${data.length} pasangan.`);
+                }
+
+            } catch (error) {
+                console.error('Export error:', error);
+                alert('❌ Gagal export data: ' + error.message);
+            }
+        }
+
+        async function exportSingleCouple(testId) {
+            try {
+                const doc = await db.collection('wellness_tests').doc(testId).get();
+                if (!doc.exists) {
+                    alert('Data tidak ditemukan!');
+                    return;
+                }
+
+                const data = { id: doc.id, ...doc.data() };
+                const json = JSON.stringify(data, null, 2);
+                const blob = new Blob([json], { type: 'application/json' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = `pasangan_${data.inviteCode || testId}_${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                URL.revokeObjectURL(link.href);
+                alert('✅ Export berhasil!');
+
+                const modal = document.querySelector('div[style*="position:fixed"]');
+                if (modal) modal.remove();
+
+            } catch (error) {
+                console.error('Export single error:', error);
+                alert('❌ Gagal export: ' + error.message);
             }
         }
 
@@ -1086,9 +1949,6 @@
             }
         }
 
-        // ============================================================
-        //  RENDER SALES
-        // ============================================================
         function renderSales() {
             const tbody = document.getElementById('salesTableBody');
             const totalSales = salesData.reduce((sum, s) => s.status === 'success' ? sum + s.price : sum, 0);
@@ -1123,9 +1983,6 @@
             `).join('');
         }
 
-        // ============================================================
-        //  RENDER ADSENSE
-        // ============================================================
         function renderAdsense() {
             const tbody = document.getElementById('adsenseTableBody');
             const totalRevenue = adsenseData.reduce((sum, a) => sum + a.revenue, 0);
@@ -1172,7 +2029,7 @@
                     db.collection('users').get(),
                     db.collection('articles').get(),
                     db.collection('ebooks').get(),
-                    db.collection('couples').get()
+                    db.collection('wellness_tests').where('userCompleted', '==', true).where('partnerCompleted', '==', true).get()
                 ]);
                 document.getElementById('statUsers').textContent = usersSnap.size;
                 document.getElementById('statArticles').textContent = articlesSnap.size;
@@ -1183,8 +2040,8 @@
             }
         }
 
-// ============================================================
-        //  SETTINGS ADMIN (FIRESTORE) - LENGKAP DENGAN VALIDASI
+        // ============================================================
+        //  SETTINGS ADMIN
         // ============================================================
         const DEFAULT_ADMIN = { email: 'admin@relasi.com', password: 'admin123' };
 
@@ -1210,17 +2067,15 @@
             const email = document.getElementById('settingsEmail').value.trim();
             const password = document.getElementById('settingsPassword').value.trim();
 
-            // 🔥 Validasi Email
             if (!email) {
                 showSettingsAlert('Email tidak boleh kosong!', 'error');
                 return;
             }
             if (!email.includes('@') || !email.includes('.')) {
-                showSettingsAlert('Email tidak valid! Masukkan email yang benar (contoh: admin@domain.com)', 'error');
+                showSettingsAlert('Email tidak valid!', 'error');
                 return;
             }
 
-            // 🔥 Validasi Password (minimal 6 karakter jika diisi)
             if (password && password.length < 6) {
                 showSettingsAlert('Password minimal 6 karakter!', 'error');
                 return;
@@ -1239,10 +2094,6 @@
                 await db.collection('admin').doc('settings').set(data, { merge: true });
 
                 document.getElementById('adminEmailDisplay').textContent = email;
-
-                // 🔥 Update localStorage agar login menggunakan data baru
-                const adminSettings = { email: email, password: password || DEFAULT_ADMIN.password };
-                localStorage.setItem('adminSettings', JSON.stringify(adminSettings));
                 localStorage.setItem('adminEmail', email);
 
                 showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
@@ -1266,14 +2117,10 @@
 
             try {
                 await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
-
-                localStorage.setItem('adminSettings', JSON.stringify(DEFAULT_ADMIN));
                 localStorage.setItem('adminEmail', DEFAULT_ADMIN.email);
-
                 document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
                 document.getElementById('settingsPassword').value = '';
                 document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
-
                 showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
 
                 setTimeout(() => {
@@ -1297,9 +2144,93 @@
         }
 
         // ============================================================
+        //  CSS tambahan untuk love language badge
+        // ============================================================
+        function addLoveLanguageStyles() {
+            const style = document.createElement('style');
+            style.textContent = `
+                .love-language-badge {
+                    display: inline-block;
+                    padding: 4px 12px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 500;
+                    white-space: nowrap;
+                    cursor: help;
+                }
+                
+                .btn-edit {
+                    background: #d4a373;
+                    color: white;
+                    border: none;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    margin-right: 4px;
+                }
+                
+                .btn-edit:hover {
+                    opacity: 0.8;
+                }
+                
+                .btn-delete {
+                    background: #d46a6a;
+                    color: white;
+                    border: none;
+                    padding: 4px 10px;
+                    border-radius: 4px;
+                    cursor: pointer;
+                    font-size: 12px;
+                }
+                
+                .btn-delete:hover {
+                    opacity: 0.8;
+                }
+                
+                .btn-add {
+                    padding: 4px 12px;
+                    border: none;
+                    border-radius: 6px;
+                    cursor: pointer;
+                    font-size: 12px;
+                    font-weight: 500;
+                    transition: all 0.2s ease;
+                }
+                
+                .btn-add:hover {
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                }
+                
+                .badge.active {
+                    background: #d4edda;
+                    color: #155724;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+                
+                .badge.inactive {
+                    background: #f8d7da;
+                    color: #721c24;
+                    padding: 4px 12px;
+                    border-radius: 20px;
+                    font-size: 12px;
+                    font-weight: 500;
+                }
+            `;
+            document.head.appendChild(style);
+        }
+
+        // ============================================================
         //  INIT
         // ============================================================
         async function init() {
+            addLoveLanguageStyles();
             await loadSettings();
             await loadUsers();
             await loadArticles();

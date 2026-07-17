@@ -1,165 +1,1016 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <!-- ===== DI BAGIAN <head> ===== -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
-    <title>Hasil Love Language</title>
+    <title>Hasil - Relasi</title>
 
     <link rel="stylesheet" href="/css/style.css" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
-    
-    <script>
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.href = '/login';
-            }
-        });
-    </script>
+    <script src="/questions/wellness-questions.js"></script>
 
-<!-- ===== DI BAGIAN <script> PALING ATAS ===== -->
-    <script>
-        // 🔥 PROTEKSI: CEK LOGIN, REDIRECT DENGAN replace()
-        firebase.auth().onAuthStateChanged((user) => {
-            if (!user) {
-                window.location.replace('/login');
-            }
-        });
-    </script>
+    <style>
+        /* ============================================================
+           STYLE KHUSUS HASIL wellness & love language
+           ============================================================ */
+        .empty-state-enhanced {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--pink-bg, #fff5f8);
+            border-radius: 16px;
+            border: 2px dashed var(--pink-primary, #f4a7bb);
+        }
 
-</head>
-<body>
-    <div class="app">
-        <div class="card" style="background:white;border-radius:20px;padding:30px 25px;box-shadow:0 8px 30px rgba(58,125,118,0.08);border:1px solid rgba(58,125,118,0.06);margin-bottom:16px;">
-            <h1 style="font-size:26px;font-weight:300;color:#1d3b36;margin-bottom:6px;">📊 <strong>Hasil</strong> Love Language</h1>
-            <div style="color:#5a6f6a;font-weight:300;margin-bottom:20px;">Lihat hasil tes terakhirmu di sini</div>
+        .empty-illustration {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 16px;
+        }
 
-            <div id="hasilContainer">
-                <!-- Akan diisi JavaScript -->
-            </div>
+        .empty-icon {
+            font-size: 64px;
+            display: block;
+        }
 
-            <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
-                <a href="/love-language" style="flex:1;min-width:120px;text-align:center;background:#3a7d76;color:white;border:none;padding:14px 32px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;transition:0.2s;text-decoration:none;">🔄 Tes Ulang</a>
-                <a href="/" style="flex:1;min-width:120px;text-align:center;background:transparent;color:#3a7d76;border:2px solid #3a7d76;padding:14px 32px;border-radius:50px;font-size:16px;font-weight:600;cursor:pointer;transition:0.2s;text-decoration:none;">🏠 Beranda</a>
-            </div>
-        </div>
+        .empty-emoji-cloud {
+            position: absolute;
+            top: -10px;
+            right: -30px;
+            font-size: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
 
-        <div class="bottom-nav">
-            <a href="/">
-                <span class="nav-icon">🏠</span>
-                Beranda
-            </a>
-            <a href="/love-language">
-                <span class="nav-icon">❤️</span>
-                Love
-            </a>
-            <a href="/hasil" class="active">
-                <span class="nav-icon">📊</span>
-                Hasil
-            </a>
-            <a href="/profil">
-    <span class="nav-icon">👤</span>
-    Profil
-</a>
-        </div>
-    </div>
+        .empty-emoji-cloud span {
+            display: inline-block;
+            animation: float 2s ease-in-out infinite;
+        }
 
-    <script>
-        function tampilkanHasil() {
-            const container = document.getElementById('hasilContainer');
-            const rawData = localStorage.getItem('loveLanguageResult');
-            const date = localStorage.getItem('loveLanguageDate');
+        .empty-emoji-cloud span:nth-child(2) {
+            animation-delay: 0.5s;
+        }
 
-            if (!rawData) {
-                container.innerHTML = `
-                    <div style="text-align:center;padding:40px 20px;color:#5a6f6a;">
-                        <div style="font-size:56px;margin-bottom:12px;">📭</div>
-                        <h3 style="color:#1d3b36;margin-bottom:8px;">Belum Ada Hasil</h3>
-                        <p style="color:#5a6f6a;">Kamu belum menyelesaikan tes Love Language.</p>
-                        <a href="/love-language" style="display:inline-block;margin-top:16px;background:#3a7d76;color:white;padding:14px 32px;border-radius:50px;text-decoration:none;font-weight:600;">Mulai Tes →</a>
-                    </div>
-                `;
-                return;
+        .empty-emoji-cloud span:nth-child(3) {
+            animation-delay: 1s;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0);
             }
 
-            try {
-                const data = JSON.parse(rawData);
-                const sorted = Object.keys(data).sort((a, b) => parseInt(data[b]) - parseInt(data[a]));
-
-                const colors = {
-                    'Words of Affirmation': '#6c5ce7',
-                    'Acts of Service': '#00b894',
-                    'Quality Time': '#d4a373',
-                    'Physical Touch': '#e17055',
-                    'Receiving Gifts': '#fd79a8'
-                };
-                const emoji = {
-                    'Words of Affirmation': '💬',
-                    'Acts of Service': '🤝',
-                    'Quality Time': '⏰',
-                    'Physical Touch': '🫂',
-                    'Receiving Gifts': '🎁'
-                };
-
-                let html = '';
-                if (date) {
-                    const d = new Date(date);
-                    html += `<div style="font-size:13px;color:#8a9e99;margin-bottom:16px;">📅 Terakhir dikerjakan: ${d.toLocaleDateString('id-ID')} ${d.toLocaleTimeString('id-ID', {hour:'2-digit',minute:'2-digit'})}</div>`;
-                }
-
-                sorted.forEach(key => {
-                    const percent = parseInt(data[key]);
-                    const color = colors[key] || '#3a7d76';
-                    const emojiIcon = emoji[key] || '';
-                    html += `
-                        <div class="chart-item">
-                            <div class="label">${emojiIcon} ${key}</div>
-                            <div class="bar-bg">
-                                <div class="bar-fill" style="width:0%;background:${color};" data-width="${percent}"></div>
-                            </div>
-                            <div class="percent">${percent}%</div>
-                        </div>
-                    `;
-                });
-
-                const topKey = sorted[0];
-                html += `
-                    <div style="margin-top:20px;padding:16px;background:#f0f7f5;border-radius:14px;text-align:center;">
-                        <div style="font-size:14px;color:#5a6f6a;">🌟 Love Language Utamamu</div>
-                        <div style="font-size:24px;font-weight:600;color:#1d3b36;margin-top:4px;">
-                            ${emoji[topKey] || ''} ${topKey}
-                        </div>
-                        <div style="font-size:14px;color:#5a6f6a;margin-top:2px;">${data[topKey]}%</div>
-                    </div>
-                `;
-
-                container.innerHTML = html;
-
-                setTimeout(() => {
-                    document.querySelectorAll('.bar-fill').forEach(el => {
-                        el.style.width = el.dataset.width + '%';
-                    });
-                }, 300);
-
-            } catch (e) {
-                container.innerHTML = `<div style="text-align:center;padding:40px 20px;color:#5a6f6a;"><div style="font-size:56px;margin-bottom:12px;">⚠️</div><h3 style="color:#1d3b36;margin-bottom:8px;">Data Error</h3><p>Ada masalah dengan data yang tersimpan.</p></div>`;
+            50% {
+                transform: translateY(-8px);
             }
         }
 
-        tampilkanHasil();
+        .empty-state-enhanced h3 {
+            font-size: 20px;
+            color: var(--pink-text, #4a3a40);
+            margin-bottom: 8px;
+        }
 
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'loveLanguageResult') {
-                tampilkanHasil();
+        .empty-state-enhanced p {
+            color: var(--pink-text-light, #8a7a80);
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .empty-sub {
+            font-size: 14px !important;
+            margin-bottom: 16px !important;
+        }
+
+        .empty-meta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            font-size: 13px;
+            color: var(--pink-text-light, #8a7a80);
+            margin: 12px 0 20px;
+        }
+
+        .empty-meta span {
+            background: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--pink-primary-light, #fcd5e3);
+        }
+
+        .btn-glow {
+            box-shadow: 0 4px 20px rgba(244, 167, 187, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 8px 30px rgba(244, 167, 187, 0.5);
+            transform: translateY(-2px);
+        }
+
+        /* Tab */
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            background: var(--pink-bg, #fff5f8);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--pink-primary-light, #fcd5e3);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: transparent;
+            color: var(--pink-text-light, #8a7a80);
+        }
+
+        .tab-btn:hover {
+            background: var(--pink-primary-light, #fcd5e3);
+            color: var(--pink-text, #4a3a40);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: var(--pink-primary-dark, #e8879f);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Chart */
+        .chart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+
+        .chart-item .label {
+            width: 140px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--pink-text, #4a3a40);
+            flex-shrink: 0;
+            text-align: right;
+        }
+
+        .chart-item .bar-bg {
+            flex: 1;
+            height: 24px;
+            background: var(--pink-primary-light, #fcd5e3);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-item .bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            transition: width 1s ease;
+            width: 0%;
+        }
+
+        .chart-item .percent {
+            width: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--pink-text, #4a3a40);
+            flex-shrink: 0;
+            text-align: left;
+        }
+
+        /* Primary Box */
+        .primary-box {
+            background: linear-gradient(135deg, var(--pink-primary-light, #fcd5e3), white);
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 2px solid var(--pink-primary, #f4a7bb);
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .primary-box .label {
+            font-size: 13px;
+            color: var(--pink-text-light, #8a7a80);
+            font-weight: 500;
+        }
+
+        .primary-box .value {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--pink-text, #4a3a40);
+        }
+
+        .primary-box .value small {
+            font-size: 14px;
+            color: var(--pink-text-light, #8a7a80);
+            font-weight: 400;
+        }
+
+        /* Score Display */
+        .score-display {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .score-circle .number {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .score-circle .label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .score-info h3 {
+            font-size: 20px;
+            margin-bottom: 2px;
+            color: var(--pink-text, #4a3a40);
+        }
+
+        .score-info p {
+            font-size: 14px;
+            color: var(--pink-text-light, #8a7a80);
+            margin: 0;
+        }
+
+        /* Dimension Grid */
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .dimension-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            background: var(--pink-bg, #fff5f8);
+            border-radius: 8px;
+            font-size: 14px;
+            border: 1px solid var(--pink-primary-light, #fcd5e3);
+        }
+
+        .dimension-item .dim-score {
+            font-weight: 700;
+            color: var(--pink-primary-dark, #e8879f);
+        }
+
+        /* Risk Alert */
+        .risk-alert {
+            background: #fff3e0;
+            border: 2px solid #ff9800;
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .risk-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-header .icon {
+            font-size: 24px;
+        }
+
+        .risk-header h4 {
+            color: #e65100;
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .risk-body {
+            font-size: 14px;
+            color: var(--pink-text, #4a3a40);
+            margin-top: 4px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .action-buttons .btn-secondary {
+            flex: 1;
+            text-align: center;
+            min-width: 120px;
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .chart-item .label {
+                width: 100px;
+                font-size: 12px;
+            }
+
+            .chart-item .percent {
+                width: 40px;
+                font-size: 12px;
+            }
+
+            .dimension-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .score-display {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .score-circle {
+                width: 80px;
+                height: 80px;
+            }
+
+            .score-circle .number {
+                font-size: 26px;
+            }
+
+            .empty-meta {
+                flex-direction: column;
+                align-items: center;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="app">
+        <div class="card">
+            <h1 style="font-size:28px;font-weight:700;color:var(--pink-text, #4a3a40);margin-bottom:4px;">📊 Hasil</h1>
+            <div style="color:var(--pink-text-light, #8a7a80);font-size:15px;margin-bottom:24px;">
+                Lihat hasil Love Language &amp; Relationship Wellness Check
+            </div>
+
+            <!-- TAB BUTTONS -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="love-language">❤️ Love Language</button>
+                <button class="tab-btn" data-tab="wellness">🧠 Wellness Check</button>
+            </div>
+
+            <!-- TAB: LOVE LANGUAGE -->
+            <div id="tab-love-language" class="tab-content active">
+                <div id="loveLanguageContainer">
+                    <!-- Akan diisi JavaScript -->
+                </div>
+            </div>
+
+            <!-- TAB: WELLNESS -->
+            <div id="tab-wellness" class="tab-content">
+                <div id="wellnessContainer">
+                    <!-- Akan diisi JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BOTTOM NAV ===== -->
+    <div class="bottom-nav">
+        <a href="/">
+            <span class="nav-icon">🏠</span>
+            Beranda
+        </a>
+        <a href="/love-language.html">
+            <span class="nav-icon">❤️</span>
+            Love
+        </a>
+        <a href="/hasil.html" class="active">
+            <span class="nav-icon">📊</span>
+            Hasil
+        </a>
+        <a href="/profil.html">
+            <span class="nav-icon">👤</span>
+            Profil
+        </a>
+    </div>
+
+    <script>
+        // ============================================================
+        //  🔥 TUNGGU FIREBASE SIAP
+        // ============================================================
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                // // console.log('✅ Firebase sudah siap!');
+                initApp();
+            } else {
+                // // console.log('⏳ Menunggu Firebase siap...');
+                var checkFirebase = setInterval(function () {
+                    if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+                        clearInterval(checkFirebase);
+                        // // // console.log('✅ Firebase siap!');
+                        initApp();
+                    }
+                }, 100);
             }
         });
+
+        function initApp() {
+            var API_BASE = window.API_BASE || '/api';
+            // // console.log('✅ API_BASE:', API_BASE);
+            var db = firebase.firestore();
+
+            // ============================================================
+            //  🔥 TAB NAVIGATION
+            // ============================================================
+            document.querySelectorAll('.tab-btn').forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    document.querySelectorAll('.tab-btn').forEach(function (b) {
+                        b.classList.remove('active');
+                    });
+                    this.classList.add('active');
+
+                    var tab = this.dataset.tab;
+                    document.querySelectorAll('.tab-content').forEach(function (el) {
+                        el.classList.remove('active');
+                    });
+                    document.getElementById('tab-' + tab).classList.add('active');
+
+                    if (tab === 'love-language') tampilkanLoveLanguage();
+                    if (tab === 'wellness') tampilkanWellness();
+                });
+            });
+
+            // ============================================================
+            //  🔥 GET USER NAME
+            // ============================================================
+            function getUserName() {
+                try {
+                    var user = firebase.auth().currentUser;
+                    if (user && user.displayName) return user.displayName.split(' ')[0];
+                    if (user && user.email) return user.email.split('@')[0];
+                } catch (e) {}
+                return 'Pengguna';
+            }
+
+            // ============================================================
+            //  🔥 TAMPILKAN LOVE LANGUAGE DARI FIRESTORE
+            // ============================================================
+            function tampilkanLoveLanguage() {
+                var container = document.getElementById('loveLanguageContainer');
+                var userName = getUserName();
+                var user = firebase.auth().currentUser;
+
+                // // console.log('🔍 tampilkanLoveLanguage - user:', user ? user.uid : 'TIDAK ADA');
+
+                if (!user) {
+                    container.innerHTML =
+                        '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🔑</span></div><h3>Silakan Login Dulu</h3><p>Login untuk melihat hasil Love Language-mu.</p><a href="/login.html" class="btn-primary">🔑 Login</a></div>';
+                    return;
+                }
+
+                container.innerHTML =
+                    '<div style="text-align:center;padding:30px;"><div style="font-size:32px;animation:float 1s ease-in-out infinite;">⏳</div><p style="color:#7a6a70;margin-top:12px;">Memuat data Love Language...</p></div>';
+
+                db.collection('users').doc(user.uid).get()
+                    .then(function (docSnap) {
+                        // // console.log('📄 Love Language document exists:', docSnap.exists);
+
+                        if (!docSnap.exists) {
+                            container.innerHTML =
+                                '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">💌</span><div class="empty-emoji-cloud"><span>❤️</span><span>💕</span><span>✨</span></div></div><h3>Hai, ' +
+                                userName +
+                                '! 👋</h3><p>Kamu belum mengetahui <strong>Love Language</strong>-mu.</p><p class="empty-sub">Kenali cara kamu dan pasangan memberi &amp; menerima cinta.</p><div class="empty-meta"><span>⏱️ 5 menit</span><span>📋 30 pertanyaan</span></div><a href="/love-language.html" class="btn-primary btn-glow">🚀 Mulai Love Language Test</a></div>';
+                            return;
+                        }
+
+                        var userData = docSnap.data();
+                        var loveLanguageData = userData.loveLanguage;
+                        var updatedAt = userData.updatedAt || userData.createdAt || null;
+                        var data = {};
+
+                        // Extract dari all array
+                        if (loveLanguageData && loveLanguageData.all && Array.isArray(loveLanguageData.all)) {
+                            for (var i = 0; i < loveLanguageData.all.length; i++) {
+                                var item = loveLanguageData.all[i];
+                                data[item.label] = item.score;
+                            }
+                            // // console.log('📊 Data dari all array:', data);
+                        } else if (loveLanguageData && typeof loveLanguageData === 'object') {
+                            var possibleKeys = ['Words of Affirmation', 'Acts of Service', 'Quality Time',
+                                'Physical Touch', 'Receiving Gifts'
+                            ];
+                            var found = false;
+                            for (var k = 0; k < possibleKeys.length; k++) {
+                                if (loveLanguageData[possibleKeys[k]] !== undefined) {
+                                    data[possibleKeys[k]] = loveLanguageData[possibleKeys[k]];
+                                    found = true;
+                                }
+                            }
+                            if (!found) data = loveLanguageData;
+                            // // console.log('📊 Data dari object:', data);
+                        }
+
+                        // Fallback primary/secondary
+                        if (!data || Object.keys(data).length === 0) {
+                            if (userData.primary) {
+                                var label = userData.primary.label || userData.primary.key || 'Primary';
+                                data[label] = userData.primary.score || 60;
+                            }
+                            if (userData.secondary) {
+                                var label2 = userData.secondary.label || userData.secondary.key || 'Secondary';
+                                data[label2] = userData.secondary.score || 40;
+                            }
+                            // // console.log('📊 Data dari primary/secondary:', data);
+                        }
+
+                        // Fallback localStorage
+                        if (!data || Object.keys(data).length === 0) {
+                            try {
+                                var raw = localStorage.getItem('loveLanguageResult');
+                                if (raw) {
+                                    var parsed = JSON.parse(raw);
+                                    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                                        data = parsed;
+                                        // // console.log('📊 Data dari localStorage:', data);
+                                    }
+                                }
+                            } catch (e) {}
+                        }
+
+                        if (!data || Object.keys(data).length === 0) {
+                            container.innerHTML =
+                                '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">💌</span></div><h3>Hai, ' +
+                                userName +
+                                '! 👋</h3><p>Data Love Language belum tersedia.</p><a href="/love-language.html" class="btn-primary btn-glow">🚀 Mulai Tes</a></div>';
+                            return;
+                        }
+
+                        // RENDER
+                        var colors = {
+                            'Words of Affirmation': '#6c5ce7',
+                            'Acts of Service': '#00b894',
+                            'Quality Time': '#d4a373',
+                            'Physical Touch': '#e17055',
+                            'Receiving Gifts': '#fd79a8'
+                        };
+                        var emoji = {
+                            'Words of Affirmation': '💬',
+                            'Acts of Service': '🤝',
+                            'Quality Time': '⏰',
+                            'Physical Touch': '🫂',
+                            'Receiving Gifts': '🎁'
+                        };
+
+                        var sorted = Object.keys(data).sort(function (a, b) {
+                            return parseInt(data[b]) - parseInt(data[a]);
+                        });
+
+                        var html = '';
+
+                        if (updatedAt) {
+                            var d = updatedAt.toDate ? updatedAt.toDate() : new Date(updatedAt);
+                            html +=
+                                '<div style="text-align:center;font-size:13px;color:#7a6a70;margin-bottom:16px;">📅 ' +
+                                d.toLocaleDateString('id-ID') + ' ' + d.toLocaleTimeString('id-ID', {
+                                    hour: '2-digit',
+                                    minute: '2-digit'
+                                }) + '</div>';
+                        }
+
+                        for (var j = 0; j < sorted.length; j++) {
+                            var key = sorted[j];
+                            var percent = parseInt(data[key]) || 0;
+                            var color = colors[key] || '#9c27b0';
+                            var icon = emoji[key] || '📌';
+
+                            html += '<div class="chart-item">';
+                            html += '  <div class="label">' + icon + ' ' + key + '</div>';
+                            html += '  <div class="bar-bg">';
+                            html += '    <div class="bar-fill" style="width:0%;background:' + color +
+                                ';" data-width="' +
+                                percent + '"></div>';
+                            html += '  </div>';
+                            html += '  <div class="percent">' + percent + '%</div>';
+                            html += '</div>';
+                        }
+
+                        // ============================================================
+                        //  ACTION BUTTONS LOVE LANGUAGE - ESTETIK
+                        // ============================================================
+                        var topKey = sorted[0];
+                        html += '<div class="primary-box">';
+                        html += '  <div class="label">🌟 Love Language Utamamu</div>';
+                        html += '  <div class="value">' + (emoji[topKey] || '') + ' ' + topKey + ' <small>' + data[
+                            topKey] + '%</small></div>';
+                        html += '</div>';
+
+                        // 🔥 ACTION BUTTONS YANG ESTETIK
+                        html +=
+                            '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
+
+                        // Tombol Tes Ulang - Gradient Pink
+                        html +=
+                            '  <a href="/love-language.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 20px rgba(233,30,99,0.30);position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                            '    <span style="font-size:18px;">🔄</span> Tes Ulang' +
+                            '    <span class="shimmer"></span>' +
+                            '  </a>';
+
+                        // Tombol Beranda - Outline Pink
+                        html +=
+                            '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;">' +
+                            '    <span style="font-size:18px;">🏠</span> Beranda' +
+                            '    <span class="shimmer"></span>' +
+                            '  </a>';
+
+                        html += '</div>';
+
+                        container.innerHTML = html;
+
+                        container.innerHTML = html;
+
+                        setTimeout(function () {
+                            var bars = container.querySelectorAll('.bar-fill');
+                            for (var k = 0; k < bars.length; k++) {
+                                bars[k].style.width = bars[k].dataset.width + '%';
+                            }
+                        }, 400);
+
+                    })
+                    .catch(function (err) {
+                        console.error('Error:', err);
+                        container.innerHTML =
+                            '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">⚠️</span></div><h3>Gagal Memuat Data</h3><p style="color:#7a6a70;font-size:13px;">' +
+                            err.message +
+                            '</p><button onclick="tampilkanLoveLanguage()" class="btn-secondary" style="margin-top:12px;">🔄 Coba Lagi</button></div>';
+                    });
+            }
+
+            // ============================================================
+            //  🔥 TAMPILKAN WELLNESS RESULT - TANPA getCurrentUser()
+            // ============================================================
+            function tampilkanWellness() {
+                var container = document.getElementById('wellnessContainer');
+                var userName = getUserName();
+                var user = firebase.auth().currentUser;
+
+                // // console.log('🔍 tampilkanWellness - user:', user ? user.uid : 'TIDAK ADA');
+
+                if (!user) {
+                    container.innerHTML =
+                        '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🔑</span></div><h3>Silakan Login Dulu</h3><p>Login untuk melihat hasil Wellness Check-mu.</p><a href="/login.html" class="btn-primary">🔑 Login</a></div>';
+                    return;
+                }
+
+                container.innerHTML =
+                    '<div style="text-align:center;padding:30px;"><div style="font-size:32px;animation:float 1s ease-in-out infinite;">⏳</div><p style="color:#7a6a70;margin-top:12px;">Memuat data wellness...</p></div>';
+
+                var uid = user.uid;
+                // // console.log('🔍 Mencari wellness test untuk UID:', uid);
+
+                // 🔥 CARI SEBAGAI USER A (PEMILIK)
+                db.collection('wellness_tests')
+                    .where('userId', '==', uid)
+                    .where('userCompleted', '==', true)
+                    .where('partnerCompleted', '==', true)
+                    .limit(1)
+                    .get()
+                    .then(function (snapshot) {
+                        // // console.log('🔍 Query userId - empty:', snapshot.empty);
+                        // // console.log('🔍 Query userId - size:', snapshot.size);
+
+                        if (!snapshot.empty) {
+                            var doc = snapshot.docs[0];
+                            var docData = doc.data();
+                            var role = 'user';
+                            // // console.log('✅ Ditemukan sebagai User A, testId:', doc.id);
+                            // // console.log('📦 Results:', docData.results);
+                            processWellnessData(docData, role, container, userName);
+                            return null;
+                        } else {
+                            // 🔥 COBA CARI SEBAGAI PARTNER
+                            // // console.log('🔍 Tidak ditemukan sebagai User A, coba sebagai Partner...');
+                            return db.collection('wellness_tests')
+                                .where('partnerUserId', '==', uid)
+                                .where('userCompleted', '==', true)
+                                .where('partnerCompleted', '==', true)
+                                .limit(1)
+                                .get();
+                        }
+                    })
+                    .then(function (snapshot) {
+                        if (snapshot && !snapshot.empty) {
+                            var doc = snapshot.docs[0];
+                            var docData = doc.data();
+                            var role = 'partner';
+                            // // console.log('✅ Ditemukan sebagai Partner, testId:', doc.id);
+                            // // console.log('📦 Results:', docData.results);
+                            processWellnessData(docData, role, container, userName);
+                            return null;
+                        }
+
+                        if (snapshot === null) {
+                            // Sudah diproses di atas
+                            return null;
+                        }
+
+                        // 🔥 TIDAK ADA DATA - TAMPILKAN EMPTY STATE
+                        // // console.log('❌ Tidak ada wellness test');
+                        container.innerHTML =
+                            '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🧠</span><div class="empty-emoji-cloud"><span>💪</span><span>❤️</span><span>✨</span></div></div><h3>Hai, ' +
+                            userName +
+                            '! 👋</h3><p>Kamu belum menyelesaikan <strong>Relationship Wellness Check</strong>.</p><p class="empty-sub">Refleksi edukatif untuk memahami kekuatan hubungan dan area yang dapat diperkuat bersama.</p><div class="empty-meta"><span>⏱️ 10 menit</span><span>📋 64 pertanyaan</span></div><a href="/relationship-check.html" class="btn-primary btn-glow" style="text-decoration:none;">🚀 Mulai Wellness Check</a></div>';
+                        return null;
+                    })
+                    .catch(function (err) {
+                        console.error('❌ Error wellness:', err);
+                        container.innerHTML =
+                            '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">⚠️</span></div><h3>Gagal Memuat Data</h3><p style="color:#7a6a70;font-size:13px;">' +
+                            err.message +
+                            '</p><button onclick="tampilkanWellness()" class="btn-secondary" style="margin-top:12px;">🔄 Coba Lagi</button></div>';
+                    });
+            }
+
+            // ============================================================
+            //  🔥 PROCESS WELLNESS DATA
+            // ============================================================
+            function processWellnessData(docData, role, container, userName) {
+                // // console.log('🔍 processWellnessData dipanggil');
+                // // console.log('📦 docData.results:', docData ? docData.results : 'UNDEFINED');
+
+                if (!docData.results) {
+                    var statusMessage = '';
+                    if (role === 'user' && docData.userCompleted && !docData.partnerCompleted) {
+                        statusMessage = 'Kamu sudah mengisi, tetapi <strong>pasangan belum</strong>.';
+                    } else if (role === 'partner' && docData.partnerCompleted && !docData.userCompleted) {
+                        statusMessage = 'Kamu sudah mengisi, tetapi <strong>pasangan belum</strong>.';
+                    } else {
+                        statusMessage = 'Keduanya belum selesai mengisi.';
+                    }
+
+                    container.innerHTML =
+                        '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">⏳</span></div><h3>Hai, ' +
+                        userName +
+                        '! 👋</h3><p>' +
+                        statusMessage +
+                        '</p><p class="empty-sub">Hasil akan muncul setelah pasangan selesai mengisi.</p><button class="btn-secondary" onclick="window.location.reload()" style="margin-top:12px;">🔄 Cek Ulang</button></div>';
+                    return;
+                }
+
+                var results = docData.results;
+                // // console.log('✅ Results ditemukan:', results);
+
+                // 🔥 Helper functions
+                function getDimLabel(id) {
+                    if (window.wellnessDimensions && Array.isArray(window.wellnessDimensions)) {
+                        for (var i = 0; i < window.wellnessDimensions.length; i++) {
+                            if (window.wellnessDimensions[i].id === id) {
+                                return window.wellnessDimensions[i].label;
+                            }
+                        }
+                    }
+                    return id;
+                }
+
+                function getDimIcon(id) {
+                    if (window.wellnessDimensions && Array.isArray(window.wellnessDimensions)) {
+                        for (var i = 0; i < window.wellnessDimensions.length; i++) {
+                            if (window.wellnessDimensions[i].id === id) {
+                                return window.wellnessDimensions[i].icon || '📌';
+                            }
+                        }
+                    }
+                    return '📌';
+                }
+
+                var userAName = (role === 'user') ? 'Anda' : 'Pasangan';
+                var userBName = (role === 'user') ? 'Pasangan' : 'Anda';
+
+                var categoryColor = '#4CAF50';
+                var categoryEmoji = '🌟';
+                if (results.category === 'Sangat Kuat') {
+                    categoryColor = '#2E7D32';
+                    categoryEmoji = '💪';
+                } else if (results.category === 'Cukup Sehat') {
+                    categoryColor = '#4CAF50';
+                    categoryEmoji = '🌿';
+                } else if (results.category === 'Perlu Diperkuat') {
+                    categoryColor = '#FF9800';
+                    categoryEmoji = '🔄';
+                } else if (results.category === 'Perlu Perhatian') {
+                    categoryColor = '#E65100';
+                    categoryEmoji = '⚠️';
+                }
+
+                var html = '';
+
+                // Score Display
+                html +=
+                    '<div style="background:linear-gradient(135deg, #f8faf9, var(--pink-bg, #fff5f8));padding:20px;border-radius:12px;margin-bottom:16px;">';
+                html += '  <div class="score-display">';
+                html +=
+                    '    <div class="score-circle" style="background:linear-gradient(135deg, var(--pink-primary, #f4a7bb), ' +
+                    categoryColor + ');">';
+                html += '      <span class="number">' + (results.wellnessScore || 0) + '</span>';
+                html += '      <span class="label">/ 100</span>';
+                html += '    </div>';
+                html += '    <div class="score-info">';
+                html += '      <h3>' + categoryEmoji + ' ' + (results.category || 'Belum Terukur') + '</h3>';
+                html += '      <p>Skor refleksi hubungan Anda saat ini.</p>';
+                html += '      <div style="font-size:13px;color:var(--pink-text-light, #8a7a80);margin-top:4px;">📊 ' +
+                    userAName + ' & ' + userBName + '</div>';
+                html += '    </div>';
+                html += '  </div>';
+                html += '</div>';
+
+                // Date
+                var completedDate = new Date();
+                if (docData.completedAt) {
+                    if (docData.completedAt.toDate) {
+                        completedDate = docData.completedAt.toDate();
+                    } else {
+                        completedDate = new Date(docData.completedAt);
+                    }
+                }
+                html +=
+                    '<div style="font-size:13px;color:var(--pink-text-light, #8a7a80);margin-bottom:12px;text-align:center;">📅 ' +
+                    completedDate.toLocaleDateString('id-ID') + ' ' + completedDate.toLocaleTimeString('id-ID', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    }) + '</div>';
+
+                // Strengths
+                html += '<div style="margin-bottom:12px;">';
+                html +=
+                    '<div style="font-size:14px;font-weight:600;color:var(--pink-text, #4a3a40);margin-bottom:8px;">🌟 Kekuatan</div>';
+                html += '<div class="dimension-grid">';
+
+                if (results.strengths && results.strengths.length > 0) {
+                    for (var s = 0; s < results.strengths.length; s++) {
+                        var str = results.strengths[s];
+                        html += '<div class="dimension-item">';
+                        html += '  <span>' + getDimIcon(str.dimension) + ' ' + getDimLabel(str.dimension) + '</span>';
+                        html += '  <span class="dim-score">' + str.score + '%</span>';
+                        html += '</div>';
+                    }
+                } else {
+                    html += '<div style="color:var(--pink-text-light, #8a7a80);font-size:14px;">Belum ada data</div>';
+                }
+                html += '</div></div>';
+
+                // Priorities
+                html += '<div style="margin-bottom:12px;">';
+                html +=
+                    '<div style="font-size:14px;font-weight:600;color:var(--pink-text, #4a3a40);margin-bottom:8px;">💡 Area untuk Diperkuat</div>';
+                html += '<div class="dimension-grid">';
+
+                if (results.priorities && results.priorities.length > 0) {
+                    for (var p = 0; p < results.priorities.length; p++) {
+                        var pri = results.priorities[p];
+                        html += '<div class="dimension-item">';
+                        html += '  <span>' + getDimIcon(pri.dimension) + ' ' + getDimLabel(pri.dimension) + '</span>';
+                        html += '  <span class="dim-score">' + pri.score + '%</span>';
+                        html += '</div>';
+                    }
+                } else {
+                    html += '<div style="color:var(--pink-text-light, #8a7a80);font-size:14px;">Belum ada data</div>';
+                }
+                html += '</div></div>';
+
+                // Risk Alert
+                var riskDetected = results.riskDetected && results.riskDetected.detected ? true : false;
+                if (riskDetected) {
+                    html += '<div class="risk-alert">';
+                    html += '  <div class="risk-header">';
+                    html += '    <span class="icon">⚠️</span>';
+                    html += '    <h4>Perhatian</h4>';
+                    html += '  </div>';
+                    html += '  <div class="risk-body">';
+                    html += '    Terdeteksi pola yang mungkin tidak aman. Hubungi profesional jika diperlukan.';
+                    html +=
+                        '    <div style="margin-top:8px;font-size:12px;color:var(--pink-text-light, #8a7a80);">📞 Hotline Kesehatan Mental: 119</div>';
+                    html += '  </div>';
+                    html += '</div>';
+                }
+
+                // ============================================================
+                //  ACTION BUTTONS - ESTETIK
+                // ============================================================
+                html +=
+                    '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
+
+                // Tombol Ulangi Tes - Gradient Pink
+                html +=
+                    '  <a href="/relationship-check.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);box-shadow:0 4px 20px rgba(233,30,99,0.30);position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                    '    <span style="font-size:18px;">🔄</span> Ulangi Tes' +
+                    '    <span style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left 0.6s ease;"></span>' +
+                    '  </a>';
+
+                // Tombol Beranda - Outline Pink
+                html +=
+                    '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s cubic-bezier(0.4,0,0.2,1);display:inline-flex;align-items:center;justify-content:center;gap:8px;position:relative;overflow:hidden;">' +
+                    '    <span style="font-size:18px;">🏠</span> Beranda' +
+                    '    <span style="position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(233,30,99,0.06),transparent);transition:left 0.6s ease;"></span>' +
+                    '  </a>';
+
+                html += '</div>';
+
+                container.innerHTML = html;
+                // // console.log('✅ Wellness data berhasil ditampilkan!');
+            }
+
+            // ============================================================
+            //  🔥 START - TAMPILKAN LOADING DULU
+            // ============================================================
+            var loadingHtml =
+                '<div style="text-align:center;padding:30px;"><div style="font-size:32px;animation:float 1s ease-in-out infinite;">⏳</div><p style="color:#7a6a70;margin-top:12px;">Menunggu autentikasi...</p></div>';
+            document.getElementById('loveLanguageContainer').innerHTML = loadingHtml;
+            document.getElementById('wellnessContainer').innerHTML = loadingHtml;
+
+            var sudahLoad = false;
+
+            // 🔥 AUTH STATE LISTENER
+            firebase.auth().onAuthStateChanged(function (user) {
+                // // console.log('👤 onAuthStateChanged:', user ? 'LOGIN - ' + user.uid : 'LOGOUT');
+
+                if (user) {
+                    // // console.log('✅ User terdeteksi di onAuthStateChanged!');
+                    if (!sudahLoad) {
+                        sudahLoad = true;
+                        setTimeout(function () {
+                            tampilkanLoveLanguage();
+                            tampilkanWellness();
+                        }, 300);
+                    } else {
+                        tampilkanLoveLanguage();
+                        tampilkanWellness();
+                    }
+                } else {
+                    // // console.log('🚪 User tidak terdeteksi');
+                    var loginHtml =
+                        '<div class="empty-state-enhanced"><div class="empty-illustration"><span class="empty-icon">🔑</span></div><h3>Silakan Login Dulu</h3><p>Login untuk melihat hasil Anda.</p><a href="/login.html" class="btn-primary">🔑 Login</a></div>';
+                    document.getElementById('loveLanguageContainer').innerHTML = loginHtml;
+                    document.getElementById('wellnessContainer').innerHTML = loginHtml;
+                    sudahLoad = false;
+                }
+            });
+
+            // 🔥 FALLBACK: Cek langsung
+            setTimeout(function () {
+                var user = firebase.auth().currentUser;
+                // // console.log('🔍 Cek langsung (fallback):', user ? 'LOGIN - ' + user.uid : 'TIDAK ADA');
+
+                if (user && !sudahLoad) {
+                    // // console.log('✅ User ditemukan di fallback!');
+                    sudahLoad = true;
+                    tampilkanLoveLanguage();
+                    tampilkanWellness();
+                }
+            }, 1500);
+
+            // // console.log('✅ Hasil page loaded!');
+        }
     </script>
+
 </body>
+
 </html>

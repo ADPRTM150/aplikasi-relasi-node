@@ -315,37 +315,49 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
     }
 });
 
-// 2. GET TEST
+// 2. GET TEST - IZINKAN PEMILIK DAN PARTNER
 app.get('/api/wellness/test/:testId', verifyFirebaseToken, async (req, res) => {
     try {
         const { testId } = req.params;
         const userId = req.user.uid;
-        
+
         if (!testId || testId.length < 10) {
             return res.status(400).json({ success: false, message: 'ID tes tidak valid' });
         }
-        
+
         const doc = await db.collection('wellness_tests').doc(testId).get();
-        
+
         if (!doc.exists) {
             return res.status(404).json({ success: false, message: 'Test tidak ditemukan' });
         }
-        
+
         const data = doc.data();
-        
-        if (data.userId !== userId) {
-            return res.status(403).json({ success: false, message: 'Akses ditolak' });
+
+        // ============================================================
+        //  🔥 CEK AKSES: IZINKAN PEMILIK DAN PARTNER
+        // ============================================================
+        const isOwner = data.userId === userId;
+        const isPartner = data.partnerUserId === userId;
+
+        if (!isOwner && !isPartner) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Akses ditolak' 
+            });
         }
-        
+
+        // ============================================================
+        //  🔥 KIRIM DATA (TANPA JAWABAN DETAIL)
+        // ============================================================
         const responseData = { ...data, id: doc.id };
         delete responseData.userAnswers;
         delete responseData.partnerAnswers;
-        
+
         res.json({ 
             success: true, 
             data: responseData
         });
-        
+
     } catch (error) {
         console.error('Get test error:', error);
         res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
@@ -361,40 +373,47 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         console.log('🔍 Received submit request:');
         console.log('  testId:', testId);
         console.log('  role:', role);
+        console.log('  userId:', userId);
         console.log('  answers count:', Object.keys(answers || {}).length);
 
+        // ============================================================
+        //  🔥 VALIDASI INPUT
+        // ============================================================
         if (!testId) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'testId tidak ditemukan' 
+            return res.status(400).json({
+                success: false,
+                message: 'testId tidak ditemukan'
             });
         }
 
         if (!role) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'role tidak ditemukan' 
+            return res.status(400).json({
+                success: false,
+                message: 'role tidak ditemukan'
             });
         }
 
         if (!answers || typeof answers !== 'object' || Array.isArray(answers) || Object.keys(answers).length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Jawaban tidak valid atau kosong' 
+            return res.status(400).json({
+                success: false,
+                message: 'Jawaban tidak valid atau kosong'
             });
         }
 
         if (role !== 'user' && role !== 'partner') {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Role tidak valid. Harus "user" atau "partner"' 
+            return res.status(400).json({
+                success: false,
+                message: 'Role tidak valid. Harus "user" atau "partner"'
             });
         }
 
+        // ============================================================
+        //  🔥 VALIDASI JAWABAN (1-5)
+        // ============================================================
         const validAnswers = {};
         let isValid = true;
         let questionCount = 0;
-        
+
         for (const [key, value] of Object.entries(answers)) {
             const num = parseInt(value);
             if (isNaN(num) || num < 1 || num > 5) {
@@ -407,60 +426,94 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         }
 
         if (!isValid) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Jawaban tidak valid. Nilai harus 1-5.' 
+            return res.status(400).json({
+                success: false,
+                message: 'Jawaban tidak valid. Nilai harus 1-5.'
             });
         }
 
         if (questionCount < 64) {
-            return res.status(400).json({ 
-                success: false, 
-                message: `Jawaban tidak lengkap. Harus 64 pertanyaan, saat ini ${questionCount}.` 
+            return res.status(400).json({
+                success: false,
+                message: `Jawaban tidak lengkap. Harus 64 pertanyaan, saat ini ${questionCount}.`
             });
         }
 
+        // ============================================================
+        //  🔥 AMBIL DATA TEST DARI FIRESTORE
+        // ============================================================
         const testRef = db.collection('wellness_tests').doc(testId);
         const testDoc = await testRef.get();
-        
+
         if (!testDoc.exists) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Test tidak ditemukan' 
+            return res.status(404).json({
+                success: false,
+                message: 'Test tidak ditemukan'
             });
         }
-        
+
         const testData = testDoc.data();
-        
-        if (testData.userId !== userId) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Akses ditolak' 
+
+        // ============================================================
+        //  🔥 CEK AKSES - IZINKAN PEMILIK DAN PARTNER
+        // ============================================================
+        const isOwner = testData.userId === userId;
+        const isPartner = testData.partnerUserId === userId && role === 'partner';
+
+        // Jika bukan pemilik dan role-nya user → TOLAK
+        if (!isOwner && role === 'user') {
+            return res.status(403).json({
+                success: false,
+                message: 'Akses ditolak. Anda bukan pemilik test.'
             });
         }
 
+        // Jika role partner, cek apakah user sudah mengisi
+        if (role === 'partner') {
+            // Cek apakah partner sudah mengisi
+            if (testData.partnerCompleted) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Pasangan sudah mengisi tes ini'
+                });
+            }
+            // Cek apakah user (pemilik) sudah mengisi
+            if (!testData.userCompleted) {
+                return res.status(400).json({
+                    success: false,
+                    message: 'Pasangan Anda harus mengisi tes terlebih dahulu'
+                });
+            }
+            // ✅ Partner diizinkan mengisi
+        }
+
+        // Jika role user (pemilik), cek apakah sudah mengisi
         if (role === 'user' && testData.userCompleted) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Anda sudah mengisi tes ini' 
-            });
-        }
-        
-        if (role === 'partner' && testData.partnerCompleted) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Pasangan sudah mengisi tes ini' 
+            return res.status(400).json({
+                success: false,
+                message: 'Anda sudah mengisi tes ini'
             });
         }
 
+        // ============================================================
+        //  🔥 UPDATE DATA
+        // ============================================================
         const updateData = {
             [`${role}Answers`]: validAnswers,
             [`${role}Completed`]: true,
             [`${role}CompletedAt`]: admin.firestore.FieldValue.serverTimestamp()
         };
 
+        // 🔥 SIMPAN partnerUserId jika role partner
+        if (role === 'partner') {
+            updateData.partnerUserId = userId;
+        }
+
+        // ============================================================
+        //  🔥 CEK APAKAH KEDUANYA SUDAH SELESAI
+        // ============================================================
         const isComplete = (role === 'user' && testData.partnerCompleted) ||
-                           (role === 'partner' && testData.userCompleted);
+            (role === 'partner' && testData.userCompleted);
 
         if (isComplete) {
             const userAnswers = role === 'user' ? validAnswers : testData.userAnswers;
@@ -471,9 +524,16 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         }
 
         await testRef.update(updateData);
-        
+
+        // ============================================================
+        //  🔥 AMBIL DATA TERBARU & KIRIM RESPONSE
+        // ============================================================
         const updatedDoc = await testRef.get();
         const data = updatedDoc.data();
+
+        console.log('✅ Submit success:');
+        console.log('  isComplete:', !!data.results);
+        console.log('  inviteCode:', data.inviteCode);
 
         res.json({
             success: true,
@@ -486,9 +546,9 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
 
     } catch (error) {
         console.error('❌ Submit answers error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Terjadi kesalahan server: ' + error.message 
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan server: ' + error.message
         });
     }
 });
@@ -498,7 +558,7 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
     try {
         const { inviteCode } = req.body;
         const userId = req.user.uid;
-        
+
         if (!inviteCode || typeof inviteCode !== 'string') {
             return res.status(400).json({ 
                 success: false, 
@@ -532,10 +592,13 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         console.log('🔍 Verify invite:');
         console.log('  userId (current):', userId);
         console.log('  test owner:', data.userId);
+        console.log('  partnerUserId:', data.partnerUserId || 'belum ada');
         console.log('  userCompleted:', data.userCompleted);
         console.log('  partnerCompleted:', data.partnerCompleted);
 
-        // 🔥 CEK: User ini pemilik test?
+        // ============================================================
+        //  🔥 CEK: User ini pemilik test?
+        // ============================================================
         const isOwner = data.userId === userId;
 
         if (isOwner) {
@@ -546,7 +609,6 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
                     message: 'Anda sudah mengisi tes ini' 
                 });
             }
-            // Pemilik bisa mengisi sebagai 'user'
             return res.json({
                 success: true,
                 testId: doc.id,
@@ -559,7 +621,7 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
                 }
             });
         } else {
-            // BUKAN PEMILIK → BERARTI PARTNER!
+            // BUKAN PEMILIK → PARTNER
             if (data.partnerCompleted) {
                 return res.status(400).json({ 
                     success: false, 
@@ -572,13 +634,19 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
                     message: 'Pasangan Anda harus mengisi tes terlebih dahulu' 
                 });
             }
-            // Partner bisa mengisi sebagai 'partner'
+
+            // 🔥 SIMPAN partnerUserId saat verify (untuk akses nanti)
+            await doc.ref.update({
+                partnerUserId: userId
+            });
+
             return res.json({
                 success: true,
                 testId: doc.id,
-                role: 'partner',  // ← KIRIM ROLE PARTNER!
+                role: 'partner',
                 data: {
                     userId: data.userId,
+                    partnerUserId: userId,
                     userCompleted: data.userCompleted,
                     partnerCompleted: data.partnerCompleted,
                     startedAt: data.startedAt
@@ -592,6 +660,62 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
             success: false, 
             message: 'Terjadi kesalahan server' 
         });
+    }
+});
+
+// ============================================================
+//  🔥 GET WELLNESS RESULT BY TEST ID
+// ============================================================
+app.get('/api/wellness/result/:testId', verifyFirebaseToken, async (req, res) => {
+    try {
+        const { testId } = req.params;
+        const userId = req.user.uid;
+
+        const doc = await db.collection('wellness_tests').doc(testId).get();
+
+        if (!doc.exists) {
+            return res.status(404).json({ 
+                success: false, 
+                message: 'Test tidak ditemukan' 
+            });
+        }
+
+        const data = doc.data();
+
+        // ============================================================
+        //  🔥 IZINKAN: pemilik ATAU partner
+        // ============================================================
+        const isOwner = data.userId === userId;
+        const isPartner = data.partnerUserId === userId;
+
+        if (!isOwner && !isPartner) {
+            return res.status(403).json({ 
+                success: false, 
+                message: 'Akses ditolak' 
+            });
+        }
+
+        if (!data.results) {
+            return res.json({ 
+                success: true, 
+                data: null, 
+                message: 'Hasil belum tersedia' 
+            });
+        }
+
+        res.json({ 
+            success: true, 
+            data: {
+                results: data.results,
+                userCompleted: data.userCompleted,
+                partnerCompleted: data.partnerCompleted,
+                inviteCode: data.inviteCode
+            }
+        });
+
+    } catch (error) {
+        console.error('Get result error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
     }
 });
 

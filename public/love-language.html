@@ -11,6 +11,8 @@
     <meta http-equiv="Expires" content="0" />
 
     <link rel="stylesheet" href="/css/style.css" />
+    <!-- Google Fonts: Poppins & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
     <script src="./questions/questions.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -37,18 +39,19 @@
         });
     </script>
 </head>
-<body>
-    <div class="container" id="app">
+<body class="love-page">
+
+    <div class="love-container" id="app">
 
         <!-- ===== INTRO ===== -->
-        <div class="intro" id="intro">
+        <div class="love-intro" id="intro">
             <div class="icon">💬</div>
             <h1><strong>Love</strong> Language Check</h1>
             <p>Kenali cara kamu merasa dicintai dan dihargai dalam hubungan.</p>
 
             <div class="selector-group">
                 <div class="label">👤 Pilih gender kamu:</div>
-                <div class="options" id="genderOptions">
+                <div class="love-options" id="genderOptions">
                     <button class="btn-opt" data-value="wanita" onclick="pilihGender('wanita')">♀️ Perempuan</button>
                     <button class="btn-opt" data-value="pria" onclick="pilihGender('pria')">♂️ Laki-laki</button>
                 </div>
@@ -56,7 +59,7 @@
 
             <div class="selector-group">
                 <div class="label">💞 Pilih status hubunganmu:</div>
-                <div class="options" id="statusOptions">
+                <div class="love-options" id="statusOptions">
                     <button class="btn-opt" data-value="single" onclick="pilihStatus('single')">🔹 Single</button>
                     <button class="btn-opt" data-value="pdkt" onclick="pilihStatus('pdkt')">🔸 PDKT</button>
                     <button class="btn-opt" data-value="pacaran" onclick="pilihStatus('pacaran')">💞 Pacaran</button>
@@ -73,7 +76,7 @@
         </div>
 
         <!-- ===== SOAL ===== -->
-        <div class="soal-wrapper" id="soalWrapper">
+        <div class="love-soal-wrapper" id="soalWrapper">
             <div class="progress"><div class="bar" id="progressBar"></div></div>
             <div class="counter" id="counter">1 / 0</div>
             <div class="soal-text" id="soalText">Loading...</div>
@@ -85,20 +88,20 @@
         </div>
 
         <!-- ===== HASIL ===== -->
-        <div class="hasil-wrapper" id="hasilWrapper">
-            <div class="hasil-title">🎉 Hasil Tes Selesai!</div>
-            <div class="hasil-sub">Ini cara kamu paling merasa dicintai</div>
+        <div class="love-hasil-wrapper" id="hasilWrapper">
+            <div class="love-hasil-title">🎉 Hasil Tes Selesai!</div>
+            <div class="love-hasil-sub">Ini cara kamu paling merasa dicintai</div>
 
             <div id="chartContainer"></div>
 
-            <div class="detail-section" id="detailContainer"></div>
+            <div class="love-detail-section" id="detailContainer"></div>
 
             <div class="btn-group">
                 <button class="btn btn-secondary" onclick="simpanHasil()">📋 Simpan Hasil</button>
                 <a href="/" class="btn" style="text-align:center;text-decoration:none;">🏠 Ke Beranda</a>
             </div>
 
-            <div class="note">
+            <div class="love-note">
                 <strong>💡 Ingat:</strong> Love Language bukan tentang menuntut pasangan untuk mencintaimu dengan satu cara tertentu. Hasil ini adalah gambaran preferensi yang dapat membantu kalian saling memahami. Setiap orang biasanya memiliki lebih dari satu cara untuk merasakan kasih sayang, dan kebutuhan tersebut dapat berubah seiring waktu, pengalaman hidup, maupun tahap hubungan. Gunakan hasil ini sebagai awal percakapan, bukan sebagai label atau penilaian terhadap pasangan.
             </div>
 
@@ -132,7 +135,23 @@
     <script>
         let userGender = null;
         let userStatus = null;
+        let currentUser = null;
 
+        // ============================================================
+        //  🔥 CEK LOGIN
+        // ============================================================
+        firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                window.location.replace('/login');
+            } else {
+                currentUser = user;
+                console.log('✅ User logged in:', user.email);
+            }
+        });
+
+        // ============================================================
+        //  GENDER & STATUS
+        // ============================================================
         function pilihGender(gender) {
             userGender = gender;
             document.querySelectorAll('#genderOptions .btn-opt').forEach(btn => {
@@ -160,6 +179,9 @@
             }
         }
 
+        // ============================================================
+        //  DATA SOAL
+        // ============================================================
         function getSoalByStatus(status) {
             const data = PERTANYAAN[status];
             if (!data) return [];
@@ -215,6 +237,9 @@
             return result;
         }
 
+        // ============================================================
+        //  TES LOGIC
+        // ============================================================
         let soalAcak = [];
         let currentIndex = 0;
         let jawaban = [];
@@ -324,6 +349,56 @@
             }
         }
 
+        // ============================================================
+        //  🔥 AUTO SAVE KE FIRESTORE
+        // ============================================================
+        async function autoSaveToFirestore(data) {
+            if (!currentUser) {
+                console.warn('⚠️ User belum login, data hanya disimpan di lokal');
+                return false;
+            }
+
+            try {
+                const userRef = db.collection('users').doc(currentUser.uid);
+                
+                const llRef = userRef.collection('love_language_results');
+                await llRef.add({
+                    ...data,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    userEmail: currentUser.email,
+                    userName: currentUser.displayName || 'Pengguna',
+                    userUid: currentUser.uid
+                });
+
+                await userRef.update({
+                    loveLanguage: {
+                        primary: data.primary ? {
+                            key: data.primary,
+                            label: data.primary,
+                            score: data.scores?.[data.primary] || 0
+                        } : null,
+                        secondary: data.secondary ? {
+                            key: data.secondary,
+                            label: data.secondary,
+                            score: data.scores?.[data.secondary] || 0
+                        } : null,
+                        all: data.all || [],
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }
+                });
+
+                console.log('✅ Love Language auto-saved to Firestore');
+                return true;
+
+            } catch (error) {
+                console.error('❌ Auto-save error:', error);
+                return false;
+            }
+        }
+
+        // ============================================================
+        //  TAMPILKAN HASIL + AUTO SAVE
+        // ============================================================
         function tampilkanHasil() {
             soalWrapper.classList.remove('active');
             hasilWrapper.classList.add('active');
@@ -355,7 +430,7 @@
                 const emoji = EMOJI[k] || '';
                 const color = WARNA[k] || '#3a7d76';
                 chartHtml += `
-                    <div class="chart-item">
+                    <div class="love-chart-item">
                         <div class="label">${emoji} ${k}</div>
                         <div class="bar-bg">
                             <div class="bar-fill" style="width:0%;background:${color};" data-width="${p}"></div>
@@ -380,7 +455,7 @@
                 const emoji = EMOJI[k] || '';
                 const isTop = (k === sorted[0]);
                 detailHtml += `
-                    <div class="detail-tab ${isTop ? 'open' : ''}" onclick="toggleDetail(this)">
+                    <div class="love-detail-tab ${isTop ? 'open' : ''}" onclick="toggleDetail(this)">
                         <div class="head">
                             <span>${emoji} ${k}</span>
                             <span>${persen[k]}%</span>
@@ -399,8 +474,28 @@
             });
             document.getElementById('detailContainer').innerHTML = detailHtml;
 
+            const hasilData = {
+                primary: sorted[0],
+                secondary: sorted[1],
+                all: sorted.map(k => ({
+                    key: k,
+                    label: k,
+                    score: persen[k],
+                    emoji: EMOJI[k] || '',
+                    color: WARNA[k] || '#3a7d76'
+                })),
+                scores: persen,
+                gender: userGender,
+                status: userStatus,
+                tanggal: new Date().toISOString()
+            };
+
+            localStorage.setItem('loveLanguageResult', JSON.stringify(hasilData));
             localStorage.setItem('userGender', userGender);
             localStorage.setItem('userStatus', userStatus);
+
+            // 🔥 AUTO SAVE KE FIRESTORE
+            autoSaveToFirestore(hasilData);
 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
@@ -409,35 +504,55 @@
             el.classList.toggle('open');
         }
 
+        // ============================================================
+        //  SIMPAN HASIL
+        // ============================================================
         function simpanHasil() {
-            const items = document.querySelectorAll('.chart-item');
-            const data = {};
-            items.forEach(el => {
-                const label = el.querySelector('.label').textContent.trim();
-                const percent = el.querySelector('.percent').textContent;
-                data[label] = percent;
-            });
+            const rawData = localStorage.getItem('loveLanguageResult');
+            if (!rawData) {
+                alert('⚠️ Belum ada hasil tes!');
+                return;
+            }
 
-            localStorage.setItem('loveLanguageResult', JSON.stringify(data));
-            localStorage.setItem('loveLanguageDate', new Date().toISOString());
-            localStorage.setItem('userGender', userGender);
-            localStorage.setItem('userStatus', userStatus);
-
-            alert('📋 Hasil berhasil disimpan! Kamu bisa lihat di halaman Hasil nanti.');
+            try {
+                const data = JSON.parse(rawData);
+                alert('📋 Hasil berhasil disimpan!');
+                autoSaveToFirestore(data);
+            } catch (error) {
+                console.error('Error saving:', error);
+                alert('❌ Gagal menyimpan hasil.');
+            }
         }
 
+        // ============================================================
+        //  KEYBOARD SHORTCUT
+        // ============================================================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && soalWrapper.classList.contains('active')) {
                 nextSoal();
             }
         });
 
+        // ============================================================
+        //  LOAD SAVED DATA
+        // ============================================================
         window.addEventListener('load', () => {
             const savedGender = localStorage.getItem('userGender');
             const savedStatus = localStorage.getItem('userStatus');
             if (savedGender) pilihGender(savedGender);
             if (savedStatus) pilihStatus(savedStatus);
+
+            if (!currentUser) {
+                const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+                    if (user) {
+                        currentUser = user;
+                        console.log('✅ User loaded:', user.email);
+                    }
+                    unsubscribe();
+                });
+            }
         });
     </script>
+
 </body>
 </html>
