@@ -270,19 +270,27 @@ async function logEbookPurchased(ebook, price) {
   );
 }
 
-// Love Language Test
+// ============================================================
+//  🔥 FUNGSI LOG LOVE LANGUAGE TEST
+// ============================================================
 async function logLoveLanguageTest(testData) {
-  return await logActivity(
-    "love_language_test",
-    "💕",
-    "high",
-    {
-      primary: testData.primary || 'N/A',
-      secondary: testData.secondary || 'N/A',
-      testId: testData.id || 'unknown'
+    const user = auth.currentUser;
+    if (user) {
+        await logUserActivity({
+            type: 'love_language_test',
+            icon: '💕',
+            priority: 'high',
+            details: {
+                primary: testData.primary || 'N/A',
+                secondary: testData.secondary || 'N/A',
+                testId: testData.id || 'unknown'
+            }
+        });
     }
-  );
 }
+
+// Ekspor ke global
+window.logLoveLanguageTest = logLoveLanguageTest;
 
 // View Results
 async function logViewResults() {
