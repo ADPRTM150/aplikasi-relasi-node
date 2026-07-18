@@ -1,8 +1,7 @@
-// public/firebase-config.js
+// ============================================================
+//  🔥 FIREBASE CONFIG - OPTIMAL DENGAN SESSION STORAGE
+// ============================================================
 
-// ============================================================
-//  🔥 FIREBASE CONFIG
-// ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyAO7fOMHvFoxHgVTCW4t2wcDzI6eUvhdgE",
   authDomain: "aplikasi-relasi.firebaseapp.com",
@@ -22,7 +21,32 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
-//  🔥 LOGIN WITH GOOGLE (REDIRECT - TANPA POPUP)
+//  🔥 SESSION STORAGE HELPER
+// ============================================================
+const SessionLog = {
+  // Cek apakah sudah di-log di session ini
+  has: function(key) {
+    return sessionStorage.getItem(key) === 'true';
+  },
+  
+  // Tandai sudah di-log
+  set: function(key) {
+    sessionStorage.setItem(key, 'true');
+  },
+  
+  // Hapus semua log untuk user
+  clearAll: function(userId) {
+    const keys = Object.keys(sessionStorage);
+    keys.forEach(function(key) {
+      if (key.includes(userId)) {
+        sessionStorage.removeItem(key);
+      }
+    });
+  }
+};
+
+// ============================================================
+//  🔥 LOGIN WITH GOOGLE
 // ============================================================
 function loginWithGoogle() {
   const provider = new firebase.auth.GoogleAuthProvider();
@@ -32,8 +56,7 @@ function loginWithGoogle() {
 // ============================================================
 //  🔥 HANDLE REDIRECT RESULT
 // ============================================================
-auth
-  .getRedirectResult()
+auth.getRedirectResult()
   .then((result) => {
     if (result.user) {
       const user = result.user;
@@ -53,9 +76,21 @@ auth
 //  🔥 LOGOUT
 // ============================================================
 function logout() {
-  auth.signOut().then(() => {
-    window.location.replace("/login");
-  });
+  const user = auth.currentUser;
+  if (user) {
+    // Log logout sebelum signOut
+    logUserLogout().finally(() => {
+      auth.signOut().then(() => {
+        // Bersihkan session storage
+        SessionLog.clearAll(user.uid);
+        window.location.replace("/login");
+      });
+    });
+  } else {
+    auth.signOut().then(() => {
+      window.location.replace("/login");
+    });
+  }
 }
 
 // ============================================================
@@ -78,180 +113,252 @@ function simpanUser(user) {
       createdAt: firebase.firestore.FieldValue.serverTimestamp(),
       lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
     },
-    {
-      merge: true,
-    },
+    { merge: true }
   );
 }
 
 // ============================================================
-//  FUNGSI LOG ACTIVITY - UNTUK WEBSITE UTAMA
+//  🔥 CORE LOG FUNCTION
 // ============================================================
-
-// Simpan aktivitas user ke Firestore
-async function logUserActivity(activityData) {
+async function logActivity(type, icon, priority, details = {}) {
   try {
-    // Pastikan user sudah login
     const user = auth.currentUser;
     if (!user) {
       console.warn("⚠️ User tidak login, activity tidak disimpan");
-      return;
+      return false;
     }
 
-    // Tambahkan data user
+    // 🔥 CEK SESSION STORAGE UNTUK DUPLIKAT
+    const sessionKey = `${type}_${user.uid}_${details.id || details.articleId || 'default'}`;
+    if (SessionLog.has(sessionKey)) {
+      console.log(`⏭️ ${type} already logged this session, skipping`);
+      return false;
+    }
+
     const emailName = user.email ? user.email.split("@")[0] : "";
     const data = {
-      ...activityData,
+      type: type,
+      icon: icon,
+      priority: priority || "normal",
       userId: user.uid,
       userEmail: user.email || "-",
       userName: user.displayName || emailName || "Pengguna",
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      details: details
     };
 
-    // Simpan ke Firestore
     await db.collection("activities").add(data);
-    console.log("✅ Activity logged:", data.type);
+    console.log(`✅ Activity logged: ${type}`);
+    
+    // Tandai sudah di-log
+    SessionLog.set(sessionKey);
+    return true;
+    
   } catch (error) {
     console.error("❌ Error logging activity:", error);
+    return false;
   }
 }
 
-// Fungsi untuk log user login
+// ============================================================
+//  🔥 SPECIFIC LOG FUNCTIONS
+// ============================================================
+
+// User Login
 async function logUserLogin() {
   const user = auth.currentUser;
-  if (user) {
-    await logUserActivity({
-      type: "user_login",
-      icon: "👤",
-      priority: "normal",
-      details: {
-        loginMethod: "email",
-        device: navigator.userAgent || "unknown",
-      },
-    });
+  if (!user) return false;
+  
+  const key = `user_login_${user.uid}`;
+  if (SessionLog.has(key)) {
+    console.log('⏭️ Login already logged this session, skipping');
+    return false;
   }
+  
+  return await logActivity(
+    "user_login",
+    "👤",
+    "normal",
+    {
+      loginMethod: "email",
+      device: navigator.userAgent || "unknown"
+    }
+  );
 }
 
-// Fungsi untuk log user logout
+// User Logout
 async function logUserLogout() {
   const user = auth.currentUser;
-  if (user) {
-    await logUserActivity({
-      type: "user_logout",
-      icon: "🚪",
-      priority: "normal",
-      details: {},
-    });
-  }
-}
-
-// Fungsi untuk log test completed
-async function logTestCompleted(testData) {
-  const user = auth.currentUser;
-  if (user) {
-    await logUserActivity({
-      type: "test_completed",
-      icon: "📝",
-      priority: "high",
-      details: {
-        score: testData.wellnessScore || 0,
-        category: testData.category || "N/A",
-        testId: testData.id || "unknown",
-      },
-    });
-  }
-}
-
-// Fungsi untuk log couple connected
-async function logCoupleConnected(coupleData) {
-  const user = auth.currentUser;
-  if (user) {
-    // Ambil data partner
-    let partnerName = "Pasangan";
-    if (coupleData.partnerUserId) {
-      try {
-        const partnerDoc = await db
-          .collection("users")
-          .doc(coupleData.partnerUserId)
-          .get();
-        if (partnerDoc.exists) {
-          partnerName =
-            partnerDoc.data().nama || partnerDoc.data().name || "Pasangan";
-        }
-      } catch (e) {}
+  if (!user) return false;
+  
+  return await logActivity(
+    "user_logout",
+    "🚪",
+    "normal",
+    {
+      logoutTime: new Date().toISOString()
     }
-
-    await logUserActivity({
-      type: "couple_connected",
-      icon: "💑",
-      priority: "high",
-      details: {
-        partnerName: partnerName,
-        coupleCode: coupleData.inviteCode || "N/A",
-        partnerUserId: coupleData.partnerUserId || "",
-      },
-    });
-  }
+  );
 }
 
-// Fungsi untuk log article read
+// Test Completed (Wellness)
+async function logTestCompleted(testData) {
+  return await logActivity(
+    "test_completed",
+    "📝",
+    "high",
+    {
+      score: testData.wellnessScore || 0,
+      category: testData.category || "N/A",
+      testId: testData.id || "unknown"
+    }
+  );
+}
+
+// Couple Connected
+async function logCoupleConnected(coupleData) {
+  let partnerName = "Pasangan";
+  if (coupleData.partnerUserId) {
+    try {
+      const partnerDoc = await db.collection("users").doc(coupleData.partnerUserId).get();
+      if (partnerDoc.exists) {
+        partnerName = partnerDoc.data().nama || partnerDoc.data().name || "Pasangan";
+      }
+    } catch (e) {
+      console.warn('⚠️ Gagal ambil data partner:', e);
+    }
+  }
+  
+  return await logActivity(
+    "couple_connected",
+    "💑",
+    "high",
+    {
+      partnerName: partnerName,
+      coupleCode: coupleData.inviteCode || "N/A",
+      partnerUserId: coupleData.partnerUserId || ""
+    }
+  );
+}
+
+// Article Read
 async function logArticleRead(article) {
-  const user = auth.currentUser;
-  if (user) {
-    await logUserActivity({
-      type: "article_read",
-      icon: "📖",
-      priority: "normal",
-      details: {
-        articleId: article.id || "unknown",
-        articleTitle: article.title || "Artikel",
-        category: article.category || "Lainnya",
-      },
-    });
-  }
+  const articleId = article.id || 'unknown';
+  return await logActivity(
+    "article_read",
+    "📖",
+    "normal",
+    {
+      articleId: articleId,
+      articleTitle: article.title || "Artikel",
+      category: article.category || "Lainnya"
+    }
+  );
 }
 
-// Fungsi untuk log ebook purchased
+// Ebook Purchased
 async function logEbookPurchased(ebook, price) {
-  const user = auth.currentUser;
-  if (user) {
-    await logUserActivity({
-      type: "ebook_purchased",
-      icon: "📚",
-      priority: "high",
-      details: {
-        ebookId: ebook.id || "unknown",
-        ebookTitle: ebook.title || "Ebook",
-        price: price || 0,
-      },
-    });
-  }
+  return await logActivity(
+    "ebook_purchased",
+    "📚",
+    "high",
+    {
+      ebookId: ebook.id || "unknown",
+      ebookTitle: ebook.title || "Ebook",
+      price: price || 0
+    }
+  );
+}
+
+// Love Language Test
+async function logLoveLanguageTest(testData) {
+  return await logActivity(
+    "love_language_test",
+    "💕",
+    "high",
+    {
+      primary: testData.primary || 'N/A',
+      secondary: testData.secondary || 'N/A',
+      testId: testData.id || 'unknown'
+    }
+  );
+}
+
+// View Results
+async function logViewResults() {
+  return await logActivity(
+    "view_results",
+    "📊",
+    "normal",
+    {
+      page: "hasil",
+      viewedAt: new Date().toISOString()
+    }
+  );
+}
+
+// Profile Update
+async function logProfileUpdate() {
+  return await logActivity(
+    "profile_update",
+    "✏️",
+    "normal",
+    {}
+  );
 }
 
 // ============================================================
-//  LISTENER AUTH - LOG LOGIN/LOGOUT OTOMATIS
+//  🔥 AUTH LISTENER - DENGAN SESSION STORAGE
 // ============================================================
 
-// Listen untuk perubahan auth state
+let previousUser = null;
+
 auth.onAuthStateChanged(async (user) => {
   if (user) {
-    // User login - log aktivitas
-    await logUserLogin();
-    console.log("👤 User logged in:", user.email);
+    // 🔥 CEK SESSION STORAGE
+    const key = `user_login_${user.uid}`;
+    const alreadyLogged = SessionLog.has(key);
+    
+    if (!alreadyLogged) {
+      await logUserLogin();
+      console.log("👤 User logged in:", user.email);
+    } else {
+      console.log("👤 User already logged in this session");
+    }
+    
+    // Update lastLogin di Firestore
+    try {
+      await db.collection("users").doc(user.uid).update({
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+        lastLoginAt: new Date().toISOString()
+      });
+    } catch (e) {
+      // Ignore - user mungkin belum ada di Firestore
+    }
+    
   } else {
-    // User logout
-    console.log("👤 User logged out");
+    if (previousUser) {
+      console.log("👤 User logged out:", previousUser.email);
+      // Bersihkan session storage
+      SessionLog.clearAll(previousUser.uid);
+    }
   }
+  previousUser = user;
 });
 
-// Ekspor fungsi ke global
-window.logUserActivity = logUserActivity;
+// ============================================================
+//  🔥 EKSPOR FUNGSI KE GLOBAL
+// ============================================================
+window.logActivity = logActivity;
 window.logUserLogin = logUserLogin;
 window.logUserLogout = logUserLogout;
 window.logTestCompleted = logTestCompleted;
 window.logCoupleConnected = logCoupleConnected;
 window.logArticleRead = logArticleRead;
 window.logEbookPurchased = logEbookPurchased;
+window.logLoveLanguageTest = logLoveLanguageTest;
+window.logViewResults = logViewResults;
+window.logProfileUpdate = logProfileUpdate;
 
 // ============================================================
 //  🔥 API BASE URL
@@ -260,7 +367,7 @@ const API_BASE = window.location.origin + "/api";
 console.log("✅ API_BASE:", API_BASE);
 
 // ============================================================
-//  🔥 EXPOSE KE GLOBAL (untuk diakses tanpa module)
+//  🔥 EXPOSE KE GLOBAL
 // ============================================================
 window.API_BASE = API_BASE;
 window.auth = auth;
@@ -270,4 +377,4 @@ window.logout = logout;
 window.simpanUser = simpanUser;
 window.firebaseApp = firebase;
 
-console.log("✅ Firebase Config loaded with Google Login!");
+console.log("✅ Firebase Config loaded with Session Storage!");

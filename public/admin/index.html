@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -190,6 +191,7 @@
                 opacity: 0;
                 transform: translateY(10px);
             }
+
             to {
                 opacity: 1;
                 transform: translateY(0);
@@ -268,12 +270,15 @@
         .stat-icon.green {
             background: var(--primary-light);
         }
+
         .stat-icon.pink {
             background: #fce4ec;
         }
+
         .stat-icon.purple {
             background: #ede7f6;
         }
+
         .stat-icon.orange {
             background: #fff3e0;
         }
@@ -579,6 +584,7 @@
                 opacity: 0;
                 transform: scale(0.95);
             }
+
             to {
                 opacity: 1;
                 transform: scale(1);
@@ -627,16 +633,45 @@
             transform: translateX(-20px);
         }
 
-        .activity-item:nth-child(1) { animation-delay: 0.05s; }
-        .activity-item:nth-child(2) { animation-delay: 0.10s; }
-        .activity-item:nth-child(3) { animation-delay: 0.15s; }
-        .activity-item:nth-child(4) { animation-delay: 0.20s; }
-        .activity-item:nth-child(5) { animation-delay: 0.25s; }
-        .activity-item:nth-child(6) { animation-delay: 0.30s; }
-        .activity-item:nth-child(7) { animation-delay: 0.35s; }
-        .activity-item:nth-child(8) { animation-delay: 0.40s; }
-        .activity-item:nth-child(9) { animation-delay: 0.45s; }
-        .activity-item:nth-child(10) { animation-delay: 0.50s; }
+        .activity-item:nth-child(1) {
+            animation-delay: 0.05s;
+        }
+
+        .activity-item:nth-child(2) {
+            animation-delay: 0.10s;
+        }
+
+        .activity-item:nth-child(3) {
+            animation-delay: 0.15s;
+        }
+
+        .activity-item:nth-child(4) {
+            animation-delay: 0.20s;
+        }
+
+        .activity-item:nth-child(5) {
+            animation-delay: 0.25s;
+        }
+
+        .activity-item:nth-child(6) {
+            animation-delay: 0.30s;
+        }
+
+        .activity-item:nth-child(7) {
+            animation-delay: 0.35s;
+        }
+
+        .activity-item:nth-child(8) {
+            animation-delay: 0.40s;
+        }
+
+        .activity-item:nth-child(9) {
+            animation-delay: 0.45s;
+        }
+
+        .activity-item:nth-child(10) {
+            animation-delay: 0.50s;
+        }
 
         @keyframes slideIn {
             to {
@@ -896,6 +931,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
+
 <body>
 
     <div class="admin-container">
@@ -907,8 +943,8 @@
             </div>
             <div class="admin-info">
                 <span class="email">
-                    <span>👤</span> 
-                    <span id="adminNameDisplay">Admin</span> 
+                    <span>👤</span>
+                    <span id="adminNameDisplay">Admin</span>
                     (<span id="adminEmailDisplay">admin@relasi.com</span>)
                 </span>
                 <button class="btn-logout" onclick="logoutAdmin()">
@@ -986,7 +1022,8 @@
             <div class="content-card">
                 <div class="card-header">
                     <h3><span>⏰</span> Aktivitas Terbaru</h3>
-                    <button class="btn-add" onclick="loadRecentActivities()" style="padding:4px 12px;font-size:12px;background:var(--secondary);">
+                    <button class="btn-add" onclick="loadRecentActivities()"
+                        style="padding:4px 12px;font-size:12px;background:var(--secondary);">
                         🔄 Refresh
                     </button>
                 </div>
@@ -1008,13 +1045,16 @@
                     <h3><span>👥</span> Daftar User</h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <span class="badge-count" id="userCount">0 user</span>
-                        <button class="btn-add" onclick="exportLoveLanguage('csv')" style="padding:4px 12px;font-size:12px;background:#fd79a8;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportLoveLanguage('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#fd79a8;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 CSV (Love Language)
                         </button>
-                        <button class="btn-add" onclick="exportLoveLanguage('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportLoveLanguage('json')"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 JSON (Love Language)
                         </button>
-                        <button class="btn-add" onclick="openUserModal()" style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="openUserModal()"
+                            style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">
                             ➕ Tambah User
                         </button>
                     </div>
@@ -1032,7 +1072,9 @@
                             </tr>
                         </thead>
                         <tbody id="userTableBody">
-                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1063,7 +1105,9 @@
                             </tr>
                         </thead>
                         <tbody id="articleTableBody">
-                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1093,7 +1137,9 @@
                             </tr>
                         </thead>
                         <tbody id="ebookTableBody">
-                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1122,7 +1168,9 @@
                             </tr>
                         </thead>
                         <tbody id="videoTableBody">
-                            <tr><td colspan="4" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="4" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1138,19 +1186,24 @@
                     <h3><span>💑</span> Data Pasangan Terhubung</h3>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
                         <span class="badge-count" id="coupleCount">0 pasangan</span>
-                        <button class="btn-add" onclick="exportCouples('csv')" style="padding:4px 12px;font-size:12px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportCouples('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#3a7d76;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 CSV (Lengkap)
                         </button>
-                        <button class="btn-add" onclick="exportCouples('json')" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportCouples('json')"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 JSON (Lengkap)
                         </button>
-                        <button class="btn-add" onclick="exportCouplesRingkas('csv')" style="padding:4px 12px;font-size:12px;background:#d4a373;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportCouplesRingkas('csv')"
+                            style="padding:4px 12px;font-size:12px;background:#d4a373;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 CSV (Ringkas)
                         </button>
-                        <button class="btn-add" onclick="exportCouplesRingkas('json')" style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="exportCouplesRingkas('json')"
+                            style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 JSON (Ringkas)
                         </button>
-                        <button class="btn-add" onclick="loadCouples()" style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                        <button class="btn-add" onclick="loadCouples()"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
                             🔄 Refresh
                         </button>
                     </div>
@@ -1169,7 +1222,9 @@
                             </tr>
                         </thead>
                         <tbody id="coupleTableBody">
-                            <tr><td colspan="7" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="7" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1221,7 +1276,9 @@
                             </tr>
                         </thead>
                         <tbody id="salesTableBody">
-                            <tr><td colspan="6" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1273,7 +1330,8 @@
                         <span>📊</span> Pendapatan 7 Hari Terakhir
                     </h4>
                     <div class="chart-bars" id="adsChart"></div>
-                    <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--medium);margin-top:4px;">
+                    <div
+                        style="display:flex;justify-content:space-between;font-size:10px;color:var(--medium);margin-top:4px;">
                         <span>Hari ini</span>
                         <span>7 hari lalu</span>
                     </div>
@@ -1291,7 +1349,9 @@
                             </tr>
                         </thead>
                         <tbody id="adsenseTableBody">
-                            <tr><td colspan="5" class="loading-text">⏳ Memuat data...</td></tr>
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -1317,14 +1377,17 @@
                     </div>
                     <div class="form-group">
                         <label><span>🔑</span> Password Baru</label>
-                        <input type="text" id="settingsPassword" placeholder="Kosongkan jika tidak ingin mengubah password" />
-                        <p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin mengubah password.</p>
+                        <input type="text" id="settingsPassword"
+                            placeholder="Kosongkan jika tidak ingin mengubah password" />
+                        <p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin
+                            mengubah password.</p>
                     </div>
                     <div class="btn-group">
                         <button type="submit" class="btn-save">
                             <span>💾</span> Simpan Pengaturan
                         </button>
-                        <button type="button" class="btn-cancel" onclick="resetSettings()" style="color:var(--red);border-color:var(--red);">
+                        <button type="button" class="btn-cancel" onclick="resetSettings()"
+                            style="color:var(--red);border-color:var(--red);">
                             <span>🔄</span> Reset ke Default
                         </button>
                     </div>
@@ -1466,7 +1529,8 @@
                 <div class="form-group">
                     <label>Harga (Rp) <span style="font-size:11px;color:#8a9e99;">Kosongkan jika gratis</span></label>
                     <input type="number" id="ebookPrice" placeholder="50000" min="0" step="1000" />
-                    <p style="font-size:11px;color:#8a9e99;margin-top:4px;">Isi dengan angka tanpa titik/koma. Contoh: 50000</p>
+                    <p style="font-size:11px;color:#8a9e99;margin-top:4px;">Isi dengan angka tanpa titik/koma. Contoh:
+                        50000</p>
                 </div>
                 <div class="form-group">
                     <label>Deskripsi</label>
@@ -1526,7 +1590,8 @@
             window.location.href = '/admin/login.html';
         }
 
-        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') ||
+            'admin@relasi.com';
         document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
 
         // ============================================================
@@ -1550,21 +1615,21 @@
         // ============================================================
         function switchTab(tab) {
             // Sembunyikan semua panel
-            document.querySelectorAll('.panel').forEach(function(p) {
+            document.querySelectorAll('.panel').forEach(function (p) {
                 p.classList.remove('active');
             });
-            
+
             // Nonaktifkan semua tombol nav
-            document.querySelectorAll('.admin-nav button').forEach(function(b) {
+            document.querySelectorAll('.admin-nav button').forEach(function (b) {
                 b.classList.remove('active');
             });
-            
+
             // Tampilkan panel yang dipilih
             var panel = document.getElementById('panel-' + tab);
             if (panel) {
                 panel.classList.add('active');
             }
-            
+
             // Aktifkan tombol nav yang sesuai
             var btn = document.querySelector('.admin-nav button[data-tab="' + tab + '"]');
             if (btn) {
@@ -1583,8 +1648,8 @@
             document.getElementById(id).classList.remove('show');
         }
 
-        document.querySelectorAll('.modal-overlay').forEach(function(modal) {
-            modal.addEventListener('click', function(e) {
+        document.querySelectorAll('.modal-overlay').forEach(function (modal) {
+            modal.addEventListener('click', function (e) {
                 if (e.target === this) this.classList.remove('show');
             });
         });
@@ -1601,12 +1666,12 @@
             var diffMin = Math.floor(diffSec / 60);
             var diffHour = Math.floor(diffMin / 60);
             var diffDay = Math.floor(diffHour / 24);
-            
+
             if (diffSec < 60) return 'Baru saja';
             if (diffMin < 60) return diffMin + ' menit yang lalu';
             if (diffHour < 24) return diffHour + ' jam yang lalu';
             if (diffDay < 7) return diffDay + ' hari yang lalu';
-            
+
             return date.toLocaleDateString('id-ID', {
                 day: 'numeric',
                 month: 'short',
@@ -1618,32 +1683,38 @@
         function formatActivityDetails(activity) {
             var type = activity.type;
             var details = activity.details || {};
-            
-            switch(type) {
+
+            switch (type) {
                 case 'user_login':
                     return 'login ke aplikasi';
-                    
+
                 case 'user_logout':
                     return 'logout dari aplikasi';
-                    
+
                 case 'love_language_test':
-                    return 'menyelesaikan Love Language Test - Primary: <strong>' + (details.primary || 'N/A') + '</strong>, Secondary: <strong>' + (details.secondary || 'N/A') + '</strong>';
-                    
+                    return 'menyelesaikan Love Language Test - Primary: <strong>' + (details.primary || 'N/A') +
+                        '</strong>, Secondary: <strong>' + (details.secondary || 'N/A') + '</strong>';
+
                 case 'test_completed':
                     return 'menyelesaikan Wellness Test - Skor: <strong>' + (details.score || 0) + '%</strong>';
-                    
+
                 case 'couple_connected':
-                    return 'terhubung dengan <strong>' + (details.partnerName || 'Pasangan') + '</strong> sebagai pasangan';
-                    
+                    return 'terhubung dengan <strong>' + (details.partnerName || 'Pasangan') +
+                        '</strong> sebagai pasangan';
+
                 case 'article_read':
                     return 'membaca artikel "<strong>' + (details.articleTitle || 'Artikel') + '</strong>"';
-                    
+
                 case 'ebook_purchased':
-                    return 'membeli ebook "<strong>' + (details.ebookTitle || 'Ebook') + '</strong>" - Rp ' + ((details.price || 0).toLocaleString());
-                    
+                    return 'membeli ebook "<strong>' + (details.ebookTitle || 'Ebook') + '</strong>" - Rp ' + ((details
+                        .price || 0).toLocaleString());
+
                 case 'view_results':
                     return 'melihat halaman Hasil';
-                    
+
+                case 'profile_update':
+                    return 'memperbarui profil';
+
                 case 'admin_action': {
                     var actionMap = {
                         create: 'menambahkan',
@@ -1652,85 +1723,176 @@
                         login: 'login ke dashboard',
                         logout: 'logout dari dashboard'
                     };
-                    return (actionMap[details.action] || 'memodifikasi') + ' <strong>' + (details.target || 'konten') + '</strong> "' + (details.targetName || 'N/A') + '"';
+
+                    var targetMap = {
+                        user: 'User',
+                        article: 'Artikel',
+                        ebook: 'Ebook',
+                        video: 'Video',
+                        couple: 'Pasangan',
+                        admin: 'Admin'
+                    };
+                    var targetName = targetMap[details.target] || details.target || 'konten';
+                    return (actionMap[details.action] || 'memodifikasi') + ' <strong>' + (details.target || 'konten') +
+                        '</strong> "' + (details.targetName || 'N/A') + '"';
                 }
-                    
+
                 default:
                     return JSON.stringify(details);
             }
         }
 
-        // Load aktivitas terbaru
+        // ============================================================
+        //  🔥 LOAD AKTIVITAS TERBARU - LOGIN HANYA 1 KALI PER USER
+        // ============================================================
+
         async function loadRecentActivities() {
             var container = document.getElementById('recentActivity');
-            
+
             try {
-                // Ambil 10 aktivitas terbaru dari Firestore
+                // Ambil 30 aktivitas terbaru
                 var snapshot = await db.collection('activities')
                     .orderBy('timestamp', 'desc')
-                    .limit(10)
+                    .limit(30)
                     .get();
-                
+
                 if (snapshot.empty) {
                     container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="icon">📭</div>
-                            <p>Belum ada aktivitas.</p>
-                            <p style="font-size:13px;color:var(--medium);">Aktivitas akan muncul saat user berinteraksi dengan aplikasi.</p>
-                        </div>
-                    `;
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>Belum ada aktivitas.</p>
+                </div>
+            `;
                     return;
                 }
-                
-                var html = '<div class="activity-timeline">';
-                
-                snapshot.forEach(function(doc) {
+
+                // 🔥 TRACKING: Hanya 1 login per user
+                var loginSeen = {};
+                var articleSeen = {};
+                var activities = [];
+
+                snapshot.forEach(function (doc) {
                     var activity = doc.data();
-                    var time = (activity.timestamp && activity.timestamp.toDate) ? activity.timestamp.toDate() : new Date();
+                    activity.id = doc.id;
+
+                    var userId = activity.userId || 'unknown';
+                    var type = activity.type;
+
+                    // 🔥 LOGIN: Hanya 1 per user (yang terbaru otomatis karena order desc)
+                    if (type === 'user_login') {
+                        if (loginSeen[userId]) {
+                            return; // Skip login yang sudah ada
+                        }
+                        loginSeen[userId] = true;
+                    }
+
+                    // 🔥 ARTICLE_READ: Hanya 1 per artikel per user
+                    if (type === 'article_read') {
+                        var articleId = (activity.details && activity.details.articleId) ? activity.details
+                            .articleId : 'unknown';
+                        var key = userId + '_' + articleId;
+                        if (articleSeen[key]) {
+                            return; // Skip artikel yang sudah dibaca
+                        }
+                        articleSeen[key] = true;
+                    }
+
+                    activities.push(activity);
+                });
+
+                // Urutkan berdasarkan timestamp (desc)
+                activities.sort(function (a, b) {
+                    var timeA = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date(0);
+                    var timeB = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : new Date(0);
+                    return timeB - timeA;
+                });
+
+                // Ambil 10 teratas
+                activities = activities.slice(0, 10);
+
+                if (activities.length === 0) {
+                    container.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>Belum ada aktivitas.</p>
+                </div>
+            `;
+                    return;
+                }
+
+                // 🔥 RENDER
+                var html = '<div class="activity-timeline">';
+
+                activities.forEach(function (activity) {
+                    var time = activity.timestamp && activity.timestamp.toDate ? activity.timestamp
+                        .toDate() : new Date();
                     var timeAgo = getTimeAgo(time);
                     var detailText = formatActivityDetails(activity);
-                    
+
+                    // 🔥 TAMBAHKAN LABEL AKTIVITAS
+                    var label = '';
+                    if (activity.type === 'user_login') {
+                        label =
+                            '<span style="font-size:10px;background:#6c5ce7;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">Login</span>';
+                    } else if (activity.type === 'article_read') {
+                        label =
+                            '<span style="font-size:10px;background:#00b894;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">📖 Baca</span>';
+                    } else if (activity.type === 'love_language_test') {
+                        label =
+                            '<span style="font-size:10px;background:#fd79a8;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">💕 Love</span>';
+                    } else if (activity.type === 'test_completed') {
+                        label =
+                            '<span style="font-size:10px;background:#e17055;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">📝 Wellness</span>';
+                    } else if (activity.type === 'view_results') {
+                        label =
+                            '<span style="font-size:10px;background:#d4a373;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">📊 Hasil</span>';
+                    } else if (activity.type === 'user_logout') {
+                        label =
+                            '<span style="font-size:10px;background:#d46a6a;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">🚪 Logout</span>';
+                    }
+
                     html += `
-                        <div class="activity-item ${activity.priority || 'normal'}">
-                            <div class="activity-icon">${activity.icon || '📌'}</div>
-                            <div class="activity-content">
-                                <div class="activity-header">
-                                    <span class="activity-user"><strong>${activity.userName || 'Pengguna'}</strong></span>
-                                    <span class="activity-time">${timeAgo}</span>
-                                </div>
-                                <div class="activity-detail">${detailText}</div>
-                                <div class="activity-meta">
-                                    <span class="activity-email">${activity.userEmail || '-'}</span>
-                                </div>
-                            </div>
+                <div class="activity-item ${activity.priority || 'normal'}">
+                    <div class="activity-icon">${activity.icon || '📌'}</div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <span class="activity-user">
+                                <strong>${activity.userName || 'Pengguna'}</strong>
+                                ${label}
+                            </span>
+                            <span class="activity-time">${timeAgo}</span>
                         </div>
-                    `;
-                });
-                
-                html += '</div>';
-                
-                html += `
-                    <div style="text-align:center;margin-top:16px;">
-                        <button onclick="loadRecentActivities()" style="padding:6px 20px;background:var(--light);border:none;border-radius:6px;cursor:pointer;font-size:13px;color:var(--primary);">
-                            🔄 Refresh
-                        </button>
+                        <div class="activity-detail">${detailText}</div>
+                        <div class="activity-meta">
+                            <span class="activity-email">${activity.userEmail || '-'}</span>
+                        </div>
                     </div>
-                `;
-                
+                </div>
+            `;
+                });
+
+                html += '</div>';
+
+                // 🔥 TOMBOL FILTER
+                html += `
+            <div style="display:flex;justify-content:center;gap:8px;margin-top:16px;flex-wrap:wrap;">
+                <button onclick="loadRecentActivities()" style="padding:6px 20px;background:var(--light);border:none;border-radius:6px;cursor:pointer;font-size:13px;color:var(--primary);">
+                    🔄 Refresh
+                </button>
+            </div>
+        `;
+
                 container.innerHTML = html;
-                
+
             } catch (error) {
                 console.error('Error loading activities:', error);
                 container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="icon">❌</div>
-                        <p>Gagal memuat aktivitas.</p>
-                        <p style="font-size:13px;color:var(--medium);">${error.message}</p>
-                        <button onclick="loadRecentActivities()" style="margin-top:8px;padding:6px 16px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">
-                            🔄 Coba Lagi
-                        </button>
-                    </div>
-                `;
+            <div class="empty-state">
+                <div class="icon">❌</div>
+                <p>Gagal memuat aktivitas.</p>
+                <button onclick="loadRecentActivities()" style="margin-top:8px;padding:6px 16px;background:var(--primary);color:white;border:none;border-radius:6px;cursor:pointer;">🔄 Coba Lagi</button>
+            </div>
+        `;
             }
         }
 
@@ -1741,7 +1903,7 @@
         // Fungsi untuk memformat love language
         function formatLoveLanguage(loveLang) {
             if (!loveLang) return '-';
-            
+
             try {
                 if (loveLang.primary && loveLang.secondary) {
                     var primary = loveLang.primary;
@@ -1750,21 +1912,22 @@
                     var primaryScore = primary.score || 0;
                     var secondaryLabel = secondary.key || secondary.label || 'N/A';
                     var secondaryScore = secondary.score || 0;
-                    return primaryLabel + ' ' + primaryScore + '% (Primary) | ' + secondaryLabel + ' ' + secondaryScore + '% (Secondary)';
+                    return primaryLabel + ' ' + primaryScore + '% (Primary) | ' + secondaryLabel + ' ' +
+                        secondaryScore + '% (Secondary)';
                 }
-                
+
                 if (Array.isArray(loveLang) && loveLang.length > 0) {
-                    var sorted = loveLang.sort(function(a, b) {
+                    var sorted = loveLang.sort(function (a, b) {
                         return (b.score || 0) - (a.score || 0);
                     });
                     var top = sorted.slice(0, 2);
-                    return top.map(function(l) {
+                    return top.map(function (l) {
                         return (l.key || l.label || 'N/A') + ' ' + (l.score || 0) + '%';
                     }).join(' | ');
                 }
-                
+
                 return JSON.stringify(loveLang);
-            } catch(e) {
+            } catch (e) {
                 return '-';
             }
         }
@@ -1772,7 +1935,7 @@
         // Fungsi untuk get primary love language
         function getPrimaryLoveLanguage(loveLang) {
             if (!loveLang) return '-';
-            
+
             try {
                 if (loveLang.primary) {
                     var primary = loveLang.primary;
@@ -1780,17 +1943,17 @@
                     var score = primary.score || 0;
                     return label + ' ' + score + '%';
                 }
-                
+
                 if (Array.isArray(loveLang) && loveLang.length > 0) {
-                    var sorted = loveLang.sort(function(a, b) {
+                    var sorted = loveLang.sort(function (a, b) {
                         return (b.score || 0) - (a.score || 0);
                     });
                     var top = sorted[0];
                     return (top.key || top.label || 'N/A') + ' ' + (top.score || 0) + '%';
                 }
-                
+
                 return '-';
-            } catch(e) {
+            } catch (e) {
                 return '-';
             }
         }
@@ -1802,7 +1965,7 @@
                 var snapshot = await db.collection('users')
                     .orderBy('createdAt', 'desc')
                     .get();
-                
+
                 if (snapshot.empty) {
                     tbody.innerHTML = `
                         <tr>
@@ -1818,19 +1981,19 @@
                     document.getElementById('userCount').textContent = '0 user';
                     return;
                 }
-                
+
                 var html = '';
-                snapshot.forEach(function(doc) {
+                snapshot.forEach(function (doc) {
                     var u = doc.data();
                     var userId = doc.id;
-                    
+
                     var primaryLove = getPrimaryLoveLanguage(u.loveLanguage);
                     var fullLove = formatLoveLanguage(u.loveLanguage);
-                    
+
                     var isActive = u.status === 'active' || u.lastLogin === true;
                     var statusClass = isActive ? 'active' : 'inactive';
                     var statusText = isActive ? '✅ Aktif' : '⏸️ Tidak Aktif';
-                    
+
                     var joinDate = '-';
                     if (u.createdAt) {
                         if (u.createdAt.toDate) {
@@ -1847,7 +2010,7 @@
                             });
                         }
                     }
-                    
+
                     html += `
                         <tr>
                             <td><strong>${u.nama || u.name || 'Pengguna'}</strong></td>
@@ -1870,11 +2033,11 @@
                         </tr>
                     `;
                 });
-                
+
                 tbody.innerHTML = html;
                 document.getElementById('userCount').textContent = snapshot.size + ' user';
                 document.getElementById('statUsers').textContent = snapshot.size;
-                
+
             } catch (error) {
                 console.error('Error loading users:', error);
                 tbody.innerHTML = `
@@ -1898,16 +2061,19 @@
             document.getElementById('userEditId').value = data ? data.id : '';
             document.getElementById('userName').value = data ? (data.nama || data.name || '') : '';
             document.getElementById('userEmail').value = data ? (data.email || '') : '';
-            document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') : 'active';
-            
+            document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') :
+                'active';
+
             if (data && data.loveLanguage) {
                 var loveLang = data.loveLanguage;
                 if (loveLang.primary) {
-                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary.label || 'Words of Affirmation';
+                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary
+                        .label || 'Words of Affirmation';
                     document.getElementById('userPrimaryScore').value = loveLang.primary.score || 80;
                 }
                 if (loveLang.secondary) {
-                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang.secondary.label || 'Acts of Service';
+                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang
+                        .secondary.label || 'Acts of Service';
                     document.getElementById('userSecondaryScore').value = loveLang.secondary.score || 60;
                 }
             } else {
@@ -1916,7 +2082,7 @@
                 document.getElementById('userPrimaryScore').value = 80;
                 document.getElementById('userSecondaryScore').value = 60;
             }
-            
+
             openModal('userModal');
         }
 
@@ -1925,7 +2091,10 @@
             try {
                 var doc = await db.collection('users').doc(userId).get();
                 if (doc.exists) {
-                    openUserModal({ id: userId, ...doc.data() });
+                    openUserModal({
+                        id: userId,
+                        ...doc.data()
+                    });
                 } else {
                     alert('Data user tidak ditemukan!');
                 }
@@ -1938,7 +2107,7 @@
         // Delete user
         async function deleteUser(userId) {
             if (!confirm('Yakin ingin menghapus user ini? Data tidak bisa dikembalikan!')) return;
-            
+
             try {
                 await db.collection('users').doc(userId).delete();
                 alert('✅ User berhasil dihapus!');
@@ -1951,9 +2120,9 @@
         }
 
         // Submit form user
-        document.getElementById('userForm').addEventListener('submit', async function(e) {
+        document.getElementById('userForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             var id = document.getElementById('userEditId').value;
             var name = document.getElementById('userName').value.trim();
             var email = document.getElementById('userEmail').value.trim();
@@ -1962,17 +2131,17 @@
             var loveSecondary = document.getElementById('userLoveLanguageSecondary').value;
             var primaryScore = parseInt(document.getElementById('userPrimaryScore').value) || 80;
             var secondaryScore = parseInt(document.getElementById('userSecondaryScore').value) || 60;
-            
+
             if (!name || !email) {
                 alert('❌ Nama dan Email harus diisi!');
                 return;
             }
-            
+
             if (!email.includes('@') || !email.includes('.')) {
                 alert('❌ Email tidak valid!');
                 return;
             }
-            
+
             var data = {
                 nama: name,
                 name: name,
@@ -1993,7 +2162,7 @@
                     }
                 }
             };
-            
+
             try {
                 if (id) {
                     await db.collection('users').doc(id).update(data);
@@ -2004,12 +2173,12 @@
                     await db.collection('users').add(data);
                     alert('✅ User berhasil ditambahkan!');
                 }
-                
+
                 closeModal('userModal');
                 this.reset();
                 loadUsers();
                 updateStats();
-                
+
             } catch (error) {
                 console.error('Error saving user:', error);
                 alert('❌ Gagal menyimpan user: ' + error.message);
@@ -2024,23 +2193,28 @@
                 var snapshot = await db.collection('users')
                     .orderBy('createdAt', 'desc')
                     .get();
-                
+
                 var users = [];
-                snapshot.forEach(function(doc) {
+                snapshot.forEach(function (doc) {
                     var data = doc.data();
                     users.push({
                         id: doc.id,
                         nama: data.nama || data.name || 'Pengguna',
                         email: data.email || '-',
-                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' : 'Tidak Aktif',
-                        joinDate: data.createdAt ? 
-                            (data.createdAt.toDate ? 
-                                new Date(data.createdAt.toDate()).toLocaleDateString('id-ID', {day:'2-digit',month:'2-digit',year:'numeric'}) : 
+                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' :
+                            'Tidak Aktif',
+                        joinDate: data.createdAt ?
+                            (data.createdAt.toDate ?
+                                new Date(data.createdAt.toDate()).toLocaleDateString('id-ID', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                }) :
                                 '-') : '-',
                         loveLanguage: data.loveLanguage || null
                     });
                 });
-                
+
                 return users;
             } catch (error) {
                 console.error('Error fetching users:', error);
@@ -2051,17 +2225,17 @@
         async function exportLoveLanguage(format) {
             try {
                 var users = await fetchAllUsersWithLoveLanguage();
-                
+
                 if (users.length === 0) {
                     alert('Tidak ada data user untuk diexport!');
                     return;
                 }
-                
-                var exportData = users.map(function(user) {
+
+                var exportData = users.map(function (user) {
                     var primary = '-';
                     var secondary = '-';
                     var allLove = '-';
-                    
+
                     if (user.loveLanguage) {
                         if (user.loveLanguage.primary) {
                             var p = user.loveLanguage.primary;
@@ -2074,15 +2248,15 @@
                         if (user.loveLanguage.primary && user.loveLanguage.secondary) {
                             allLove = 'Primary: ' + primary + ', Secondary: ' + secondary;
                         } else if (user.loveLanguage.all && Array.isArray(user.loveLanguage.all)) {
-                            var sorted = user.loveLanguage.all.sort(function(a, b) {
+                            var sorted = user.loveLanguage.all.sort(function (a, b) {
                                 return (b.score || 0) - (a.score || 0);
                             });
-                            allLove = sorted.map(function(l) {
+                            allLove = sorted.map(function (l) {
                                 return (l.key || l.label || 'N/A') + ': ' + (l.score || 0) + '%';
                             }).join('; ');
                         }
                     }
-                    
+
                     return {
                         'NAMA': user.nama,
                         'EMAIL': user.email,
@@ -2093,31 +2267,36 @@
                         'TANGGAL BERGABUNG': user.joinDate
                     };
                 });
-                
+
                 if (format === 'csv') {
                     var headers = Object.keys(exportData[0]);
                     var csv = headers.join(';') + '\n';
-                    exportData.forEach(function(row) {
-                        csv += headers.map(function(h) {
+                    exportData.forEach(function (row) {
+                        csv += headers.map(function (h) {
                             var val = row[h] || '';
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
-                    
-                    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+
+                    var blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'love_language_users_' + new Date().toISOString().split('T')[0] + '.csv';
                     link.click();
                     URL.revokeObjectURL(link.href);
                     alert('✅ Export CSV berhasil! ' + users.length + ' user.');
-                    
+
                 } else if (format === 'json') {
                     var json = JSON.stringify(exportData, null, 2);
-                    var blob = new Blob([json], { type: 'application/json' });
+                    var blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'love_language_users_' + new Date().toISOString().split('T')[0] + '.json';
@@ -2125,7 +2304,7 @@
                     URL.revokeObjectURL(link.href);
                     alert('✅ Export JSON berhasil! ' + users.length + ' user.');
                 }
-                
+
             } catch (error) {
                 console.error('Export error:', error);
                 alert('❌ Gagal export data: ' + error.message);
@@ -2140,18 +2319,19 @@
             try {
                 var snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function(doc) {
+                snapshot.forEach(function (doc) {
                     var a = doc.data();
                     var id = doc.id;
-                    
-                    var statusBadge = a.status === 'published' 
-                        ? '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>'
-                        : '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
-                    
+
+                    var statusBadge = a.status === 'published' ?
+                        '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>' :
+                        '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
+
                     // PERBAIKAN: tanpa optional chaining
                     var createdBy = 'Admin';
                     if (a.createdBy) {
@@ -2161,7 +2341,7 @@
                             createdBy = a.createdBy.email;
                         }
                     }
-                    
+
                     html += `
                         <tr>
                             <td><strong>${a.title}</strong></td>
@@ -2180,7 +2360,8 @@
                 document.getElementById('statArticles').textContent = snapshot.size;
             } catch (error) {
                 console.error('Error loading articles:', error);
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data artikel.</td></tr>';
             }
         }
 
@@ -2196,13 +2377,13 @@
             openModal('articleModal');
         }
 
-        document.getElementById('articleForm').addEventListener('submit', async function(e) {
+        document.getElementById('articleForm').addEventListener('submit', async function (e) {
             e.preventDefault();
-            
+
             var id = document.getElementById('articleEditId').value;
             var adminEmail = localStorage.getItem('adminEmail') || 'admin@relasi.com';
             var adminName = localStorage.getItem('adminName') || 'Admin';
-            
+
             var data = {
                 title: document.getElementById('articleTitle').value,
                 category: document.getElementById('articleCategory').value,
@@ -2239,7 +2420,10 @@
             try {
                 var doc = await db.collection('articles').doc(id).get();
                 if (doc.exists) {
-                    openArticleModal({ id: id, ...doc.data() });
+                    openArticleModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading article:', error);
@@ -2268,11 +2452,12 @@
             try {
                 var snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function(doc) {
+                snapshot.forEach(function (doc) {
                     var e = doc.data();
                     var id = doc.id;
                     var harga = e.price > 0 ? 'Rp ' + e.price.toLocaleString() : '🆓 Gratis';
@@ -2293,7 +2478,8 @@
                 document.getElementById('statEbooks').textContent = snapshot.size;
             } catch (error) {
                 console.error('Error loading ebooks:', error);
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
             }
         }
 
@@ -2308,7 +2494,7 @@
             openModal('ebookModal');
         }
 
-        document.getElementById('ebookForm').addEventListener('submit', async function(e) {
+        document.getElementById('ebookForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
             var priceInput = document.getElementById('ebookPrice').value;
@@ -2353,7 +2539,10 @@
             try {
                 var doc = await db.collection('ebooks').doc(id).get();
                 if (doc.exists) {
-                    openEbookModal({ id: id, ...doc.data() });
+                    openEbookModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading ebook:', error);
@@ -2382,11 +2571,12 @@
             try {
                 var snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
                 if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>';
+                    tbody.innerHTML =
+                        '<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function(doc) {
+                snapshot.forEach(function (doc) {
                     var v = doc.data();
                     var id = doc.id;
                     html += `
@@ -2404,7 +2594,8 @@
                 tbody.innerHTML = html;
             } catch (error) {
                 console.error('Error loading videos:', error);
-                tbody.innerHTML = '<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data video.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="4" class="empty-state"><div class="icon">❌</div>Gagal memuat data video.</td></tr>';
             }
         }
 
@@ -2418,7 +2609,7 @@
             openModal('videoModal');
         }
 
-        document.getElementById('videoForm').addEventListener('submit', async function(e) {
+        document.getElementById('videoForm').addEventListener('submit', async function (e) {
             e.preventDefault();
             var id = document.getElementById('videoEditId').value;
             var data = {
@@ -2449,7 +2640,10 @@
             try {
                 var doc = await db.collection('videos').doc(id).get();
                 if (doc.exists) {
-                    openVideoModal({ id: id, ...doc.data() });
+                    openVideoModal({
+                        id: id,
+                        ...doc.data()
+                    });
                 }
             } catch (error) {
                 console.error('Error loading video:', error);
@@ -2526,11 +2720,12 @@
                     }
 
                     var skor = data.results && data.results.wellnessScore ? data.results.wellnessScore : '-';
-                    var statusBadge = data.results
-                        ? '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>'
-                        : '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
+                    var statusBadge = data.results ?
+                        '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>' :
+                        '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
 
-                    var tanggal = data.completedAt && data.completedAt.toDate ? data.completedAt.toDate() : (data.startedAt && data.startedAt.toDate ? data.startedAt.toDate() : new Date());
+                    var tanggal = data.completedAt && data.completedAt.toDate ? data.completedAt.toDate() : (data
+                        .startedAt && data.startedAt.toDate ? data.startedAt.toDate() : new Date());
                     var tanggalStr = tanggal.toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'short',
@@ -2638,7 +2833,7 @@
 
                 document.body.insertAdjacentHTML('beforeend', detailHtml);
 
-                document.getElementById(modalId).addEventListener('click', function(e) {
+                document.getElementById(modalId).addEventListener('click', function (e) {
                     if (e.target === this) {
                         closeModalById(modalId);
                     }
@@ -2655,7 +2850,7 @@
             if (modal) {
                 modal.style.opacity = '0';
                 modal.style.transition = 'opacity 0.3s ease';
-                setTimeout(function() {
+                setTimeout(function () {
                     if (modal.parentNode) {
                         modal.parentNode.removeChild(modal);
                     }
@@ -2722,7 +2917,8 @@
                 }
 
                 var resultsData = data.results || {};
-                var tanggal = data.completedAt && data.completedAt.toDate ? data.completedAt.toDate() : (data.startedAt && data.startedAt.toDate ? data.startedAt.toDate() : new Date());
+                var tanggal = data.completedAt && data.completedAt.toDate ? data.completedAt.toDate() : (data
+                    .startedAt && data.startedAt.toDate ? data.startedAt.toDate() : new Date());
 
                 results.push({
                     id: doc.id,
@@ -2778,7 +2974,7 @@
                         headers.push('User B - Q' + i);
                     }
 
-                    var rows = data.map(function(p) {
+                    var rows = data.map(function (p) {
                         var row = [
                             p.inviteCode,
                             p.userA,
@@ -2788,11 +2984,19 @@
                             p.skor,
                             p.category,
                             p.status,
-                            p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+                            p.tanggal.toLocaleDateString('id-ID', {
+                                day: 'numeric',
+                                month: 'short',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                            })
                         ];
 
-                        var dims = ['komunikasi', 'kepercayaan', 'resolusi_konflik', 'dukungan_emosional', 'waktu_berkualitas', 'komitmen', 'penghargaan', 'keuangan'];
-                        dims.forEach(function(dim) {
+                        var dims = ['komunikasi', 'kepercayaan', 'resolusi_konflik', 'dukungan_emosional',
+                            'waktu_berkualitas', 'komitmen', 'penghargaan', 'keuangan'
+                        ];
+                        dims.forEach(function (dim) {
                             row.push(p.dimensionScores[dim] || '-');
                         });
 
@@ -2820,16 +3024,19 @@
                     });
 
                     var csv = headers.join(';') + '\n';
-                    rows.forEach(function(row) {
-                        csv += row.map(function(val) {
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                    rows.forEach(function (row) {
+                        csv += row.map(function (val) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
 
-                    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    var blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'wellness_data_lengkap_' + new Date().toISOString().split('T')[0] + '.csv';
@@ -2839,7 +3046,9 @@
 
                 } else if (format === 'json') {
                     var json = JSON.stringify(data, null, 2);
-                    var blob = new Blob([json], { type: 'application/json' });
+                    var blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'wellness_data_lengkap_' + new Date().toISOString().split('T')[0] + '.json';
@@ -2863,7 +3072,7 @@
                     return;
                 }
 
-                var ringkasData = data.map(function(p) {
+                var ringkasData = data.map(function (p) {
                     return {
                         'Kode Invitasi': p.inviteCode,
                         'User A': p.userA,
@@ -2873,24 +3082,31 @@
                         'Skor': p.skor,
                         'Kategori': p.category,
                         'Status': p.status,
-                        'Tanggal': p.tanggal.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+                        'Tanggal': p.tanggal.toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        })
                     };
                 });
 
                 if (format === 'csv') {
                     var headers = Object.keys(ringkasData[0]);
                     var csv = headers.join(';') + '\n';
-                    ringkasData.forEach(function(row) {
-                        csv += headers.map(function(h) {
+                    ringkasData.forEach(function (row) {
+                        csv += headers.map(function (h) {
                             var val = row[h] || '';
-                            if (typeof val === 'string' && (val.includes(';') || val.includes('"') || val.includes('\n'))) {
+                            if (typeof val === 'string' && (val.includes(';') || val.includes(
+                                    '"') || val.includes('\n'))) {
                                 return '"' + val.replace(/"/g, '""') + '"';
                             }
                             return val;
                         }).join(';') + '\n';
                     });
 
-                    var blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                    var blob = new Blob(['\uFEFF' + csv], {
+                        type: 'text/csv;charset=utf-8;'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'data_pasangan_ringkas_' + new Date().toISOString().split('T')[0] + '.csv';
@@ -2900,7 +3116,9 @@
 
                 } else if (format === 'json') {
                     var json = JSON.stringify(ringkasData, null, 2);
-                    var blob = new Blob([json], { type: 'application/json' });
+                    var blob = new Blob([json], {
+                        type: 'application/json'
+                    });
                     var link = document.createElement('a');
                     link.href = URL.createObjectURL(blob);
                     link.download = 'data_pasangan_ringkas_' + new Date().toISOString().split('T')[0] + '.json';
@@ -2923,12 +3141,18 @@
                     return;
                 }
 
-                var data = { id: doc.id, ...doc.data() };
+                var data = {
+                    id: doc.id,
+                    ...doc.data()
+                };
                 var json = JSON.stringify(data, null, 2);
-                var blob = new Blob([json], { type: 'application/json' });
+                var blob = new Blob([json], {
+                    type: 'application/json'
+                });
                 var link = document.createElement('a');
                 link.href = URL.createObjectURL(blob);
-                link.download = 'pasangan_' + (data.inviteCode || testId) + '_' + new Date().toISOString().split('T')[0] + '.json';
+                link.download = 'pasangan_' + (data.inviteCode || testId) + '_' + new Date().toISOString().split(
+                    'T')[0] + '.json';
                 link.click();
                 URL.revokeObjectURL(link.href);
                 alert('✅ Export berhasil!');
@@ -2949,11 +3173,22 @@
         var adsenseData = [];
 
         function generateSalesData() {
-            var ebooks = [
-                { name: 'Panduan Komunikasi Sehat', price: 45000 },
-                { name: 'Love Language untuk Pasangan', price: 35000 },
-                { name: 'Mengelola Konflik', price: 0 },
-                { name: 'Keuangan Rumah Tangga', price: 25000 }
+            var ebooks = [{
+                    name: 'Panduan Komunikasi Sehat',
+                    price: 45000
+                },
+                {
+                    name: 'Love Language untuk Pasangan',
+                    price: 35000
+                },
+                {
+                    name: 'Mengelola Konflik',
+                    price: 0
+                },
+                {
+                    name: 'Keuangan Rumah Tangga',
+                    price: 25000
+                }
             ];
             var buyers = ['Monica', 'Budi', 'Siti', 'Andi', 'Rina', 'Dewi', 'Agus', 'Nina'];
             var statuses = ['success', 'pending', 'success', 'success', 'failed', 'success', 'success'];
@@ -2994,11 +3229,17 @@
 
         function renderSales() {
             var tbody = document.getElementById('salesTableBody');
-            var totalSales = salesData.reduce(function(sum, s) {
+            var totalSales = salesData.reduce(function (sum, s) {
                 return s.status === 'success' ? sum + s.price : sum;
             }, 0);
-            var totalSold = salesData.filter(function(s) { return s.status === 'success'; }).length;
-            var uniqueBuyers = new Set(salesData.filter(function(s) { return s.status === 'success'; }).map(function(s) { return s.buyer; }));
+            var totalSold = salesData.filter(function (s) {
+                return s.status === 'success';
+            }).length;
+            var uniqueBuyers = new Set(salesData.filter(function (s) {
+                return s.status === 'success';
+            }).map(function (s) {
+                return s.buyer;
+            }));
 
             document.getElementById('totalSales').textContent = 'Rp ' + totalSales.toLocaleString();
             document.getElementById('totalEbooksSold').textContent = totalSold;
@@ -3006,7 +3247,8 @@
             document.getElementById('salesCount').textContent = salesData.length + ' transaksi';
 
             if (salesData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="empty-state"><div class="icon">💰</div>Belum ada transaksi penjualan.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="6" class="empty-state"><div class="icon">💰</div>Belum ada transaksi penjualan.</td></tr>';
                 return;
             }
 
@@ -3016,7 +3258,7 @@
                 failed: '❌ Gagal'
             };
 
-            tbody.innerHTML = salesData.map(function(s) {
+            tbody.innerHTML = salesData.map(function (s) {
                 return `
                     <tr>
                         <td><code>${s.id}</code></td>
@@ -3032,9 +3274,15 @@
 
         function renderAdsense() {
             var tbody = document.getElementById('adsenseTableBody');
-            var totalRevenue = adsenseData.reduce(function(sum, a) { return sum + a.revenue; }, 0);
-            var totalImpressions = adsenseData.reduce(function(sum, a) { return sum + a.impressions; }, 0);
-            var totalClicks = adsenseData.reduce(function(sum, a) { return sum + a.clicks; }, 0);
+            var totalRevenue = adsenseData.reduce(function (sum, a) {
+                return sum + a.revenue;
+            }, 0);
+            var totalImpressions = adsenseData.reduce(function (sum, a) {
+                return sum + a.impressions;
+            }, 0);
+            var totalClicks = adsenseData.reduce(function (sum, a) {
+                return sum + a.clicks;
+            }, 0);
             var avgCTR = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : 0;
 
             document.getElementById('adsTotalRevenue').textContent = '$ ' + totalRevenue.toFixed(2);
@@ -3043,8 +3291,10 @@
             document.getElementById('adsCTR').textContent = avgCTR + '%';
 
             var chartEl = document.getElementById('adsChart');
-            var maxRevenue = Math.max.apply(null, adsenseData.map(function(a) { return a.revenue; }).concat([1]));
-            chartEl.innerHTML = adsenseData.map(function(a) {
+            var maxRevenue = Math.max.apply(null, adsenseData.map(function (a) {
+                return a.revenue;
+            }).concat([1]));
+            chartEl.innerHTML = adsenseData.map(function (a) {
                 return `
                     <div class="chart-bar">
                         <div class="bar" style="height:${(a.revenue / maxRevenue) * 100}%;background:#3a7d76;"></div>
@@ -3054,11 +3304,12 @@
             }).join('');
 
             if (adsenseData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" class="empty-state"><div class="icon">📢</div>Belum ada data iklan.</td></tr>';
+                tbody.innerHTML =
+                    '<tr><td colspan="5" class="empty-state"><div class="icon">📢</div>Belum ada data iklan.</td></tr>';
                 return;
             }
 
-            tbody.innerHTML = adsenseData.map(function(a) {
+            tbody.innerHTML = adsenseData.map(function (a) {
                 return `
                     <tr>
                         <td>${a.date}</td>
@@ -3083,7 +3334,7 @@
                     .where('userCompleted', '==', true)
                     .where('partnerCompleted', '==', true)
                     .get();
-                    
+
                 document.getElementById('statUsers').textContent = usersSnap.size;
                 document.getElementById('statArticles').textContent = articlesSnap.size;
                 document.getElementById('statEbooks').textContent = ebooksSnap.size;
@@ -3096,7 +3347,10 @@
         // ============================================================
         //  SETTINGS ADMIN
         // ============================================================
-        var DEFAULT_ADMIN = { email: 'admin@relasi.com', password: 'admin123' };
+        var DEFAULT_ADMIN = {
+            email: 'admin@relasi.com',
+            password: 'admin123'
+        };
 
         async function loadSettings() {
             try {
@@ -3144,7 +3398,9 @@
             }
 
             try {
-                await db.collection('admin').doc('settings').set(data, { merge: true });
+                await db.collection('admin').doc('settings').set(data, {
+                    merge: true
+                });
 
                 document.getElementById('adminEmailDisplay').textContent = email;
                 localStorage.setItem('adminEmail', email);
@@ -3152,7 +3408,7 @@
                 showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
                 document.getElementById('settingsPassword').value = '';
 
-                setTimeout(function() {
+                setTimeout(function () {
                     if (confirm('Pengaturan berhasil disimpan. Login ulang dengan email baru?')) {
                         localStorage.removeItem('isAdmin');
                         window.location.href = '/admin/login';
@@ -3176,7 +3432,7 @@
                 document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
                 showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
 
-                setTimeout(function() {
+                setTimeout(function () {
                     if (confirm('Reset berhasil. Login ulang dengan default?')) {
                         localStorage.removeItem('isAdmin');
                         window.location.href = '/admin/login';
@@ -3193,7 +3449,9 @@
             var alert = document.getElementById('settingsAlert');
             alert.textContent = message;
             alert.className = 'alert show ' + type;
-            setTimeout(function() { alert.classList.remove('show'); }, 4000);
+            setTimeout(function () {
+                alert.classList.remove('show');
+            }, 4000);
         }
 
         // ============================================================
@@ -3217,7 +3475,7 @@
         init();
 
         // Auto refresh setiap 30 detik
-        setInterval(function() {
+        setInterval(function () {
             loadUsers();
             loadArticles();
             loadEbooks();
@@ -3229,4 +3487,5 @@
     </script>
 
 </body>
+
 </html>
