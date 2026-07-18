@@ -13,18 +13,18 @@
 
     <link rel="stylesheet" href="/css/style.css" />
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    
-    <script src="./questions/questions.js"></script>
+
+    <!-- ===== DATA QUESTIONS ===== -->
+    <script src="/questions/questions.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
 
-    <!-- ===== SATU KALI SAJA! ===== -->
+    <!-- ===== CEK LOGIN ===== -->
     <script>
-        // 🔥 PROTEKSI: CEK LOGIN
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(function(user) {
             if (!user) {
                 window.location.replace('/login');
             }
@@ -231,11 +231,6 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
-        }
-
-        .options label .label-text {
-            font-size: 15px;
-            color: #2a1a20;
         }
 
         .nav-soal {
@@ -549,41 +544,19 @@
 
     <script>
         // ============================================================
-        //  🔥 VARIABLES & KONSTANTA
+        //  🔥 VARIABLES
         // ============================================================
-        let userGender = null;
-        let userStatus = null;
-        let currentUser = null;
+        var userGender = null;
+        var userStatus = null;
+        var currentUser = null;
 
-        // 🔥 DEFINISIKAN EMOJI & WARNA (jika tidak ada di questions.js)
-        var EMOJI = EMOJI || {
-            'Words of Affirmation': '💬',
-            'Acts of Service': '🤝',
-            'Quality Time': '⏰',
-            'Physical Touch': '🫂',
-            'Receiving Gifts': '🎁'
-        };
-
-        var WARNA = WARNA || {
-            'Words of Affirmation': '#6c5ce7',
-            'Acts of Service': '#00b894',
-            'Quality Time': '#d4a373',
-            'Physical Touch': '#e17055',
-            'Receiving Gifts': '#fd79a8'
-        };
-
-        var KATEGORI = KATEGORI || [
-            'Words of Affirmation',
-            'Acts of Service',
-            'Quality Time',
-            'Physical Touch',
-            'Receiving Gifts'
-        ];
+        // 🔥 GUNakan DATA DARI questions.js - JANGAN DEKLARASI ULANG!
+        // EMOJI, WARNA, KATEGORI sudah ada di questions.js
 
         // ============================================================
-        //  🔥 CEK LOGIN (SATU KALI)
+        //  🔥 CEK LOGIN
         // ============================================================
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(function(user) {
             if (!user) {
                 window.location.replace('/login');
             } else {
@@ -593,26 +566,38 @@
         });
 
         // ============================================================
-        //  GENDER & STATUS
+        //  GENDER & STATUS - FUNGSI DIDEKLARASIKAN SEBELUM DIPANGGIL
         // ============================================================
         function pilihGender(gender) {
             userGender = gender;
-            document.querySelectorAll('#genderOptions .btn-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === gender);
-            });
+            var btns = document.querySelectorAll('#genderOptions .btn-opt');
+            for (var i = 0; i < btns.length; i++) {
+                var btn = btns[i];
+                if (btn.dataset.value === gender) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
             cekKelengkapan();
         }
 
         function pilihStatus(status) {
             userStatus = status;
-            document.querySelectorAll('#statusOptions .btn-opt').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.value === status);
-            });
+            var btns = document.querySelectorAll('#statusOptions .btn-opt');
+            for (var i = 0; i < btns.length; i++) {
+                var btn = btns[i];
+                if (btn.dataset.value === status) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
             cekKelengkapan();
         }
 
         function cekKelengkapan() {
-            const mulaiBtn = document.getElementById('mulaiBtn');
+            var mulaiBtn = document.getElementById('mulaiBtn');
             if (userGender && userStatus) {
                 mulaiBtn.disabled = false;
                 mulaiBtn.textContent = '🚀 Mulai Tes';
@@ -626,25 +611,40 @@
         //  DATA SOAL
         // ============================================================
         function getSoalByStatus(status) {
-            var data = PERTANYAAN && PERTANYAAN[status] ? PERTANYAAN[status] : {};
+            var data = (typeof PERTANYAAN !== 'undefined' && PERTANYAAN[status]) ? PERTANYAAN[status] : {};
             var soal = [];
-            KATEGORI.forEach(function(kat) {
+            var kategori = typeof KATEGORI !== 'undefined' ? KATEGORI : [
+                'Words of Affirmation',
+                'Acts of Service',
+                'Quality Time',
+                'Physical Touch',
+                'Receiving Gifts'
+            ];
+            for (var i = 0; i < kategori.length; i++) {
+                var kat = kategori[i];
                 var teksList = data[kat] || [];
-                teksList.forEach(function(t) {
+                for (var j = 0; j < teksList.length; j++) {
                     soal.push({
                         kategori: kat,
-                        teks: t
+                        teks: teksList[j]
                     });
-                });
-            });
+                }
+            }
             return soal;
         }
 
         function getRekomendasi(gender, status) {
-            // 🔥 FUNGSI REKOMENDASI SEDERHANA
             var rekomendasi = {};
-            KATEGORI.forEach(function(k) {
-                switch(k) {
+            var kategori = typeof KATEGORI !== 'undefined' ? KATEGORI : [
+                'Words of Affirmation',
+                'Acts of Service',
+                'Quality Time',
+                'Physical Touch',
+                'Receiving Gifts'
+            ];
+            for (var i = 0; i < kategori.length; i++) {
+                var k = kategori[i];
+                switch (k) {
                     case 'Words of Affirmation':
                         rekomendasi[k] = 'Luangkan waktu untuk mengucapkan kata-kata positif dan apresiasi setiap hari.';
                         break;
@@ -663,7 +663,7 @@
                     default:
                         rekomendasi[k] = 'Komunikasikan kebutuhan love language Anda dengan pasangan.';
                 }
-            });
+            }
             return rekomendasi;
         }
 
@@ -698,7 +698,15 @@
             };
 
             var result = {};
-            KATEGORI.forEach(function(k) {
+            var kategori = typeof KATEGORI !== 'undefined' ? KATEGORI : [
+                'Words of Affirmation',
+                'Acts of Service',
+                'Quality Time',
+                'Physical Touch',
+                'Receiving Gifts'
+            ];
+            for (var i = 0; i < kategori.length; i++) {
+                var k = kategori[i];
                 var d = baseData[k] || { desc: '', plus: [], minus: [] };
                 result[k] = {
                     desc: d.desc,
@@ -706,7 +714,7 @@
                     minus: d.minus || [],
                     action: [rekomendasi[k] || 'Perhatikan bagaimana ' + k.toLowerCase() + ' berperan dalam hubunganmu.']
                 };
-            });
+            }
             return result;
         }
 
@@ -792,14 +800,15 @@
         function pilihJawaban(val) {
             jawaban[currentIndex] = val;
             var labels = optionsContainer.querySelectorAll('label');
-            labels.forEach(function(label) {
+            for (var i = 0; i < labels.length; i++) {
+                var label = labels[i];
                 var radio = label.querySelector('input');
                 if (radio && radio.value == val) {
                     label.classList.add('selected');
                 } else {
                     label.classList.remove('selected');
                 }
-            });
+            }
         }
 
         function nextSoal() {
@@ -906,84 +915,119 @@
             soalWrapper.classList.remove('active');
             hasilWrapper.classList.add('active');
 
-            var skor = {};
-            KATEGORI.forEach(function(k) { skor[k] = 0; });
+            var kategori = typeof KATEGORI !== 'undefined' ? KATEGORI : [
+                'Words of Affirmation',
+                'Acts of Service',
+                'Quality Time',
+                'Physical Touch',
+                'Receiving Gifts'
+            ];
 
-            soalAcak.forEach(function(soal, idx) {
+            var skor = {};
+            for (var i = 0; i < kategori.length; i++) {
+                skor[kategori[i]] = 0;
+            }
+
+            for (var idx = 0; idx < soalAcak.length; idx++) {
+                var soal = soalAcak[idx];
                 var val = jawaban[idx] || 0;
                 skor[soal.kategori] += val;
-            });
+            }
 
             var maxPerKategori = {};
-            KATEGORI.forEach(function(k) {
-                var count = soalAcak.filter(function(s) { return s.kategori === k; }).length;
-                maxPerKategori[k] = count * 5;
-            });
+            for (var k2 = 0; k2 < kategori.length; k2++) {
+                var kat = kategori[k2];
+                var count = 0;
+                for (var s = 0; s < soalAcak.length; s++) {
+                    if (soalAcak[s].kategori === kat) count++;
+                }
+                maxPerKategori[kat] = count * 5;
+            }
 
             var persen = {};
-            KATEGORI.forEach(function(k) {
-                persen[k] = maxPerKategori[k] > 0 ? Math.round((skor[k] / maxPerKategori[k]) * 100) : 0;
-            });
+            for (var k3 = 0; k3 < kategori.length; k3++) {
+                var kat2 = kategori[k3];
+                persen[kat2] = maxPerKategori[kat2] > 0 ? Math.round((skor[kat2] / maxPerKategori[kat2]) * 100) : 0;
+            }
 
-            var sorted = KATEGORI.slice().sort(function(a, b) {
+            var sorted = kategori.slice().sort(function(a, b) {
                 return persen[b] - persen[a];
             });
 
+            // 🔥 GUNAKAN EMOJI & WARNA DARI questions.js
+            var emoji = typeof EMOJI !== 'undefined' ? EMOJI : {
+                'Words of Affirmation': '💬',
+                'Acts of Service': '🤝',
+                'Quality Time': '⏰',
+                'Physical Touch': '🫂',
+                'Receiving Gifts': '🎁'
+            };
+            var warna = typeof WARNA !== 'undefined' ? WARNA : {
+                'Words of Affirmation': '#6c5ce7',
+                'Acts of Service': '#00b894',
+                'Quality Time': '#d4a373',
+                'Physical Touch': '#e17055',
+                'Receiving Gifts': '#fd79a8'
+            };
+
             // 🔥 RENDER CHART
             var chartHtml = '';
-            sorted.forEach(function(k) {
+            for (var c = 0; c < sorted.length; c++) {
+                var k = sorted[c];
                 var p = persen[k];
-                var emoji = EMOJI[k] || '';
-                var color = WARNA[k] || '#3a7d76';
+                var icon = emoji[k] || '';
+                var color = warna[k] || '#3a7d76';
                 chartHtml += '<div class="love-chart-item">';
-                chartHtml += '  <div class="label">' + emoji + ' ' + k + '</div>';
+                chartHtml += '  <div class="label">' + icon + ' ' + k + '</div>';
                 chartHtml += '  <div class="bar-bg">';
                 chartHtml += '    <div class="bar-fill" style="width:0%;background:' + color + ';" data-width="' + p + '"></div>';
                 chartHtml += '  </div>';
                 chartHtml += '  <div class="percent">' + p + '%</div>';
                 chartHtml += '</div>';
-            });
+            }
             document.getElementById('chartContainer').innerHTML = chartHtml;
 
             setTimeout(function() {
-                document.querySelectorAll('.bar-fill').forEach(function(el) {
-                    el.style.width = el.dataset.width + '%';
-                });
+                var bars = document.querySelectorAll('.bar-fill');
+                for (var b = 0; b < bars.length; b++) {
+                    bars[b].style.width = bars[b].dataset.width + '%';
+                }
             }, 200);
 
             // 🔥 RENDER DETAIL
             var detailData = getDetailData();
             var detailHtml = '';
-            sorted.forEach(function(k) {
-                var d = detailData[k];
-                if (!d) return;
-                var emoji = EMOJI[k] || '';
-                var isTop = (k === sorted[0]);
+            for (var d = 0; d < sorted.length; d++) {
+                var k2 = sorted[d];
+                var data = detailData[k2];
+                if (!data) continue;
+                var icon2 = emoji[k2] || '';
+                var isTop = (k2 === sorted[0]);
                 detailHtml += '<div class="love-detail-tab ' + (isTop ? 'open' : '') + '" onclick="toggleDetail(this)">';
-                detailHtml += '  <div class="head"><span>' + emoji + ' ' + k + '</span><span>' + persen[k] + '%</span></div>';
+                detailHtml += '  <div class="head"><span>' + icon2 + ' ' + k2 + '</span><span>' + persen[k2] + '%</span></div>';
                 detailHtml += '  <div class="body">';
-                detailHtml += '    <p>' + d.desc + '</p>';
+                detailHtml += '    <p>' + data.desc + '</p>';
                 detailHtml += '    <p><strong>✅ Yang membuatmu merasa dicintai</strong></p>';
                 detailHtml += '    <ul>';
-                d.plus.forEach(function(item) {
-                    detailHtml += '<li>✅ ' + item + '</li>';
-                });
+                for (var p2 = 0; p2 < data.plus.length; p2++) {
+                    detailHtml += '<li>✅ ' + data.plus[p2] + '</li>';
+                }
                 detailHtml += '    </ul>';
                 detailHtml += '    <p><strong>❌ Yang mungkin membuatmu sedih</strong></p>';
                 detailHtml += '    <ul>';
-                d.minus.forEach(function(item) {
-                    detailHtml += '<li>❌ ' + item + '</li>';
-                });
+                for (var m = 0; m < data.minus.length; m++) {
+                    detailHtml += '<li>❌ ' + data.minus[m] + '</li>';
+                }
                 detailHtml += '    </ul>';
                 detailHtml += '    <p><strong>💗 Cara pasangan dapat menunjukkan kasih sayang</strong></p>';
                 detailHtml += '    <ul>';
-                d.action.forEach(function(item) {
-                    detailHtml += '<li>💗 ' + item + '</li>';
-                });
+                for (var a = 0; a < data.action.length; a++) {
+                    detailHtml += '<li>💗 ' + data.action[a] + '</li>';
+                }
                 detailHtml += '    </ul>';
                 detailHtml += '  </div>';
                 detailHtml += '</div>';
-            });
+            }
             document.getElementById('detailContainer').innerHTML = detailHtml;
 
             // 🔥 DATA HASIL
@@ -995,8 +1039,8 @@
                         key: k,
                         label: k,
                         score: persen[k],
-                        emoji: EMOJI[k] || '',
-                        color: WARNA[k] || '#3a7d76'
+                        emoji: emoji[k] || '',
+                        color: warna[k] || '#3a7d76'
                     };
                 }),
                 scores: persen,
