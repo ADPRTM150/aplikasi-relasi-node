@@ -12,6 +12,11 @@
   ],
   "routes": [
     {
+      "src": "/(.*)\\.html",
+      "status": 301,
+      "headers": { "Location": "/$1" }
+    },
+    {
       "src": "/css/(.*)",
       "dest": "/public/css/$1"
     },
