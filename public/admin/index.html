@@ -1900,11 +1900,22 @@
         //  FUNGSI CRUD - USERS DENGAN LOVE LANGUAGE
         // ============================================================
 
-        // Fungsi untuk memformat love language
+        // Fungsi untuk memformat love language (dari all array)
         function formatLoveLanguage(loveLang) {
             if (!loveLang) return '-';
 
             try {
+                // 🔥 PRIORITAS: dari all array (5 love language lengkap)
+                if (loveLang.all && Array.isArray(loveLang.all) && loveLang.all.length > 0) {
+                    var sorted = loveLang.all.slice().sort(function (a, b) {
+                        return (b.score || 0) - (a.score || 0);
+                    });
+                    return sorted.map(function (l) {
+                        return (l.label || l.key || 'N/A') + ' ' + (l.score || 0) + '%';
+                    }).join(' | ');
+                }
+
+                // Fallback primary/secondary
                 if (loveLang.primary && loveLang.secondary) {
                     var primary = loveLang.primary;
                     var secondary = loveLang.secondary;
@@ -1912,18 +1923,7 @@
                     var primaryScore = primary.score || 0;
                     var secondaryLabel = secondary.key || secondary.label || 'N/A';
                     var secondaryScore = secondary.score || 0;
-                    return primaryLabel + ' ' + primaryScore + '% (Primary) | ' + secondaryLabel + ' ' +
-                        secondaryScore + '% (Secondary)';
-                }
-
-                if (Array.isArray(loveLang) && loveLang.length > 0) {
-                    var sorted = loveLang.sort(function (a, b) {
-                        return (b.score || 0) - (a.score || 0);
-                    });
-                    var top = sorted.slice(0, 2);
-                    return top.map(function (l) {
-                        return (l.key || l.label || 'N/A') + ' ' + (l.score || 0) + '%';
-                    }).join(' | ');
+                    return primaryLabel + ' ' + primaryScore + '% | ' + secondaryLabel + ' ' + secondaryScore + '%';
                 }
 
                 return JSON.stringify(loveLang);
@@ -1932,24 +1932,29 @@
             }
         }
 
-        // Fungsi untuk get primary love language
+        // Fungsi untuk get primary love language (dari skor tertinggi)
         function getPrimaryLoveLanguage(loveLang) {
             if (!loveLang) return '-';
 
             try {
+                // 🔥 PRIORITAS: cari skor tertinggi dari all array
+                if (loveLang.all && Array.isArray(loveLang.all) && loveLang.all.length > 0) {
+                    var highest = loveLang.all[0];
+                    for (var i = 1; i < loveLang.all.length; i++) {
+                        if ((loveLang.all[i].score || 0) > (highest.score || 0)) {
+                            highest = loveLang.all[i];
+                        }
+                    }
+                    var hl = highest.label || highest.key || 'N/A';
+                    return hl + ' ' + (highest.score || 0) + '%';
+                }
+
+                // Fallback ke primary field
                 if (loveLang.primary) {
                     var primary = loveLang.primary;
                     var label = primary.key || primary.label || 'N/A';
                     var score = primary.score || 0;
                     return label + ' ' + score + '%';
-                }
-
-                if (Array.isArray(loveLang) && loveLang.length > 0) {
-                    var sorted = loveLang.sort(function (a, b) {
-                        return (b.score || 0) - (a.score || 0);
-                    });
-                    var top = sorted[0];
-                    return (top.key || top.label || 'N/A') + ' ' + (top.score || 0) + '%';
                 }
 
                 return '-';
@@ -2237,23 +2242,33 @@
                     var allLove = '-';
 
                     if (user.loveLanguage) {
-                        if (user.loveLanguage.primary) {
-                            var p = user.loveLanguage.primary;
-                            primary = (p.key || p.label || 'N/A') + ' ' + (p.score || 0) + '%';
-                        }
-                        if (user.loveLanguage.secondary) {
-                            var s = user.loveLanguage.secondary;
-                            secondary = (s.key || s.label || 'N/A') + ' ' + (s.score || 0) + '%';
-                        }
-                        if (user.loveLanguage.primary && user.loveLanguage.secondary) {
-                            allLove = 'Primary: ' + primary + ', Secondary: ' + secondary;
-                        } else if (user.loveLanguage.all && Array.isArray(user.loveLanguage.all)) {
-                            var sorted = user.loveLanguage.all.sort(function (a, b) {
+                        // 🔥 PRIORITAS: dari all array
+                        if (user.loveLanguage.all && Array.isArray(user.loveLanguage.all) && user.loveLanguage.all.length > 0) {
+                            var sorted = user.loveLanguage.all.slice().sort(function (a, b) {
                                 return (b.score || 0) - (a.score || 0);
                             });
                             allLove = sorted.map(function (l) {
-                                return (l.key || l.label || 'N/A') + ': ' + (l.score || 0) + '%';
+                                return (l.label || l.key || 'N/A') + ': ' + (l.score || 0) + '%';
                             }).join('; ');
+                            if (sorted.length >= 2) {
+                                primary = (sorted[0].label || sorted[0].key || 'N/A') + ' ' + (sorted[0].score || 0) + '%';
+                                secondary = (sorted[1].label || sorted[1].key || 'N/A') + ' ' + (sorted[1].score || 0) + '%';
+                            } else if (sorted.length === 1) {
+                                primary = (sorted[0].label || sorted[0].key || 'N/A') + ' ' + (sorted[0].score || 0) + '%';
+                            }
+                        } else {
+                            // Fallback primary/secondary
+                            if (user.loveLanguage.primary) {
+                                var p = user.loveLanguage.primary;
+                                primary = (p.key || p.label || 'N/A') + ' ' + (p.score || 0) + '%';
+                            }
+                            if (user.loveLanguage.secondary) {
+                                var s = user.loveLanguage.secondary;
+                                secondary = (s.key || s.label || 'N/A') + ' ' + (s.score || 0) + '%';
+                            }
+                            if (primary !== '-' || secondary !== '-') {
+                                allLove = 'Primary: ' + primary + ', Secondary: ' + secondary;
+                            }
                         }
                     }
 
