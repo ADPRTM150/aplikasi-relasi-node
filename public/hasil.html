@@ -1019,90 +1019,87 @@
                             return LL_KEYS.indexOf(k) !== -1;
                         }
 
-                        // ── 1. Ekstrak dari all array ──
-                        if (loveLanguageData && loveLanguageData.all && Array.isArray(loveLanguageData.all) && loveLanguageData.all.length > 0) {
-                            for (var i = 0; i < loveLanguageData.all.length; i++) {
-                                var item = loveLanguageData.all[i];
-                                if (item.label && item.score !== undefined) {
-                                    data[item.label] = item.score;
+                        // ── 1. Ekstrak dari Firestore ──
+                        if (loveLanguageData && typeof loveLanguageData === 'object') {
+                            // 1a. all array (5 love language lengkap)
+                            if (loveLanguageData.all && Array.isArray(loveLanguageData.all) && loveLanguageData.all.length > 0) {
+                                for (var i = 0; i < loveLanguageData.all.length; i++) {
+                                    var item = loveLanguageData.all[i];
+                                    if (item.label && item.score !== undefined) {
+                                        data[item.label] = item.score;
+                                    }
                                 }
                             }
-                        }
-
-                        // ── 2. Ekstrak dari primary/secondary (jika all kosong) ──
-                        if (Object.keys(data).length === 0 && loveLanguageData && typeof loveLanguageData === 'object') {
-                            if (loveLanguageData.primary && loveLanguageData.primary.label) {
-                                data[loveLanguageData.primary.label] = loveLanguageData.primary.score || 0;
-                            }
-                            if (loveLanguageData.secondary && loveLanguageData.secondary.label) {
-                                data[loveLanguageData.secondary.label] = loveLanguageData.secondary.score || 0;
-                            }
-                        }
-
-                        // ── 3. Cek direct keys (format lama: { "Words of Affirmation": 80, ... }) ──
-                        if (Object.keys(data).length === 0 && loveLanguageData && typeof loveLanguageData === 'object') {
+                            // 1b. direct keys (format lama)
                             for (var k = 0; k < LL_KEYS.length; k++) {
-                                if (loveLanguageData[LL_KEYS[k]] !== undefined) {
+                                if (loveLanguageData[LL_KEYS[k]] !== undefined && !data[LL_KEYS[k]]) {
                                     data[LL_KEYS[k]] = loveLanguageData[LL_KEYS[k]];
                                 }
                             }
+                            // 1c. primary/secondary objects (tambahan, jangan timpa)
+                            if (loveLanguageData.primary && loveLanguageData.primary.label) {
+                                if (!data[loveLanguageData.primary.label]) {
+                                    data[loveLanguageData.primary.label] = loveLanguageData.primary.score || 0;
+                                }
+                            }
+                            if (loveLanguageData.secondary && loveLanguageData.secondary.label) {
+                                if (!data[loveLanguageData.secondary.label]) {
+                                    data[loveLanguageData.secondary.label] = loveLanguageData.secondary.score || 0;
+                                }
+                            }
                         }
 
-                        // ── 4. Fallback primary/secondary dari root userData ──
-                        if (Object.keys(data).length === 0) {
-                            if (userData.primary && userData.primary.label) {
+                        // ── 2. Tambahan dari root userData (jangan timpa) ──
+                        if (userData.primary && userData.primary.label) {
+                            if (!data[userData.primary.label]) {
                                 data[userData.primary.label] = userData.primary.score || 60;
                             }
-                            if (userData.secondary && userData.secondary.label) {
+                        }
+                        if (userData.secondary && userData.secondary.label) {
+                            if (!data[userData.secondary.label]) {
                                 data[userData.secondary.label] = userData.secondary.score || 40;
                             }
                         }
 
-                        // ── 5. Fallback localStorage ──
-                        if (Object.keys(data).length === 0) {
-                            try {
-                                var raw = localStorage.getItem('loveLanguageResult');
-                                if (raw) {
-                                    var parsed = JSON.parse(raw);
-                                    if (parsed && typeof parsed === 'object') {
-                                        // all array
-                                        if (parsed.all && Array.isArray(parsed.all) && parsed.all.length > 0) {
-                                            for (var a = 0; a < parsed.all.length; a++) {
-                                                var ai = parsed.all[a];
-                                                if (ai.label && ai.score !== undefined) {
-                                                    data[ai.label] = ai.score;
-                                                }
-                                            }
-                                        }
-                                        // scores object
-                                        if (Object.keys(data).length === 0 && parsed.scores && typeof parsed.scores === 'object') {
-                                            for (var sk in parsed.scores) {
-                                                if (parsed.scores.hasOwnProperty(sk) && isLoveLanguageKey(sk)) {
-                                                    data[sk] = parsed.scores[sk];
-                                                }
-                                            }
-                                        }
-                                        // primary/secondary
-                                        if (Object.keys(data).length === 0) {
-                                            if (parsed.primary && typeof parsed.primary === 'string') {
-                                                data[parsed.primary] = parsed.scores ? (parsed.scores[parsed.primary] || 50) : 50;
-                                            }
-                                            if (parsed.secondary && typeof parsed.secondary === 'string') {
-                                                data[parsed.secondary] = parsed.scores ? (parsed.scores[parsed.secondary] || 40) : 40;
-                                            }
-                                        }
-                                        // flat keys
-                                        if (Object.keys(data).length === 0) {
-                                            for (var pk in parsed) {
-                                                if (parsed.hasOwnProperty(pk) && isLoveLanguageKey(pk)) {
-                                                    data[pk] = parsed[pk];
-                                                }
+                        // ── 3. Tambahan dari localStorage (jangan timpa yang sudah ada dari Firestore) ──
+                        try {
+                            var raw = localStorage.getItem('loveLanguageResult');
+                            if (raw) {
+                                var parsed = JSON.parse(raw);
+                                if (parsed && typeof parsed === 'object') {
+                                    // 3a. all array
+                                    if (parsed.all && Array.isArray(parsed.all)) {
+                                        for (var a = 0; a < parsed.all.length; a++) {
+                                            var ai = parsed.all[a];
+                                            if (ai.label && ai.score !== undefined && !data[ai.label]) {
+                                                data[ai.label] = ai.score;
                                             }
                                         }
                                     }
+                                    // 3b. scores object
+                                    if (parsed.scores && typeof parsed.scores === 'object') {
+                                        for (var sk in parsed.scores) {
+                                            if (parsed.scores.hasOwnProperty(sk) && isLoveLanguageKey(sk) && !data[sk]) {
+                                                data[sk] = parsed.scores[sk];
+                                            }
+                                        }
+                                    }
+                                    // 3c. primary/secondary strings
+                                    if (parsed.primary && typeof parsed.primary === 'string' && !data[parsed.primary]) {
+                                        data[parsed.primary] = parsed.scores ? (parsed.scores[parsed.primary] || 50) : 50;
+                                    }
+                                    if (parsed.secondary && typeof parsed.secondary === 'string' && !data[parsed.secondary]) {
+                                        data[parsed.secondary] = parsed.scores ? (parsed.scores[parsed.secondary] || 40) : 40;
+                                    }
+                                    // 3d. flat keys
+                                    for (var pk in parsed) {
+                                        if (parsed.hasOwnProperty(pk) && isLoveLanguageKey(pk) && !data[pk]) {
+                                            data[pk] = parsed[pk];
+                                        }
+                                    }
                                 }
-                            } catch (e) {}
-                        }
+                            }
+                        } catch (e) {}
 
                         if (!data || Object.keys(data).length === 0) {
                             container.innerHTML =
