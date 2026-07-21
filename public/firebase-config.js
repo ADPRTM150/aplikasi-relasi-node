@@ -212,14 +212,23 @@ const IdleTimeout = {
       logUserLogout().finally(function() {
         SessionLog.clearAll(user.uid);
         firebase.auth().signOut().then(function() {
-          window.location.replace('/login');
+          window.location.replace(IdleTimeout.getLogoutUrl());
         });
       });
     } else {
       firebase.auth().signOut().then(function() {
-        window.location.replace('/login');
+        window.location.replace(IdleTimeout.getLogoutUrl());
       });
     }
+  },
+
+  // Deteksi halaman admin
+  getLogoutUrl: function() {
+    var path = window.location.pathname;
+    if (path.indexOf('/admin') === 0) {
+      return '/admin/login';
+    }
+    return '/login';
   },
 
   start: function() {
@@ -291,12 +300,12 @@ function logout() {
       auth.signOut().then(() => {
         // Bersihkan session storage
         SessionLog.clearAll(user.uid);
-        window.location.replace("/login");
+        window.location.replace(IdleTimeout.getLogoutUrl());
       });
     });
   } else {
     auth.signOut().then(() => {
-      window.location.replace("/login");
+      window.location.replace(IdleTimeout.getLogoutUrl());
     });
   }
 }
