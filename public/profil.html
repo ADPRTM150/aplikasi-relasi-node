@@ -309,7 +309,10 @@
                 return parseInt(data[b]) - parseInt(data[a]);
             });
 
-            if (!primaryKey) primaryKey = sorted[0];
+            // 🔥 HITUNG PRIMARY DARI DATA AKTUAL, bukan dari field tersimpan!
+            if (sorted.length > 0) {
+                primaryKey = sorted[0];
+            }
 
             var html = '';
 
