@@ -1051,8 +1051,25 @@
                                 var raw = localStorage.getItem('loveLanguageResult');
                                 if (raw) {
                                     var parsed = JSON.parse(raw);
-                                    if (parsed && typeof parsed === 'object' && Object.keys(parsed).length > 0) {
-                                        data = parsed;
+                                    if (parsed && typeof parsed === 'object') {
+                                        // Format: { all: [{label, score}, ...], primary, secondary, ... }
+                                        if (parsed.all && Array.isArray(parsed.all)) {
+                                            var extracted = {};
+                                            parsed.all.forEach(function(item) {
+                                                extracted[item.label] = item.score;
+                                            });
+                                            if (Object.keys(extracted).length > 0) {
+                                                data = extracted;
+                                            }
+                                        }
+                                        // Format: { scores: { label: score, ... } }
+                                        else if (parsed.scores && typeof parsed.scores === 'object') {
+                                            data = parsed.scores;
+                                        }
+                                        // Format flat: { "Words of Affirmation": 80, ... }
+                                        else if (Object.keys(parsed).some(function(k) { return k.indexOf('Words') !== -1 || k.indexOf('Acts') !== -1 || k.indexOf('Quality') !== -1 || k.indexOf('Physical') !== -1 || k.indexOf('Receiving') !== -1; })) {
+                                            data = parsed;
+                                        }
                                     }
                                 }
                             } catch (e) {}
@@ -1101,7 +1118,7 @@
                         for (var j = 0; j < sorted.length; j++) {
                             var key = sorted[j];
                             var percent = parseInt(data[key]) || 0;
-                            var color = colors[key] || '#9c27b0';
+                            var color = colors[key] || '#b8a9c9';
                             var icon = emoji[key] || '📌';
                             var delay = 0.2 + j * 0.12;
 
