@@ -1053,6 +1053,10 @@
                             style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
                             📥 JSON (Love Language)
                         </button>
+                        <button class="btn-add" onclick="exportJawabanLoveLanguage()"
+                            style="padding:4px 12px;font-size:12px;background:#e17055;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            📥 Detail Jawaban
+                        </button>
                         <button class="btn-add" onclick="openUserModal()"
                             style="padding:4px 12px;font-size:12px;background:#00b894;color:white;border:none;border-radius:6px;cursor:pointer;">
                             ➕ Tambah User
@@ -2296,6 +2300,84 @@
             } catch (error) {
                 console.error('Export error:', error);
                 alert('❌ Gagal export data: ' + error.message);
+            }
+        }
+
+        // ============================================================
+        //  EXPORT DETAIL JAWABAN LOVE LANGUAGE
+        // ============================================================
+        async function exportJawabanLoveLanguage() {
+            try {
+                var snapshot = await db.collection('users')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                var users = [];
+                snapshot.forEach(function(doc) {
+                    var data = doc.data();
+                    users.push({
+                        id: doc.id,
+                        nama: data.nama || data.name || 'Pengguna',
+                        email: data.email || '-',
+                        loveLanguage: data.loveLanguage || null
+                    });
+                });
+
+                var rows = [];
+                users.forEach(function(user) {
+                    var ll = user.loveLanguage;
+                    if (ll && ll.jawaban && Array.isArray(ll.jawaban) && ll.jawaban.length > 0) {
+                        ll.jawaban.forEach(function(item) {
+                            rows.push({
+                                'NAMA': user.nama,
+                                'EMAIL': user.email,
+                                'NO': item.no,
+                                'KATEGORI': item.kategori,
+                                'PERTANYAAN': item.teks,
+                                'JAWABAN (1-5)': item.jawaban
+                            });
+                        });
+                    }
+                });
+
+                if (rows.length === 0) {
+                    alert('⚠️ Belum ada data jawaban! User harus tes ulang love language agar jawaban tersimpan.');
+                    return;
+                }
+
+                rows.sort(function(a, b) {
+                    if (a['NAMA'] !== b['NAMA']) return a['NAMA'].localeCompare(b['NAMA']);
+                    return a['NO'] - b['NO'];
+                });
+
+                var headers = ['NAMA', 'EMAIL', 'NO', 'KATEGORI', 'PERTANYAAN', 'JAWABAN (1-5)'];
+                var csv = headers.join(';') + '\n';
+                rows.forEach(function(row) {
+                    csv += headers.map(function(h) {
+                        var val = String(row[h] || '');
+                        if (val.includes(';') || val.includes('"') || val.includes('\n')) {
+                            return '"' + val.replace(/"/g, '""') + '"';
+                        }
+                        return val;
+                    }).join(';') + '\n';
+                });
+
+                var blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'jawaban_love_language_' + new Date().toISOString().split('T')[0] + '.csv';
+                link.click();
+                URL.revokeObjectURL(link.href);
+
+                var uniqueUsers = [];
+                rows.forEach(function(r) {
+                    if (uniqueUsers.indexOf(r['NAMA']) === -1) uniqueUsers.push(r['NAMA']);
+                });
+                alert('✅ Export berhasil! ' + rows.length + ' jawaban dari ' + uniqueUsers.length + ' user.');
+
+            } catch (error) {
+                console.error('Export jawaban error:', error);
+                alert('❌ Gagal export jawaban: ' + error.message);
             }
         }
 

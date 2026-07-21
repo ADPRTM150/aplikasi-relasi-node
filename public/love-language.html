@@ -865,6 +865,8 @@
                             score: data.scores && data.scores[data.secondary] ? data.scores[data.secondary] : 0
                         } : null,
                         all: data.all || [],
+                        jawaban: data.jawaban || [],
+                        totalSoal: data.totalSoal || 0,
                         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
                     }
                 });
@@ -1030,7 +1032,16 @@
             }
             document.getElementById('detailContainer').innerHTML = detailHtml;
 
-            // 🔥 DATA HASIL
+            // 🔥 DATA HASIL + JAWABAN MENTAH
+            var jawabanDetail = soalAcak.map(function(soal, idx) {
+                return {
+                    no: idx + 1,
+                    kategori: soal.kategori,
+                    teks: soal.teks,
+                    jawaban: jawaban[idx] || 0
+                };
+            });
+
             var hasilData = {
                 primary: sorted[0],
                 secondary: sorted[1] || sorted[0],
@@ -1046,6 +1057,8 @@
                 scores: persen,
                 gender: userGender,
                 status: userStatus,
+                jawaban: jawabanDetail,
+                totalSoal: soalAcak.length,
                 tanggal: new Date().toISOString()
             };
 
