@@ -15,39 +15,50 @@
 </head>
 
 <body class="login-page">
+    <!-- Floating background orbs -->
+    <div class="login-orbs">
+        <div class="login-orb"></div>
+        <div class="login-orb"></div>
+        <div class="login-orb"></div>
+        <div class="login-orb"></div>
+    </div>
+
+    <!-- Floating particles (di-generate JS) -->
+    <div id="loginParticles" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:0;"></div>
+
     <div class="login-wrapper">
         <div class="login-container" id="loginContainer">
-            <span class="logo">💬</span>
-            <h1><strong>Relasi</strong>🌱</h1>
-            <p class="subtitle">Grow Closer. Love Better.</p>
+            <span class="logo stagger-item">💬</span>
+            <h1 class="stagger-item"><strong>Relasi</strong>🌱</h1>
+            <p class="subtitle stagger-item">Grow Closer. Love Better.</p>
 
-            <div class="error-message" id="errorMessage">
+            <div class="error-message stagger-item" id="errorMessage">
                 ⚠️ <span id="errorText">Terjadi kesalahan. Silakan coba lagi.</span>
             </div>
 
-            <div class="loading" id="loading">
+            <div class="loading stagger-item" id="loading">
                 <div class="spinner"></div>
                 <p class="loading-text">Memproses login...</p>
             </div>
 
-            <button class="btn-google" onclick="loginWithGoogle()" id="btnGoogle">
+            <button class="btn-google stagger-item" onclick="loginWithGoogle()" id="btnGoogle">
                 <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google"
                     class="google-icon" />
                 Login dengan Google
             </button>
 
-            <div class="divider">atau</div>
+            <div class="divider stagger-item">atau</div>
 
-            <button class="btn-email" onclick="alert('🚧 Fitur login email akan segera hadir!')" id="btnEmail">
+            <button class="btn-email stagger-item" onclick="alert('🚧 Fitur login email akan segera hadir!')" id="btnEmail">
                 📧 Login dengan Email
             </button>
 
-            <div class="footer-text">
+            <div class="footer-text stagger-item">
                 Dengan login, kamu setuju dengan <br />
                 <a href="#">Syarat & Ketentuan</a> dan <a href="#">Kebijakan Privasi</a> kami.
             </div>
 
-            <div class="register-link">
+            <div class="register-link stagger-item">
                 Belum punya akun? <a href="#">Daftar di sini</a>
             </div>
         </div>
@@ -127,22 +138,47 @@
         });
 
         // ============================================================
-        //  Trigger Logging
+        //  FLOATING PARTICLES
         // ============================================================
-        // login.html
-        document.getElementById('loginForm').addEventListener('submit', async function (e) {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-                // Logging otomatis di handle oleh auth.onAuthStateChanged
-                window.location.href = '/dashboard';
-            } catch (error) {
-                alert('Login gagal: ' + error.message);
+        (function createParticles() {
+            const container = document.getElementById('loginParticles');
+            const emojis = ['🌸', '💕', '✨', '🌿', '🕊️', '💫', '🌷', '🫧'];
+            for (let i = 0; i < 15; i++) {
+                const particle = document.createElement('span');
+                particle.className = 'login-particle';
+                particle.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                particle.style.cssText = [
+                    'position:absolute',
+                    'pointer-events:none',
+                    'font-size:' + (12 + Math.random() * 18) + 'px',
+                    'left:' + Math.random() * 100 + '%',
+                    'animation:particleRise ' + (8 + Math.random() * 12) + 's linear infinite',
+                    'animation-delay:' + Math.random() * 10 + 's',
+                    'opacity:0'
+                ].join(';');
+                container.appendChild(particle);
             }
-        });
+        })();
+
+        // ============================================================
+        //  Trigger Logging (hanya jika form email login tersedia)
+        // ============================================================
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    // Logging otomatis di handle oleh auth.onAuthStateChanged
+                    window.location.href = '/dashboard';
+                } catch (error) {
+                    alert('Login gagal: ' + error.message);
+                }
+            });
+        }
     </script>
 </body>
 

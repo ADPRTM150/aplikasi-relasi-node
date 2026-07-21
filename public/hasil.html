@@ -76,6 +76,452 @@
             }
         }
 
+        /* ============================================================
+           ANIMASI WELLNESS RESULT
+           ============================================================ */
+        @keyframes scorePopIn {
+            0% { transform: scale(0); opacity: 0; }
+            60% { transform: scale(1.15); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes ringFill {
+            from { stroke-dashoffset: var(--ring-circumference, 283); }
+            to { stroke-dashoffset: var(--ring-offset, 0); }
+        }
+
+        @keyframes categorySlideUp {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes cardSlideIn {
+            0% { opacity: 0; transform: translateX(-20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes cardSlideInRight {
+            0% { opacity: 0; transform: translateX(20px); }
+            100% { opacity: 1; transform: translateX(0); }
+        }
+
+        @keyframes shimmerGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255,255,255,0.3), 0 0 30px rgba(244,167,187,0.2); }
+            50% { box-shadow: 0 0 25px rgba(255,255,255,0.5), 0 0 50px rgba(244,167,187,0.4); }
+        }
+
+        @keyframes sparkleFloat {
+            0% { transform: translateY(0) scale(0); opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { transform: translateY(-80px) scale(1.2); opacity: 0; }
+        }
+
+        @keyframes gentlePulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+
+        @keyframes barGrow {
+            from { width: 0% !important; }
+        }
+
+        /* Wellness score wrapper */
+        .wellness-score-wrap {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 0;
+        }
+
+        .wellness-ring-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .wellness-ring-container svg {
+            display: block;
+            filter: drop-shadow(0 4px 12px rgba(0,0,0,0.08));
+        }
+
+        .wellness-score-inner {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            animation: scorePopIn 0.7s cubic-bezier(0.34,1.56,0.64,1);
+        }
+
+        .wellness-score-number {
+            font-size: 40px;
+            font-weight: 800;
+            line-height: 1;
+            color: #1d3b36;
+        }
+
+        .wellness-score-label {
+            font-size: 12px;
+            color: #8a7a80;
+            font-weight: 500;
+        }
+
+        /* Category badge */
+        .wellness-category-badge {
+            display: inline-block;
+            padding: 6px 18px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 15px;
+            animation: categorySlideUp 0.5s ease 0.3s both;
+        }
+
+        /* Section title */
+        .wellness-section-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+            font-weight: 700;
+            color: #4a3a40;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: categorySlideUp 0.4s ease forwards;
+        }
+
+        /* Dimension cards */
+        .wellness-dim-card {
+            background: #fff;
+            border: 1px solid #fcd5e3;
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.25s ease;
+            opacity: 0;
+        }
+
+        .wellness-dim-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(244,167,187,0.15);
+            border-color: #f4a7bb;
+        }
+
+        .wellness-dim-card .dim-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #4a3a40;
+        }
+
+        .wellness-dim-card .dim-icon {
+            font-size: 20px;
+        }
+
+        .wellness-dim-card .dim-score-badge {
+            background: linear-gradient(135deg, #fcd5e3, #fff5f8);
+            color: #e8879f;
+            font-weight: 700;
+            font-size: 14px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .wellness-dim-card.strength .dim-score-badge {
+            background: linear-gradient(135deg, #c8e6c9, #e8f5e9);
+            color: #2e7d32;
+        }
+
+        .wellness-dim-card.priority .dim-score-badge {
+            background: linear-gradient(135deg, #fff3e0, #fff8e1);
+            color: #e65100;
+        }
+
+        /* Sparkle particles */
+        .sparkle-particle {
+            position: absolute;
+            pointer-events: none;
+            font-size: 18px;
+            animation: sparkleFloat 1.5s ease-out forwards;
+        }
+
+        /* Risk alert enhanced */
+        .risk-alert-enhanced {
+            background: linear-gradient(135deg, #fff3e0, #fff8e1);
+            border: 2px solid #ff9800;
+            border-radius: 14px;
+            padding: 18px 20px;
+            margin: 16px 0;
+            animation: categorySlideUp 0.5s ease 0.6s both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .risk-alert-enhanced::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0;
+            width: 4px;
+            height: 100%;
+            background: #ff9800;
+            border-radius: 2px 0 0 2px;
+        }
+
+        .risk-alert-enhanced .risk-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .risk-alert-enhanced .risk-icon {
+            font-size: 28px;
+            animation: gentlePulse 2s ease-in-out infinite;
+        }
+
+        /* Action buttons — style senada love-language */
+        .btn-action-primary {
+            padding: 14px 28px !important;
+            background: #e8879f !important;
+            color: white !important;
+            border: none !important;
+            border-radius: 50px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            box-shadow: 0 4px 15px rgba(232,135,159,0.25) !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            flex: 1 !important;
+            text-align: center !important;
+            min-width: 130px !important;
+        }
+
+        .btn-action-primary:hover {
+            background: #d4738a !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 24px rgba(232,135,159,0.35) !important;
+        }
+
+        .btn-action-secondary {
+            padding: 14px 28px !important;
+            background: transparent !important;
+            color: #e8879f !important;
+            border: 2px solid rgba(232,135,159,0.25) !important;
+            border-radius: 50px !important;
+            font-size: 15px !important;
+            font-weight: 600 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease !important;
+            text-decoration: none !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            flex: 1 !important;
+            text-align: center !important;
+            min-width: 130px !important;
+        }
+
+        .btn-action-secondary:hover {
+            background: rgba(232,135,159,0.06) !important;
+            border-color: #e8879f !important;
+            transform: translateY(-2px) !important;
+        }
+
+        /* Partner info */
+        .wellness-partner-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            font-size: 14px;
+            color: #5a6f6a;
+            margin-top: 6px;
+            animation: categorySlideUp 0.4s ease 0.5s both;
+        }
+
+        .wellness-partner-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f4a7bb, #b8a9c9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .wellness-date {
+            text-align: center;
+            font-size: 13px;
+            color: #8a7a80;
+            margin-bottom: 16px;
+            animation: categorySlideUp 0.4s ease 0.4s both;
+        }
+
+        /* ============================================================
+           ANIMASI LOVE LANGUAGE RESULT
+           ============================================================ */
+        @keyframes barPopIn {
+            0% { width: 0% !important; opacity: 0; }
+            60% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes primaryPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(244,167,187,0.4); }
+            50% { box-shadow: 0 0 0 12px rgba(244,167,187,0); }
+        }
+
+        @keyframes heartFloat {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-60px) rotate(20deg); opacity: 0; }
+        }
+
+        @keyframes llIconBounce {
+            0%, 100% { transform: scale(1); }
+            30% { transform: scale(1.3); }
+            50% { transform: scale(0.9); }
+            70% { transform: scale(1.1); }
+        }
+
+        .ll-chart-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+            opacity: 0;
+            animation: categorySlideUp 0.4s ease forwards;
+        }
+
+        .ll-chart-label {
+            width: 150px;
+            font-weight: 600;
+            font-size: 14px;
+            color: #4a3a40;
+            flex-shrink: 0;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: flex-end;
+        }
+
+        .ll-chart-bar-wrap {
+            flex: 1;
+            height: 28px;
+            background: #fcd5e3;
+            border-radius: 14px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .ll-chart-bar-fill {
+            height: 100%;
+            border-radius: 14px;
+            transition: width 1.2s cubic-bezier(0.34,1.56,0.64,1);
+            width: 0%;
+            position: relative;
+        }
+
+        .ll-chart-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 50%;
+            background: rgba(255,255,255,0.25);
+            border-radius: 14px 14px 0 0;
+        }
+
+        .ll-chart-percent {
+            width: 52px;
+            font-weight: 800;
+            font-size: 14px;
+            color: #4a3a40;
+            flex-shrink: 0;
+            text-align: left;
+        }
+
+        .ll-primary-box {
+            background: linear-gradient(135deg, #fff0f5, #fdf2f8, #fff5f8);
+            padding: 20px 24px;
+            border-radius: 16px;
+            border: 2px solid #f4a7bb;
+            margin-top: 18px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            animation: primaryPulse 3s ease-in-out infinite;
+        }
+
+        .ll-primary-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, transparent 60%);
+            animation: shimmerGlow 2s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        .ll-primary-label {
+            font-size: 13px;
+            color: #8a7a80;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ll-primary-value {
+            font-size: 24px;
+            font-weight: 800;
+            color: #e8879f;
+            margin-top: 4px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ll-primary-value .ll-primary-icon {
+            display: inline-block;
+            animation: llIconBounce 2s ease-in-out infinite;
+            font-size: 28px;
+            vertical-align: middle;
+            margin-right: 4px;
+        }
+
+        .ll-primary-value small {
+            font-size: 14px;
+            color: #8a7a80;
+            font-weight: 400;
+        }
+
+        .ll-hearts-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .ll-floating-heart {
+            position: absolute;
+            font-size: 16px;
+            animation: heartFloat 3s ease-in forwards;
+            pointer-events: none;
+        }
+
         .empty-state-enhanced h3 {
             font-size: 20px;
             color: var(--pink-text, #4a3a40);
@@ -622,7 +1068,7 @@
 
                         // RENDER
                         var colors = {
-                            'Words of Affirmation': '#6c5ce7',
+                            'Words of Affirmation': '#e8879f',
                             'Acts of Service': '#00b894',
                             'Quality Time': '#d4a373',
                             'Physical Touch': '#e17055',
@@ -657,39 +1103,46 @@
                             var percent = parseInt(data[key]) || 0;
                             var color = colors[key] || '#9c27b0';
                             var icon = emoji[key] || '📌';
+                            var delay = 0.2 + j * 0.12;
 
-                            html += '<div class="chart-item">';
-                            html += '  <div class="label">' + icon + ' ' + key + '</div>';
-                            html += '  <div class="bar-bg">';
-                            html += '    <div class="bar-fill" style="width:0%;background:' + color +
-                                ';" data-width="' +
-                                percent + '"></div>';
+                            html += '<div class="ll-chart-item" style="animation-delay:' + delay + 's;">';
+                            html += '  <div class="ll-chart-label">' + icon + ' ' + key + '</div>';
+                            html += '  <div class="ll-chart-bar-wrap">';
+                            html += '    <div class="ll-chart-bar-fill" style="background:' + color +
+                                ';" data-width="' + percent + '"></div>';
                             html += '  </div>';
-                            html += '  <div class="percent">' + percent + '%</div>';
+                            html += '  <div class="ll-chart-percent" data-target="' + percent + '">0%</div>';
                             html += '</div>';
                         }
 
                         // ============================================================
-                        //  ACTION BUTTONS LOVE LANGUAGE - ESTETIK
+                        //  PRIMARY BOX - ANIMASI
                         // ============================================================
                         var topKey = sorted[0];
-                        html += '<div class="primary-box">';
-                        html += '  <div class="label">🌟 Love Language Utamamu</div>';
-                        html += '  <div class="value">' + (emoji[topKey] || '') + ' ' + topKey + ' <small>' + data[
-                            topKey] + '%</small></div>';
+                        var topIcon = emoji[topKey] || '💖';
+                        var topPercent = data[topKey];
+
+                        html += '<div class="ll-primary-box" style="position:relative;">';
+                        html += '  <div class="ll-hearts-container" id="llHeartsContainer"></div>';
+                        html += '  <div class="ll-primary-label">🌟 Love Language Utamamu</div>';
+                        html += '  <div class="ll-primary-value">';
+                        html += '    <span class="ll-primary-icon">' + topIcon + '</span>';
+                        html += '    ' + topKey;
+                        html += '    <small> · ' + topPercent + '%</small>';
+                        html += '  </div>';
                         html += '</div>';
 
                         // 🔥 ACTION BUTTONS
                         html +=
-                            '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
+                            '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(244,167,187,0.10);">';
 
                         html +=
-                            '  <a href="/love-language.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;box-shadow:0 4px 20px rgba(233,30,99,0.30);display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                            '  <a href="/love-language.html" class="btn-action-primary">' +
                             '    <span style="font-size:18px;">🔄</span> Tes Ulang' +
                             '  </a>';
 
                         html +=
-                            '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
+                            '  <a href="/" class="btn-action-secondary">' +
                             '    <span style="font-size:18px;">🏠</span> Beranda' +
                             '  </a>';
 
@@ -697,12 +1150,57 @@
 
                         container.innerHTML = html;
 
+                        // ⏱️ Animate bars + counters + floating hearts
                         setTimeout(function () {
-                            var bars = container.querySelectorAll('.bar-fill');
+                            // Animate bars
+                            var bars = container.querySelectorAll('.ll-chart-bar-fill');
                             for (var k = 0; k < bars.length; k++) {
                                 bars[k].style.width = bars[k].dataset.width + '%';
                             }
-                        }, 400);
+                            // Animate counters
+                            var percents = container.querySelectorAll('.ll-chart-percent');
+                            for (var m = 0; m < percents.length; m++) {
+                                var target = parseInt(percents[m].dataset.target) || 0;
+                                animateCounterLL(percents[m], target, 1000 + m * 150);
+                            }
+                            // Floating hearts
+                            var heartsContainer = document.getElementById('llHeartsContainer');
+                            if (heartsContainer) {
+                                spawnHearts(heartsContainer);
+                            }
+                        }, 300);
+
+                        // Helper: counter animasi
+                        function animateCounterLL(el, target, duration) {
+                            var start = null;
+                            function step(ts) {
+                                if (!start) start = ts;
+                                var p = Math.min((ts - start) / duration, 1);
+                                var eased = 1 - Math.pow(1 - p, 3);
+                                el.textContent = Math.round(target * eased) + '%';
+                                if (p < 1) requestAnimationFrame(step);
+                                else el.textContent = target + '%';
+                            }
+                            requestAnimationFrame(step);
+                        }
+
+                        // Helper: floating hearts
+                        function spawnHearts(container) {
+                            var hearts = ['💕', '❤️', '💗', '💖', '💝', '🩷', '💘', '✨'];
+                            for (var h = 0; h < 10; h++) {
+                                setTimeout(function() {
+                                    var heart = document.createElement('span');
+                                    heart.className = 'll-floating-heart';
+                                    heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+                                    heart.style.left = (10 + Math.random() * 80) + '%';
+                                    heart.style.bottom = '0';
+                                    heart.style.fontSize = (12 + Math.random() * 14) + 'px';
+                                    heart.style.animationDuration = (2 + Math.random() * 3) + 's';
+                                    container.appendChild(heart);
+                                    setTimeout(function() { heart.remove(); }, 3500);
+                                }, h * 200);
+                            }
+                        }
 
                     })
                     .catch(function (err) {
@@ -787,7 +1285,7 @@
             }
 
             // ============================================================
-            //  🔥 PROCESS WELLNESS DATA
+            //  🔥 PROCESS WELLNESS DATA (DENGAN ANIMASI)
             // ============================================================
             function processWellnessData(docData, role, container, userName) {
                 if (!docData.results) {
@@ -811,7 +1309,6 @@
 
                 var results = docData.results;
 
-                // 🔥 Helper functions
                 function getDimLabel(id) {
                     if (window.wellnessDimensions && Array.isArray(window.wellnessDimensions)) {
                         for (var i = 0; i < window.wellnessDimensions.length; i++) {
@@ -836,45 +1333,77 @@
 
                 var userAName = (role === 'user') ? 'Anda' : 'Pasangan';
                 var userBName = (role === 'user') ? 'Pasangan' : 'Anda';
+                var score = results.wellnessScore || 0;
 
                 var categoryColor = '#4CAF50';
                 var categoryEmoji = '🌟';
+                var ringColor = '#4CAF50';
                 if (results.category === 'Sangat Kuat') {
                     categoryColor = '#2E7D32';
                     categoryEmoji = '💪';
+                    ringColor = '#43A047';
                 } else if (results.category === 'Cukup Sehat') {
                     categoryColor = '#4CAF50';
                     categoryEmoji = '🌿';
+                    ringColor = '#66BB6A';
                 } else if (results.category === 'Perlu Diperkuat') {
                     categoryColor = '#FF9800';
                     categoryEmoji = '🔄';
+                    ringColor = '#FFA726';
                 } else if (results.category === 'Perlu Perhatian') {
                     categoryColor = '#E65100';
                     categoryEmoji = '⚠️';
+                    ringColor = '#EF6C00';
                 }
+
+                // Sparkle particles untuk skor >= 70
+                var showSparkles = score >= 70;
 
                 var html = '';
 
-                // Score Display
-                html +=
-                    '<div style="background:linear-gradient(135deg, #f8faf9, var(--pink-bg, #fff5f8));padding:20px;border-radius:12px;margin-bottom:16px;">';
-                html += '  <div class="score-display">';
-                html +=
-                    '    <div class="score-circle" style="background:linear-gradient(135deg, var(--pink-primary, #f4a7bb), ' +
-                    categoryColor + ');">';
-                html += '      <span class="number">' + (results.wellnessScore || 0) + '</span>';
-                html += '      <span class="label">/ 100</span>';
-                html += '    </div>';
-                html += '    <div class="score-info">';
-                html += '      <h3>' + categoryEmoji + ' ' + (results.category || 'Belum Terukur') + '</h3>';
-                html += '      <p>Skor refleksi hubungan Anda saat ini.</p>';
-                html += '      <div style="font-size:13px;color:var(--pink-text-light, #8a7a80);margin-top:4px;">📊 ' +
-                    userAName + ' & ' + userBName + '</div>';
-                html += '    </div>';
+                // ── SCORE SECTION DENGAN SVG RING ──
+                var ringRadius = 58;
+                var circumference = 2 * Math.PI * ringRadius;
+                var ringOffset = circumference * (1 - score / 100);
+
+                html += '<div class="wellness-score-wrap" id="wellnessScoreWrap">';
+
+                // Sparkle container
+                if (showSparkles) {
+                    html += '<div id="sparkleContainer" style="position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:2;"></div>';
+                }
+
+                html += '<div class="wellness-ring-container">';
+                html += '  <svg width="150" height="150" viewBox="0 0 150 150">';
+                html += '    <circle cx="75" cy="75" r="' + ringRadius + '" fill="none" stroke="#f0eefc" stroke-width="6"/>';
+                html += '    <circle id="wellnessRing" cx="75" cy="75" r="' + ringRadius + '" fill="none"';
+                html += '      stroke="' + ringColor + '" stroke-width="6" stroke-linecap="round"';
+                html += '      transform="rotate(-90 75 75)"';
+                html += '      style="stroke-dasharray:' + circumference + ';stroke-dashoffset:' + circumference + ';';
+                html += '        transition:stroke-dashoffset 1.5s cubic-bezier(0.4,0,0.2,1);"/>';
+                html += '  </svg>';
+                html += '  <div class="wellness-score-inner">';
+                html += '    <span class="wellness-score-number" id="wellnessScoreNum">0</span>';
+                html += '    <span class="wellness-score-label">/ 100</span>';
                 html += '  </div>';
                 html += '</div>';
+                html += '</div>';
 
-                // Date
+                // ── CATEGORY BADGE ──
+                html += '<div style="text-align:center;margin-bottom:6px;">';
+                html += '  <span class="wellness-category-badge" style="background:' + categoryColor + '15;color:' + categoryColor + ';">';
+                html += '    ' + categoryEmoji + ' ' + (results.category || 'Belum Terukur');
+                html += '  </span>';
+                html += '</div>';
+
+                // ── PARTNER INFO ──
+                html += '<div class="wellness-partner-info">';
+                html += '  <div class="wellness-partner-avatar">👤</div>';
+                html += '  <span>' + userAName + ' <span style="color:#b0c2bd;">&</span> ' + userBName + '</span>';
+                html += '  <div class="wellness-partner-avatar">👤</div>';
+                html += '</div>';
+
+                // ── DATE ──
                 var completedDate = new Date();
                 if (docData.completedAt) {
                     if (docData.completedAt.toDate) {
@@ -883,86 +1412,122 @@
                         completedDate = new Date(docData.completedAt);
                     }
                 }
-                html +=
-                    '<div style="font-size:13px;color:var(--pink-text-light, #8a7a80);margin-bottom:12px;text-align:center;">📅 ' +
-                    completedDate.toLocaleDateString('id-ID') + ' ' + completedDate.toLocaleTimeString('id-ID', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    }) + '</div>';
+                html += '<div class="wellness-date">📅 ' +
+                    completedDate.toLocaleDateString('id-ID') + ' · ' +
+                    completedDate.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) +
+                    '</div>';
 
-                // Strengths
-                html += '<div style="margin-bottom:12px;">';
-                html +=
-                    '<div style="font-size:14px;font-weight:600;color:var(--pink-text, #4a3a40);margin-bottom:8px;">🌟 Kekuatan</div>';
-                html += '<div class="dimension-grid">';
-
+                // ── STRENGTHS ──
+                html += '<div class="wellness-section-title" style="animation-delay:0.5s;">🌟 Kekuatan Hubungan</div>';
+                html += '<div class="dimension-grid" style="margin-bottom:14px;">';
                 if (results.strengths && results.strengths.length > 0) {
                     for (var s = 0; s < results.strengths.length; s++) {
                         var str = results.strengths[s];
-                        html += '<div class="dimension-item">';
-                        html += '  <span>' + getDimIcon(str.dimension) + ' ' + getDimLabel(str.dimension) + '</span>';
-                        html += '  <span class="dim-score">' + str.score + '%</span>';
+                        var delay = 0.5 + s * 0.1;
+                        html += '<div class="wellness-dim-card strength" style="animation:cardSlideIn 0.4s ease ' + delay + 's both;">';
+                        html += '  <div class="dim-left"><span class="dim-icon">' + getDimIcon(str.dimension) + '</span>' + getDimLabel(str.dimension) + '</div>';
+                        html += '  <div class="dim-score-badge">' + str.score + '%</div>';
                         html += '</div>';
                     }
-                } else {
-                    html += '<div style="color:var(--pink-text-light, #8a7a80);font-size:14px;">Belum ada data</div>';
                 }
-                html += '</div></div>';
+                html += '</div>';
 
-                // Priorities
-                html += '<div style="margin-bottom:12px;">';
-                html +=
-                    '<div style="font-size:14px;font-weight:600;color:var(--pink-text, #4a3a40);margin-bottom:8px;">💡 Area untuk Diperkuat</div>';
-                html += '<div class="dimension-grid">';
-
+                // ── PRIORITIES ──
+                html += '<div class="wellness-section-title" style="animation-delay:0.7s;">💡 Area untuk Diperkuat</div>';
+                html += '<div class="dimension-grid" style="margin-bottom:14px;">';
                 if (results.priorities && results.priorities.length > 0) {
                     for (var p = 0; p < results.priorities.length; p++) {
                         var pri = results.priorities[p];
-                        html += '<div class="dimension-item">';
-                        html += '  <span>' + getDimIcon(pri.dimension) + ' ' + getDimLabel(pri.dimension) + '</span>';
-                        html += '  <span class="dim-score">' + pri.score + '%</span>';
+                        var delay2 = 0.7 + p * 0.1;
+                        html += '<div class="wellness-dim-card priority" style="animation:cardSlideInRight 0.4s ease ' + delay2 + 's both;">';
+                        html += '  <div class="dim-left"><span class="dim-icon">' + getDimIcon(pri.dimension) + '</span>' + getDimLabel(pri.dimension) + '</div>';
+                        html += '  <div class="dim-score-badge">' + pri.score + '%</div>';
                         html += '</div>';
                     }
-                } else {
-                    html += '<div style="color:var(--pink-text-light, #8a7a80);font-size:14px;">Belum ada data</div>';
                 }
-                html += '</div></div>';
+                html += '</div>';
 
-                // Risk Alert
+                // ── RISK ALERT (ENHANCED) ──
                 var riskDetected = results.riskDetected && results.riskDetected.detected ? true : false;
                 if (riskDetected) {
-                    html += '<div class="risk-alert">';
+                    html += '<div class="risk-alert-enhanced">';
                     html += '  <div class="risk-header">';
-                    html += '    <span class="icon">⚠️</span>';
-                    html += '    <h4>Perhatian</h4>';
+                    html += '    <span class="risk-icon">⚠️</span>';
+                    html += '    <div>';
+                    html += '      <h4 style="margin:0;color:#e65100;font-size:16px;">Perhatian</h4>';
+                    html += '      <p style="margin:2px 0 0;font-size:13px;color:#5a6f6a;">Terdeteksi pola yang mungkin tidak aman. Hubungi profesional jika diperlukan.</p>';
+                    html += '    </div>';
                     html += '  </div>';
-                    html += '  <div class="risk-body">';
-                    html += '    Terdeteksi pola yang mungkin tidak aman. Hubungi profesional jika diperlukan.';
-                    html +=
-                        '    <div style="margin-top:8px;font-size:12px;color:var(--pink-text-light, #8a7a80);">📞 Hotline Kesehatan Mental: 119</div>';
-                    html += '  </div>';
+                    html += '  <div style="margin-top:8px;font-size:12px;color:#8a7a80;padding-left:38px;">📞 Hotline Kesehatan Mental: <strong>119</strong></div>';
                     html += '</div>';
                 }
 
-                // ============================================================
-                //  ACTION BUTTONS
-                // ============================================================
-                html +=
-                    '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(233,30,99,0.08);">';
-
-                html +=
-                    '  <a href="/relationship-check.html" class="btn-action btn-action-primary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:linear-gradient(135deg,#e91e63,#9c27b0);color:white;border:none;border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;box-shadow:0 4px 20px rgba(233,30,99,0.30);display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
-                    '    <span style="font-size:18px;">🔄</span> Ulangi Tes' +
-                    '  </a>';
-
-                html +=
-                    '  <a href="/" class="btn-action btn-action-secondary" style="flex:1;text-align:center;min-width:130px;text-decoration:none;padding:14px 28px;background:transparent;color:#e91e63;border:2px solid rgba(233,30,99,0.25);border-radius:14px;font-weight:600;font-size:15px;cursor:pointer;transition:all 0.4s;display:inline-flex;align-items:center;justify-content:center;gap:8px;">' +
-                    '    <span style="font-size:18px;">🏠</span> Beranda' +
-                    '  </a>';
-
+                // ── ACTION BUTTONS ──
+                html += '<div class="action-buttons" style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(244,167,187,0.10);">';
+                html += '  <a href="/relationship-check" class="btn-action-primary" style="text-decoration:none;">';
+                html += '    <span style="font-size:18px;">🔄</span> Ulangi Tes</a>';
+                html += '  <a href="/" class="btn-action-secondary" style="text-decoration:none;">';
+                html += '    <span style="font-size:18px;">🏠</span> Beranda</a>';
                 html += '</div>';
 
                 container.innerHTML = html;
+
+                // ⏱️ Animate score counter & ring after render
+                setTimeout(function() {
+                    var ring = document.getElementById('wellnessRing');
+                    var numEl = document.getElementById('wellnessScoreNum');
+                    if (ring) {
+                        ring.style.strokeDashoffset = ringOffset;
+                    }
+                    if (numEl) {
+                        animateCounter(numEl, 0, score, 1200);
+                    }
+                    // Sparkles
+                    if (showSparkles) {
+                        spawnSparkles(document.getElementById('sparkleContainer'));
+                    }
+                }, 200);
+            }
+
+            // ============================================================
+            //  🔥 ANIMATE COUNTER HELPER
+            // ============================================================
+            function animateCounter(el, from, to, duration) {
+                var start = null;
+                function step(timestamp) {
+                    if (!start) start = timestamp;
+                    var progress = Math.min((timestamp - start) / duration, 1);
+                    // Ease out cubic
+                    var eased = 1 - Math.pow(1 - progress, 3);
+                    el.textContent = Math.round(from + (to - from) * eased);
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        el.textContent = to;
+                    }
+                }
+                requestAnimationFrame(step);
+            }
+
+            // ============================================================
+            //  🔥 SPARKLE PARTICLES
+            // ============================================================
+            function spawnSparkles(container) {
+                if (!container) return;
+                var emojis = ['✨', '💫', '⭐', '🌟', '💖', '🪩'];
+                for (var i = 0; i < 12; i++) {
+                    setTimeout(function() {
+                        var spark = document.createElement('span');
+                        spark.className = 'sparkle-particle';
+                        spark.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                        spark.style.left = (20 + Math.random() * 60) + '%';
+                        spark.style.top = (40 + Math.random() * 40) + '%';
+                        spark.style.animationDelay = Math.random() * 0.3 + 's';
+                        spark.style.fontSize = (14 + Math.random() * 16) + 'px';
+                        container.appendChild(spark);
+                        setTimeout(function() { spark.remove(); }, 1600);
+                    }, i * 80);
+                }
             }
 
             // ============================================================

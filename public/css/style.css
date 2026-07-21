@@ -884,7 +884,9 @@ body {
 
 /* ─── BODY LOGIN ─── */
 body.login-page {
-    background: #FFF0F3;
+    background: linear-gradient(135deg, #FFF0F3 0%, #FCE4EC 30%, #F3E5F5 60%, #FFF0F3 100%);
+    background-size: 400% 400%;
+    animation: loginBgShift 12s ease-in-out infinite;
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -892,6 +894,85 @@ body.login-page {
     padding: 20px;
     margin: 0;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    overflow: hidden;
+    position: relative;
+}
+
+@keyframes loginBgShift {
+    0%, 100% { background-position: 0% 50%; }
+    25% { background-position: 100% 0%; }
+    50% { background-position: 100% 100%; }
+    75% { background-position: 0% 100%; }
+}
+
+/* ─── FLOATING ORBS ─── */
+.login-orbs {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.login-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(40px);
+    opacity: 0.35;
+    animation: orbFloat ease-in-out infinite;
+}
+
+.login-orb:nth-child(1) {
+    width: 260px; height: 260px;
+    background: #F4A7BB;
+    top: -80px; right: -60px;
+    animation-duration: 8s;
+}
+
+.login-orb:nth-child(2) {
+    width: 200px; height: 200px;
+    background: #B8A9C9;
+    bottom: -60px; left: -50px;
+    animation-duration: 10s;
+    animation-delay: -3s;
+}
+
+.login-orb:nth-child(3) {
+    width: 180px; height: 180px;
+    background: #FFD4B8;
+    top: 40%; left: 60%;
+    animation-duration: 9s;
+    animation-delay: -5s;
+}
+
+.login-orb:nth-child(4) {
+    width: 140px; height: 140px;
+    background: #a5d8d4;
+    top: 10%; left: 10%;
+    animation-duration: 11s;
+    animation-delay: -7s;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(30px, -40px) scale(1.1); }
+    50% { transform: translate(-20px, 20px) scale(0.9); }
+    75% { transform: translate(-30px, -30px) scale(1.05); }
+}
+
+/* ─── FLOATING PARTICLES ─── */
+.login-particle {
+    position: absolute;
+    pointer-events: none;
+    animation: particleRise linear infinite;
+    opacity: 0;
+}
+
+@keyframes particleRise {
+    0% { transform: translateY(100vh) rotate(0deg) scale(0); opacity: 0; }
+    10% { opacity: 0.7; }
+    90% { opacity: 0.3; }
+    100% { transform: translateY(-10vh) rotate(360deg) scale(1); opacity: 0; }
 }
 
 /* ─── WRAPPER ─── */
@@ -907,15 +988,19 @@ body.login-page {
 .login-container {
     max-width: 420px;
     width: 100%;
-    background: white;
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border-radius: 28px;
     padding: 48px 40px;
     box-shadow: 0 8px 40px rgba(244, 167, 187, 0.10);
-    border: 1px solid rgba(244, 167, 187, 0.06);
+    border: 1px solid rgba(255,255,255,0.6);
     text-align: center;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease;
+    transform: translateY(30px);
+    transition: all 0.7s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+    z-index: 1;
 }
 
 .login-container.visible {
@@ -923,11 +1008,39 @@ body.login-page {
     transform: translateY(0);
 }
 
+/* ─── STAGGERED ENTRANCE ─── */
+.login-container .stagger-item {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.login-container.visible .stagger-item {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.login-container.visible .stagger-item:nth-child(1) { transition-delay: 0.05s; }
+.login-container.visible .stagger-item:nth-child(2) { transition-delay: 0.15s; }
+.login-container.visible .stagger-item:nth-child(3) { transition-delay: 0.25s; }
+.login-container.visible .stagger-item:nth-child(4) { transition-delay: 0.35s; }
+.login-container.visible .stagger-item:nth-child(5) { transition-delay: 0.45s; }
+.login-container.visible .stagger-item:nth-child(6) { transition-delay: 0.55s; }
+.login-container.visible .stagger-item:nth-child(7) { transition-delay: 0.60s; }
+.login-container.visible .stagger-item:nth-child(8) { transition-delay: 0.65s; }
+
 /* ─── LOGO ─── */
 .login-container .logo {
     font-size: 52px;
     margin-bottom: 4px;
     display: block;
+    animation: logoBounce 0.7s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes logoBounce {
+    0% { transform: scale(0); opacity: 0; }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); opacity: 1; }
 }
 
 .login-container h1 {
@@ -939,10 +1052,16 @@ body.login-page {
 
 .login-container h1 strong {
     font-weight: 700;
-    background: linear-gradient(135deg, #F4A7BB, #B8A9C9);
+    background: linear-gradient(135deg, #F4A7BB 0%, #B8A9C9 50%, #F4A7BB 100%);
+    background-size: 200% auto;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: textShimmer 3s linear infinite;
+}
+
+@keyframes textShimmer {
+    to { background-position: 200% center; }
 }
 
 .login-container .subtitle {
@@ -969,6 +1088,25 @@ body.login-page {
     justify-content: center;
     gap: 12px;
     font-family: inherit;
+    position: relative;
+    z-index: 1;
+}
+
+/* Pulse ring */
+.login-container .btn-google::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 54px;
+    border: 2px solid rgba(244, 167, 187, 0.4);
+    animation: btnPulse 2.5s ease-out infinite;
+    z-index: -1;
+    pointer-events: none;
+}
+
+@keyframes btnPulse {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.06); opacity: 0; }
 }
 
 .login-container .btn-google:hover:not(:disabled) {
@@ -3876,6 +4014,33 @@ body.love-page {
     flex-wrap: wrap;
     gap: 6px;
     margin-top: 10px;
+}
+
+/* Staggered entrance untuk tags */
+.riwayat-tags .tag-strength,
+.riwayat-tags .tag-priority {
+    opacity: 0;
+    animation: tagPopIn 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+
+@keyframes tagPopIn {
+    from { opacity: 0; transform: scale(0.8) translateY(8px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Score shimmer */
+@keyframes scoreShimmer {
+    0%, 100% { background-position: 0% center; }
+    50% { background-position: 100% center; }
+}
+
+.riwayat-score .number.animate {
+    background: linear-gradient(90deg, #1d3b36, #e8879f, #f4a7bb, #1d3b36);
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: scoreShimmer 2s ease-in-out 1;
 }
 
 .riwayat-tags .tag-strength {

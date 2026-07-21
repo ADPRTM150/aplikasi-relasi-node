@@ -46,6 +46,265 @@ const SessionLog = {
 };
 
 // ============================================================
+//  🔥 IDLE TIMEOUT - AUTO LOGOUT (15 MENIT)
+// ============================================================
+const IdleTimeout = {
+  // Konfigurasi
+  IDLE_TIME: 15 * 60 * 1000,       // 15 menit tidak aktif
+  WARNING_TIME: 60 * 1000,          // Peringatan 60 detik sebelum logout
+
+  // State
+  timer: null,
+  warningTimer: null,
+  countdownInterval: null,
+  isWarningShown: false,
+
+  // Reset timer — dipanggil tiap ada aktivitas user
+  reset: function() {
+    // Clear timer yang ada
+    if (this.timer) clearTimeout(this.timer);
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+
+    // Sembunyikan warning kalau sedang tampil
+    if (this.isWarningShown) {
+      this.hideWarning();
+    }
+
+    // Hanya tracking kalau user sedang login
+    var user = firebase.auth().currentUser;
+    if (!user) return;
+
+    // Set timer baru: tampilkan warning 60 detik sebelum logout
+    this.timer = setTimeout(function() {
+      IdleTimeout.showWarning();
+    }, this.IDLE_TIME - this.WARNING_TIME);
+  },
+
+  // Tampilkan modal peringatan (dengan animasi)
+  showWarning: function() {
+    this.isWarningShown = true;
+    var totalSeconds = Math.round(this.WARNING_TIME / 1000);
+    var self = this;
+
+    // Inject CSS animasi
+    var style = document.createElement('style');
+    style.id = 'idleWarningStyles';
+    style.textContent =
+      '@keyframes idleFadeIn {' +
+        '0% { opacity: 0; }' +
+        '100% { opacity: 1; }' +
+      '}' +
+      '@keyframes idleScaleIn {' +
+        '0% { opacity: 0; transform: scale(0.85) translateY(20px); }' +
+        '100% { opacity: 1; transform: scale(1) translateY(0); }' +
+      '}' +
+      '@keyframes idlePulse {' +
+        '0%, 100% { transform: scale(1); }' +
+        '50% { transform: scale(1.15); }' +
+      '}' +
+      '@keyframes idleShake {' +
+        '0%, 100% { transform: translateX(0); }' +
+        '20% { transform: translateX(-6px); }' +
+        '40% { transform: translateX(6px); }' +
+        '60% { transform: translateX(-4px); }' +
+        '80% { transform: translateX(4px); }' +
+      '}' +
+      '@keyframes idleProgressPulse {' +
+        '0%, 100% { opacity: 1; }' +
+        '50% { opacity: 0.6; }' +
+      '}' +
+      '#idleExtendBtn:hover {' +
+        'transform: scale(1.03) !important;' +
+        'box-shadow: 0 8px 25px rgba(108,99,255,0.4) !important;' +
+      '}' +
+      '#idleExtendBtn:active {' +
+        'transform: scale(0.97) !important;' +
+      '}';
+    document.head.appendChild(style);
+
+    var modal = document.createElement('div');
+    modal.id = 'idleWarningModal';
+    modal.innerHTML =
+      // Backdrop
+      '<div style="position:fixed;top:0;left:0;right:0;bottom:0;' +
+        'background:rgba(0,0,0,0.45);z-index:99999;display:flex;align-items:center;' +
+        'justify-content:center;animation:idleFadeIn 0.35s ease;' +
+        'backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);">' +
+
+        // Card
+        '<div style="background:#fff;border-radius:20px;padding:36px 28px 28px;' +
+          'max-width:380px;width:90%;text-align:center;' +
+          'box-shadow:0 24px 80px rgba(0,0,0,0.25);' +
+          'animation:idleScaleIn 0.4s cubic-bezier(0.34,1.56,0.64,1);' +
+          'position:relative;overflow:visible;">' +
+
+          // Circular countdown ring
+          '<div style="position:relative;display:inline-block;margin-bottom:16px;">' +
+            '<svg width="90" height="90" viewBox="0 0 90 90" style="display:block;">' +
+              '<circle cx="45" cy="45" r="38" fill="none" stroke="#f0eefc" stroke-width="5"/>' +
+              '<circle id="idleCountdownRing" cx="45" cy="45" r="38" fill="none" ' +
+                'stroke="#6C63FF" stroke-width="5" stroke-linecap="round" ' +
+                'transform="rotate(-90 45 45)" ' +
+                'style="stroke-dasharray:238.76;stroke-dashoffset:0;transition:stroke-dashoffset 0.9s linear,stroke 0.4s ease;"/>' +
+            '</svg>' +
+            // Timer icon & countdown number di tengah ring
+            '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;">' +
+              '<span style="font-size:26px;display:block;line-height:1;' +
+                'animation:idlePulse 2s ease-in-out infinite;">⏳</span>' +
+              '<strong id="idleCountdown" style="font-size:20px;color:#1d3b36;display:block;' +
+                'margin-top:2px;font-variant-numeric:tabular-nums;">' + totalSeconds + '</strong>' +
+            '</div>' +
+          '</div>' +
+
+          // Title
+          '<h3 style="margin:0 0 6px;color:#1d3b36;font-size:18px;font-weight:700;">Sesi Hampir Berakhir</h3>' +
+
+          // Description
+          '<p style="color:#5a6f6a;font-size:13px;margin:0 0 18px;line-height:1.6;">' +
+            'Kamu tidak aktif selama 15 menit.<br>' +
+            'Klik tombol di bawah untuk melanjutkan sesi.</p>' +
+
+          // Progress bar
+          '<div style="width:100%;height:4px;background:#f0eefc;border-radius:4px;margin-bottom:20px;overflow:hidden;">' +
+            '<div id="idleProgressBar" style="height:100%;background:linear-gradient(90deg,#6C63FF,#a78bfa);' +
+              'border-radius:4px;width:100%;transition:width 0.9s linear;"></div>' +
+          '</div>' +
+
+          // Button
+          '<button id="idleExtendBtn" ' +
+            'style="background:linear-gradient(135deg,#6C63FF,#7c73ff);color:#fff;border:none;' +
+            'padding:13px 32px;border-radius:50px;font-size:15px;font-weight:600;' +
+            'cursor:pointer;transition:all 0.25s ease;width:100%;letter-spacing:0.3px;' +
+            'box-shadow:0 4px 15px rgba(108,99,255,0.3);">' +
+            '✨  Lanjutkan Sesi' +
+          '</button>' +
+
+        '</div>' +
+      '</div>';
+    document.body.appendChild(modal);
+
+    // Event listener untuk tombol
+    document.getElementById('idleExtendBtn').addEventListener('click', function() {
+      self.extend();
+    });
+
+    // Countdown dengan animasi circular ring
+    var countdown = totalSeconds;
+    var countdownEl = document.getElementById('idleCountdown');
+    var ring = document.getElementById('idleCountdownRing');
+    var progressBar = document.getElementById('idleProgressBar');
+    var card = modal.querySelector('[style*="animation:idleScaleIn"]');
+    var circumference = 2 * Math.PI * 38; // ~238.76
+
+    this.countdownInterval = setInterval(function() {
+      countdown--;
+      if (countdownEl) countdownEl.textContent = countdown;
+
+      // Update circular ring
+      if (ring) {
+        var offset = circumference * (1 - countdown / totalSeconds);
+        ring.style.strokeDashoffset = offset;
+
+        // Warna berubah saat mendekati habis
+        if (countdown <= 10) {
+          ring.style.stroke = '#ef4444';
+        } else if (countdown <= 20) {
+          ring.style.stroke = '#f59e0b';
+        }
+      }
+
+      // Update progress bar
+      if (progressBar) {
+        progressBar.style.width = (countdown / totalSeconds * 100) + '%';
+        if (countdown <= 10) {
+          progressBar.style.background = 'linear-gradient(90deg,#ef4444,#f87171)';
+          progressBar.style.animation = 'idleProgressPulse 0.6s ease-in-out infinite';
+        }
+      }
+
+      // Shake animation saat 5 detik terakhir
+      if (countdown <= 5 && card) {
+        card.style.animation = 'idleShake 0.5s ease-in-out';
+        setTimeout(function() {
+          card.style.animation = '';
+        }, 500);
+      }
+
+      if (countdown <= 0) {
+        clearInterval(self.countdownInterval);
+        self.countdownInterval = null;
+        self.forceLogout();
+      }
+    }, 1000);
+  },
+
+  // Sembunyikan warning
+  hideWarning: function() {
+    this.isWarningShown = false;
+    var modal = document.getElementById('idleWarningModal');
+    if (modal) modal.remove();
+    var style = document.getElementById('idleWarningStyles');
+    if (style) style.remove();
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+  },
+
+  // User klik "Lanjutkan Sesi"
+  extend: function() {
+    this.hideWarning();
+    this.reset();
+    console.log('⏰ Sesi diperpanjang oleh user');
+  },
+
+  // Paksa logout
+  forceLogout: function() {
+    this.hideWarning();
+    console.log('⏰ Auto-logout: user tidak aktif 15 menit');
+
+    var user = firebase.auth().currentUser;
+    if (user) {
+      // Log aktivitas logout
+      logUserLogout().finally(function() {
+        SessionLog.clearAll(user.uid);
+        firebase.auth().signOut().then(function() {
+          window.location.replace('/login');
+        });
+      });
+    } else {
+      firebase.auth().signOut().then(function() {
+        window.location.replace('/login');
+      });
+    }
+  },
+
+  // Mulai tracking aktivitas
+  start: function() {
+    var events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
+    var self = this;
+    events.forEach(function(event) {
+      document.addEventListener(event, function() {
+        self.reset();
+      }, { passive: true });
+    });
+    this.reset();
+    console.log('⏰ Idle timeout aktif — 15 menit');
+  },
+
+  // Hentikan tracking
+  stop: function() {
+    if (this.timer) clearTimeout(this.timer);
+    if (this.countdownInterval) clearInterval(this.countdownInterval);
+    this.hideWarning();
+    console.log('⏰ Idle timeout dihentikan');
+  }
+};
+
+// Expose ke global
+window.IdleTimeout = IdleTimeout;
+
+// ============================================================
 //  🔥 LOGIN WITH GOOGLE
 // ============================================================
 function loginWithGoogle() {
@@ -326,14 +585,16 @@ auth.onAuthStateChanged(async (user) => {
     // 🔥 CEK SESSION STORAGE
     const key = `user_login_${user.uid}`;
     const alreadyLogged = SessionLog.has(key);
-    
+
     if (!alreadyLogged) {
       await logUserLogin();
       console.log("👤 User logged in:", user.email);
+      // 🔥 Mulai idle timeout (hanya saat login baru)
+      IdleTimeout.start();
     } else {
       console.log("👤 User already logged in this session");
     }
-    
+
     // Update lastLogin di Firestore
     try {
       await db.collection("users").doc(user.uid).update({
@@ -343,12 +604,14 @@ auth.onAuthStateChanged(async (user) => {
     } catch (e) {
       // Ignore - user mungkin belum ada di Firestore
     }
-    
+
   } else {
     if (previousUser) {
       console.log("👤 User logged out:", previousUser.email);
       // Bersihkan session storage
       SessionLog.clearAll(previousUser.uid);
+      // 🔥 Hentikan idle timeout
+      IdleTimeout.stop();
     }
   }
   previousUser = user;

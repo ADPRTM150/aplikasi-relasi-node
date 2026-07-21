@@ -481,7 +481,7 @@ async function tampilkanRiwayat() {
                     </div>
 
                     <div class="riwayat-score">
-                        <span class="number">${results.wellnessScore || 0}</span>
+                        <span class="number animate" id="riwayatScoreNum">0</span>
                         <span class="label">%</span>
                         <span class="category">${results.category || 'Belum Terukur'}</span>
                     </div>
@@ -490,12 +490,12 @@ async function tampilkanRiwayat() {
                         <span>👤 ${userAName} & ${userBName}</span>
                     </div>
 
-                    <div class="riwayat-tags">
-                        ${strengths.slice(0, 3).map(s => `
-                            <span class="tag-strength">🌟 ${dimLabels[s.dimension] || s.dimension} ${s.score}%</span>
+                    <div class="riwayat-tags" id="riwayatTags">
+                        ${strengths.slice(0, 3).map((s, i) => `
+                            <span class="tag-strength" style="animation-delay:${0.3 + i * 0.08}s;">🌟 ${dimLabels[s.dimension] || s.dimension} ${s.score}%</span>
                         `).join('')}
-                        ${priorities.slice(0, 3).map(p => `
-                            <span class="tag-priority">💡 ${dimLabels[p.dimension] || p.dimension} ${p.score}%</span>
+                        ${priorities.slice(0, 3).map((p, i) => `
+                            <span class="tag-priority" style="animation-delay:${0.3 + (strengths.slice(0,3).length + i) * 0.08}s;">💡 ${dimLabels[p.dimension] || p.dimension} ${p.score}%</span>
                         `).join('')}
                     </div>
 
@@ -508,6 +508,13 @@ async function tampilkanRiwayat() {
 
             container.innerHTML = html;
             document.getElementById('riwayatCount').textContent = '1';
+
+            // ⏱️ Animate score counter
+            var scoreTarget = results.wellnessScore || 0;
+            var scoreEl = document.getElementById('riwayatScoreNum');
+            if (scoreEl && scoreTarget > 0) {
+                animateRiwayatScore(scoreEl, scoreTarget);
+            }
 
         } else {
             // BELUM SELESAI
@@ -565,6 +572,26 @@ async function tampilkanRiwayat() {
         function kembaliKeArtikel(e) {
             e.preventDefault();
             window.location.replace('/artikel');
+        }
+
+        // ============================================================
+        //  🔥 ANIMATE SCORE COUNTER (PERJALANAN RELASI)
+        // ============================================================
+        function animateRiwayatScore(el, target) {
+            var start = null;
+            var duration = 1200;
+            function step(ts) {
+                if (!start) start = ts;
+                var p = Math.min((ts - start) / duration, 1);
+                var eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased);
+                if (p < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    el.textContent = target;
+                }
+            }
+            requestAnimationFrame(step);
         }
 
         // ❌ HAPUS PEMANGGILAN INI (SUDAH DI ATAS)
