@@ -172,58 +172,115 @@
                         const userData = userDoc.data();
                         const ll = userData.loveLanguage;
 
-                        // Format: { primary: {label, score}, secondary: {...}, all: [...] }
+                        // 1a. all array (5 love language lengkap)
                         if (ll && ll.all && Array.isArray(ll.all) && ll.all.length > 0) {
-                            data = {};
+                            if (!data) data = {};
                             ll.all.forEach(function(item) {
-                                data[item.label] = item.score;
+                                if (item.label && item.score !== undefined) {
+                                    data[item.label] = item.score;
+                                }
                             });
-                            primaryKey = ll.primary ? ll.primary.label : null;
-                            if (userData.updatedAt) {
-                                var d = userData.updatedAt.toDate ? userData.updatedAt.toDate() : new Date(userData.updatedAt);
-                                tanggal = d;
+                            if (ll.primary && ll.primary.label && !primaryKey) {
+                                primaryKey = ll.primary.label;
                             }
                         }
-                        // Format lama: { "Words of Affirmation": 80, ... }
-                        else if (ll && typeof ll === 'object') {
-                            var keys = Object.keys(ll).filter(function(k) {
-                                return k !== 'primary' && k !== 'secondary' && k !== 'all' && k !== 'updatedAt';
+
+                        // 1b. direct keys (format lama)
+                        if (ll && typeof ll === 'object') {
+                            var LL_KEYS = ['Words of Affirmation', 'Acts of Service', 'Quality Time', 'Physical Touch', 'Receiving Gifts'];
+                            LL_KEYS.forEach(function(k) {
+                                if (ll[k] !== undefined && (!data || !data[k])) {
+                                    if (!data) data = {};
+                                    data[k] = ll[k];
+                                }
                             });
-                            if (keys.length > 0) {
-                                data = {};
-                                keys.forEach(function(k) { data[k] = ll[k]; });
-                                primaryKey = ll.primary || null;
+                        }
+
+                        // 1c. primary/secondary objects
+                        if (ll && ll.primary && ll.primary.label) {
+                            if (!data) data = {};
+                            if (!data[ll.primary.label]) {
+                                data[ll.primary.label] = ll.primary.score || 0;
                             }
+                            if (!primaryKey) primaryKey = ll.primary.label;
+                        }
+                        if (ll && ll.secondary && ll.secondary.label) {
+                            if (!data) data = {};
+                            if (!data[ll.secondary.label]) {
+                                data[ll.secondary.label] = ll.secondary.score || 0;
+                            }
+                        }
+
+                        // Tanggal
+                        if (!tanggal && userData.updatedAt) {
+                            tanggal = userData.updatedAt.toDate ? userData.updatedAt.toDate() : new Date(userData.updatedAt);
                         }
                     }
                 }
             } catch (e) {
-                console.warn('⚠️ Gagal baca Firestore, fallback ke localStorage:', e.message);
+                console.warn('⚠️ Gagal baca Firestore:', e.message);
             }
 
-            // ── 2. FALLBACK KE LOCALSTORAGE ──
-            if (!data || Object.keys(data).length === 0) {
-                try {
-                    const raw = localStorage.getItem('loveLanguageResult');
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        if (parsed && typeof parsed === 'object') {
-                            // Bisa jadi format { all: [...] } atau { label: score }
-                            if (parsed.all && Array.isArray(parsed.all)) {
-                                data = {};
-                                parsed.all.forEach(function(item) {
+            // ── 2. TAMBAHAN DARI LOCALSTORAGE ──
+            try {
+                const raw = localStorage.getItem('loveLanguageResult');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === 'object') {
+                        if (!data) data = {};
+
+                        // 2a. all array
+                        if (parsed.all && Array.isArray(parsed.all)) {
+                            parsed.all.forEach(function(item) {
+                                if (item.label && item.score !== undefined && !data[item.label]) {
                                     data[item.label] = item.score;
-                                });
-                                primaryKey = parsed.primary || null;
-                            } else {
-                                data = parsed;
-                            }
-                            if (parsed.tanggal) {
-                                tanggal = new Date(parsed.tanggal);
-                            }
+                                }
+                            });
+                        }
+
+                        // 2b. scores object
+                        if (parsed.scores && typeof parsed.scores === 'object') {
+                            Object.keys(parsed.scores).forEach(function(k) {
+                                if (!data[k]) {
+                                    data[k] = parsed.scores[k];
+                                }
+                            });
+                        }
+
+                        // 2c. primary/secondary strings
+                        if (parsed.primary && typeof parsed.primary === 'string' && !data[parsed.primary]) {
+                            data[parsed.primary] = parsed.scores ? (parsed.scores[parsed.primary] || 50) : 50;
+                        }
+                        if (parsed.secondary && typeof parsed.secondary === 'string' && !data[parsed.secondary]) {
+                            data[parsed.secondary] = parsed.scores ? (parsed.scores[parsed.secondary] || 40) : 40;
+                        }
+
+                        if (!primaryKey) primaryKey = parsed.primary || null;
+                        if (!tanggal && parsed.tanggal) {
+                            tanggal = new Date(parsed.tanggal);
                         }
                     }
-                } catch (e) {}
+                }
+            } catch (e) {}
+
+            // ── 3. FILTER: hanya love language keys ──
+            var VALID_KEYS = ['Words of Affirmation', 'Acts of Service', 'Quality Time', 'Physical Touch', 'Receiving Gifts'];
+            if (data) {
+                var cleanData = {};
+                VALID_KEYS.forEach(function(k) {
+                    if (data[k] !== undefined) {
+                        cleanData[k] = data[k];
+                    }
+                });
+                // Fallback: kalau ada extra keys dari primary/secondary strings
+                if (Object.keys(cleanData).length === 0) {
+                    Object.keys(data).forEach(function(k) {
+                        if (VALID_KEYS.indexOf(k) !== -1) {
+                            cleanData[k] = data[k];
+                        }
+                    });
+                }
+                data = cleanData;
             }
 
             // ── 3. TIDAK ADA DATA ──
