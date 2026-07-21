@@ -4308,107 +4308,148 @@ body.love-page {
     margin-left: auto;
 }
 /* ============================================================
-   DARK MODE — font jelas, background gelap, warna tetap soft
+   DARK MODE — true black, clean kontras
    ============================================================ */
 @media (prefers-color-scheme: dark) {
     :root {
-        --dark: #e8e4e0;
-        --medium: #b0aaa5;
+        --dark: #ffffff;
+        --medium: #aaaaaa;
     }
 
-    body {
-        background: #1a1418 !important;
-        color: #e8e4e0;
+    body, body.login-page, body.love-page {
+        background: #000000 !important;
+        color: #ffffff;
     }
-    body.login-page { background: #1a1418 !important; }
-    body.love-page { background: #1a1418 !important; }
 
-    .header { background: #221b20; border-bottom-color: #2a2328; }
-    .header .logo-text { color: #e8e4e0; }
-    .badge { background: #2a2328; color: #b0aaa5; }
-
+    /* ─── SEMUA CARD HITAM ─── */
     .card, .love-card, .login-container, .profil-container form,
     .artikel-card, .artikel-detail, .riwayat-card, .recommendation-card,
-    .dimension-item {
-        background: #221b20 !important;
-        border-color: #2a2328 !important;
-        color: #e8e4e0 !important;
-        box-shadow: 0 2px 16px rgba(0,0,0,0.3) !important;
+    .dimension-item, .content-card, .stat-card {
+        background: #111111 !important;
+        border-color: #222222 !important;
+        box-shadow: none !important;
     }
 
+    /* ─── HEADER ─── */
+    .header { background: #000; border-bottom: 1px solid #222; }
+    .header .logo-text { color: #fff; }
+
+    /* ─── TEKS PUTIH ─── */
     h1, h2, h3, h4, h5, h6,
     .greeting-text h1, .love-intro h1, .card h4,
     .fitur-item .label, .recommendation-card h4,
     .riwayat-score .number, .riwayat-title h4,
     .love-hasil-title, .love-detail-tab .head,
-    .ll-chart-label, .wellness-score-number {
-        color: #f0ece8 !important;
-        -webkit-text-fill-color: #f0ece8 !important;
+    .ll-chart-label, .wellness-score-number,
+    .love-soal-wrapper .soal-text, .selector-group .label {
+        color: #ffffff !important;
+        -webkit-text-fill-color: #ffffff !important;
     }
 
+    /* ─── TEKS ABU ─── */
     .greeting-text p, .card p, .fitur-item .desc,
     .love-intro p, .recommendation-card p,
     .riwayat-score .category, .riwayat-score .label,
     .riwayat-partner, .ll-chart-percent, .wellness-score-label,
     .love-detail-tab .body, .love-hasil-sub,
     .artikel-card .desc, .artikel-card .meta,
-    .artikel-detail .meta, .artikel-detail .content {
-        color: #b0aaa5 !important;
+    .artikel-detail .meta, .artikel-detail .content,
+    .love-soal-wrapper .counter, .ll-primary-label, .primary-box .label {
+        color: #999999 !important;
     }
 
+    /* ─── INPUT ─── */
     input, select, textarea {
-        background: #2a2328 !important;
-        color: #e8e4e0 !important;
-        border-color: #3a3238 !important;
+        background: #1a1a1a !important;
+        color: #fff !important;
+        border-color: #333 !important;
     }
 
-    .btn-google { background: #2a2328 !important; color: #e8e4e0 !important; border-color: #3a3238 !important; }
-    .btn-email { background: linear-gradient(135deg, #c97a8a, #9a7a9a) !important; }
-    .btn-challenge, .btn-small.primary, .riwayat-actions .btn-riwayat.primary,
-    .riwayat-empty .btn-start, .btn-action-primary { background: #c97a8a !important; }
-    .btn-action-secondary { color: #c97a8a !important; border-color: #c97a8a !important; }
+    /* ─── BUTTONS ─── */
+    .btn-google { background: #111 !important; color: #fff !important; border-color: #333 !important; }
+    .btn-google:hover { background: #1a1a1a !important; border-color: #e8879f !important; }
+    .btn-email, .btn-challenge, .btn-small.primary,
+    .riwayat-actions .btn-riwayat.primary, .riwayat-empty .btn-start,
+    .btn-action-primary, .cta-wellness, .love-container .btn {
+        background: #e8879f !important;
+    }
+    .btn-action-secondary {
+        color: #e8879f !important;
+        border-color: #e8879f !important;
+        background: transparent !important;
+    }
 
-    .bottom-nav { background: rgba(26, 20, 24, 0.95) !important; border-top-color: #2a2328 !important; }
-    .bottom-nav a { color: #5a5258; }
-    .bottom-nav a.active, .bottom-nav a:hover { color: #c97a8a; }
+    /* ─── BOTTOM NAV ─── */
+    .bottom-nav {
+        background: #000 !important;
+        border-top: 1px solid #222 !important;
+    }
+    .bottom-nav a { color: #666; }
+    .bottom-nav a.active, .bottom-nav a:hover { color: #e8879f; }
 
-    .ll-chart-bar-wrap, .ll-profil-bar-wrap, .love-chart-item .bar-bg,
-    .chart-item .bar-bg { background: #2a2328 !important; }
+    /* ─── CHART BARS ─── */
+    .ll-chart-bar-wrap, .ll-profil-bar-wrap,
+    .love-chart-item .bar-bg, .chart-item .bar-bg,
+    .love-soal-wrapper .progress { background: #1a1a1a !important; }
 
+    /* ─── PRIMARY BOX ─── */
     .ll-primary-box, .ll-profil-primary, .primary-box {
-        background: #2a1820 !important; border-color: #3a2830 !important;
+        background: #111 !important;
+        border-color: #222 !important;
     }
-    .ll-primary-label, .primary-box .label { color: #b0aaa5 !important; }
-    .ll-primary-value { color: #c97a8a !important; }
+    .ll-primary-value { color: #e8879f !important; }
 
-    .tag-strength { background: #1a2825 !important; color: #a0c8c2 !important; }
-    .tag-priority { background: #2a2218 !important; color: #c9a878 !important; }
-    .risk-alert, .risk-alert-enhanced { background: #2a2018 !important; border-color: #c97a3a !important; }
-    .wellness-ring-container svg circle:first-child { stroke: #2a2328; }
+    /* ─── TAGS ─── */
+    .tag-strength { background: #0d1a16 !important; color: #66bb6a !important; }
+    .tag-priority { background: #1a1208 !important; color: #ffa726 !important; }
+    .risk-alert, .risk-alert-enhanced { background: #111 !important; border-color: #ff9800 !important; }
 
-    .divider::before, .divider::after { background: #2a2328 !important; }
-    .tab-buttons { background: #221b20 !important; border-color: #2a2328 !important; }
-    .tab-btn { color: #b0aaa5 !important; }
-    .tab-btn.active { background: #c97a8a !important; color: white !important; }
+    /* ─── SVG RING ─── */
+    .wellness-ring-container svg circle:first-child { stroke: #1a1a1a; }
 
-    .disclaimer-box, .love-note { background: #2a1820 !important; border-color: #3a2830 !important; color: #b0aaa5 !important; }
-    .empty-state-enhanced { background: #221b20 !important; border-color: #3a3238 !important; }
-    .cta-wellness { background: #c97a8a !important; }
-    .love-soal-wrapper .progress { background: #2a2328 !important; }
-    .avatar-placeholder { background: #2a2328 !important; }
-    .user-dropdown { background: #221b20 !important; border-color: #2a2328 !important; }
-    .user-dropdown .dropdown-item { color: #e8e4e0 !important; }
-    .user-dropdown .dropdown-item:hover { background: #2a2328 !important; }
-    .dropdown-divider { background: #2a2328 !important; }
-    .login-orb { opacity: 0.2 !important; }
-    .love-soal-wrapper .soal-text { color: #f0ece8 !important; }
-    .love-soal-wrapper .counter { color: #b0aaa5 !important; }
-    .love-soal-wrapper .options label { background: #221b20; color: #e8e4e0; border-color: #2a2328; }
+    /* ─── DIVIDER ─── */
+    .divider::before, .divider::after { background: #333 !important; }
+
+    /* ─── TAB ─── */
+    .tab-buttons { background: #111 !important; border-color: #222 !important; }
+    .tab-btn { color: #888 !important; }
+    .tab-btn.active { background: #e8879f !important; color: #fff !important; }
+
+    /* ─── MISC ─── */
+    .disclaimer-box, .love-note { background: #111 !important; border-color: #222 !important; color: #999 !important; }
+    .empty-state-enhanced { background: #111 !important; border-color: #222 !important; }
+    .avatar-placeholder, .user-dropdown { background: #111 !important; border-color: #222 !important; }
+    .user-dropdown .dropdown-item { color: #fff !important; }
+    .user-dropdown .dropdown-item:hover { background: #1a1a1a !important; }
+    .dropdown-divider { background: #222 !important; }
+    .login-orb { opacity: 0.15 !important; }
+    .love-soal-wrapper .options label {
+        background: #111; color: #fff; border-color: #222;
+    }
     .love-soal-wrapper .options label:hover,
-    .love-soal-wrapper .options label.selected { background: #2a1820; border-color: #c97a8a; }
-    .selector-group .love-options .btn-opt { background: #221b20; color: #b0aaa5; border-color: #2a2328; }
-    .selector-group .love-options .btn-opt.active { background: #c97a8a; color: white; border-color: #c97a8a; }
-    .selector-group .label { color: #e8e4e0 !important; }
-    .btn-outline { color: #c97a8a !important; border-color: #c97a8a !important; }
-    .score-circle .number { color: white !important; }
+    .love-soal-wrapper .options label.selected {
+        background: #1a1a1a; border-color: #e8879f;
+    }
+    .selector-group .love-options .btn-opt {
+        background: #111; color: #999; border-color: #222;
+    }
+    .selector-group .love-options .btn-opt.active {
+        background: #e8879f; color: #fff; border-color: #e8879f;
+    }
+    .btn-outline, .riwayat-actions .btn-riwayat.outline {
+        color: #e8879f !important; border-color: #e8879f !important;
+        background: transparent !important;
+    }
+    .score-circle .number { color: #fff !important; }
+    .badge, .badge.active, .badge.inactive { background: #1a1a1a; color: #999; }
+    .riwayat-header .badge-wellness { background: #e8879f; color: #fff; }
+    .riwayat-empty .icon, .empty-icon { opacity: 0.4; }
+    .fitur-item .icon { background: rgba(232,135,159,0.15); }
+    .fitur-item:hover { border-color: #e8879f; }
+    .challenge-card { background: #111 !important; border-color: #222 !important; }
+    .greeting-text h1 span {
+        background: linear-gradient(135deg, #e8879f, #b8a9c9);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
 }
