@@ -812,13 +812,69 @@ body {
 .riwayat-section {
     margin-top: 24px;
     padding-top: 20px;
-    border-top: 2px solid #f0f7f5;
+    border-top: 2px solid rgba(244,167,187,0.15);
 }
 
 .riwayat-section h3 {
     font-size: 16px;
     color: #1d3b36;
     margin-bottom: 12px;
+}
+
+/* ─── RIWAYAT LOVE LANGUAGE PROFIL ─── */
+.ll-profil-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    padding: 8px 0;
+    opacity: 0;
+    animation: categorySlideUp 0.4s ease forwards;
+}
+
+.ll-profil-bar-wrap {
+    flex: 1;
+    height: 18px;
+    background: #fcd5e3;
+    border-radius: 9px;
+    overflow: hidden;
+    min-width: 60px;
+}
+
+.ll-profil-bar-fill {
+    height: 100%;
+    border-radius: 9px;
+    width: 0%;
+    transition: width 1s cubic-bezier(0.34,1.56,0.64,1);
+    position: relative;
+}
+
+.ll-profil-bar-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 50%;
+    background: rgba(255,255,255,0.25);
+    border-radius: 9px 9px 0 0;
+}
+
+.ll-profil-percent {
+    width: 40px;
+    font-weight: 700;
+    font-size: 13px;
+    color: #4a3a40;
+    flex-shrink: 0;
+    text-align: right;
+}
+
+.ll-profil-primary {
+    margin-top: 14px;
+    padding: 14px 18px;
+    background: linear-gradient(135deg, #fff0f5, #fff5f8);
+    border: 1.5px solid rgba(244,167,187,0.3);
+    border-radius: 14px;
+    text-align: center;
+    animation: primaryPulse 3s ease-in-out infinite;
 }
 
 .riwayat-item {
@@ -3592,7 +3648,7 @@ body.love-page {
 
 /* ─── PERJALANAN RELASI ─── */
 .riwayat-item {
-    border-bottom: 2px solid #f5f0ec;
+    border-bottom: 1.5px solid rgba(244,167,187,0.10);
     padding-bottom: 14px;
     margin-bottom: 12px;
     transition: 0.3s;
@@ -3895,6 +3951,16 @@ body.love-page {
         opacity: 1;
         transform: translateY(0) scale(1);
     }
+}
+
+@keyframes categorySlideUp {
+    0% { opacity: 0; transform: translateY(16px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes primaryPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(244,167,187,0.3); }
+    50% { box-shadow: 0 0 0 10px rgba(244,167,187,0); }
 }
 
 /* ─── HEADER PERJALANAN ─── */

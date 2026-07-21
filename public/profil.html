@@ -145,54 +145,180 @@
                 });
 
             // Tampilkan riwayat Love Language
-            tampilkanRiwayat();
+            tampilkanRiwayat().catch(function(err) {
+                console.error('Gagal tampilkan riwayat:', err);
+            });
         }
 
         // ============================================================
-        //  TAMPILKAN RIWAYAT LOVE LANGUAGE
+        //  TAMPILKAN RIWAYAT LOVE LANGUAGE (Firestore + localStorage)
         // ============================================================
-        function tampilkanRiwayat() {
+        async function tampilkanRiwayat() {
             const container = document.getElementById('riwayatContainer');
-            const rawData = localStorage.getItem('loveLanguageResult');
-            const date = localStorage.getItem('loveLanguageDate');
+            const db = firebase.firestore();
+            const user = firebase.auth().currentUser;
 
-            if (!rawData) {
-                container.innerHTML = '<p style="color:#8a9e99;font-size:14px;">Belum ada hasil tes.</p>';
+            container.innerHTML = '<p style="color:#b0c2bd;font-size:14px;text-align:center;">⏳ Memuat riwayat...</p>';
+
+            let data = null;
+            let tanggal = null;
+            let primaryKey = null;
+
+            // ── 1. COBA DARI FIRESTORE ──
+            try {
+                if (user) {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        const ll = userData.loveLanguage;
+
+                        // Format: { primary: {label, score}, secondary: {...}, all: [...] }
+                        if (ll && ll.all && Array.isArray(ll.all) && ll.all.length > 0) {
+                            data = {};
+                            ll.all.forEach(function(item) {
+                                data[item.label] = item.score;
+                            });
+                            primaryKey = ll.primary ? ll.primary.label : null;
+                            if (userData.updatedAt) {
+                                var d = userData.updatedAt.toDate ? userData.updatedAt.toDate() : new Date(userData.updatedAt);
+                                tanggal = d;
+                            }
+                        }
+                        // Format lama: { "Words of Affirmation": 80, ... }
+                        else if (ll && typeof ll === 'object') {
+                            var keys = Object.keys(ll).filter(function(k) {
+                                return k !== 'primary' && k !== 'secondary' && k !== 'all' && k !== 'updatedAt';
+                            });
+                            if (keys.length > 0) {
+                                data = {};
+                                keys.forEach(function(k) { data[k] = ll[k]; });
+                                primaryKey = ll.primary || null;
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('⚠️ Gagal baca Firestore, fallback ke localStorage:', e.message);
+            }
+
+            // ── 2. FALLBACK KE LOCALSTORAGE ──
+            if (!data || Object.keys(data).length === 0) {
+                try {
+                    const raw = localStorage.getItem('loveLanguageResult');
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (parsed && typeof parsed === 'object') {
+                            // Bisa jadi format { all: [...] } atau { label: score }
+                            if (parsed.all && Array.isArray(parsed.all)) {
+                                data = {};
+                                parsed.all.forEach(function(item) {
+                                    data[item.label] = item.score;
+                                });
+                                primaryKey = parsed.primary || null;
+                            } else {
+                                data = parsed;
+                            }
+                            if (parsed.tanggal) {
+                                tanggal = new Date(parsed.tanggal);
+                            }
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // ── 3. TIDAK ADA DATA ──
+            if (!data || Object.keys(data).length === 0) {
+                container.innerHTML = '<p style="color:#b0c2bd;font-size:14px;text-align:center;">📭 Belum ada hasil tes.</p>';
                 return;
             }
 
-            try {
-                const data = JSON.parse(rawData);
-                const sorted = Object.keys(data).sort((a, b) => parseInt(data[b]) - parseInt(data[a]));
+            // ── 4. RENDER DENGAN ANIMASI ──
+            var colors = {
+                'Words of Affirmation': '#6c5ce7',
+                'Acts of Service': '#00b894',
+                'Quality Time': '#d4a373',
+                'Physical Touch': '#e17055',
+                'Receiving Gifts': '#fd79a8'
+            };
+            var emoji = {
+                'Words of Affirmation': '💬',
+                'Acts of Service': '🤝',
+                'Quality Time': '⏰',
+                'Physical Touch': '🫂',
+                'Receiving Gifts': '🎁'
+            };
 
-                let html = '';
-                if (date) {
-                    const d = new Date(date);
-                    html += `<div style="font-size:12px;color:#8a9e99;margin-bottom:10px;">📅 ${d.toLocaleDateString('id-ID')}</div>`;
-                }
+            var sorted = Object.keys(data).sort(function(a, b) {
+                return parseInt(data[b]) - parseInt(data[a]);
+            });
 
-                sorted.forEach(key => {
-                    html += `
-                        <div class="riwayat-item">
-                            <span class="label">${key}</span>
-                            <span class="value">${data[key]}</span>
-                        </div>
-                    `;
-                });
+            if (!primaryKey) primaryKey = sorted[0];
 
-                // Love Language utama
-                const topKey = sorted[0];
-                html += `
-                    <div style="margin-top:12px;padding:12px;background:#f0f7f5;border-radius:12px;text-align:center;">
-                        <span style="font-size:13px;color:#5a6f6a;">🌟 Love Language Utamamu</span>
-                        <div style="font-size:18px;font-weight:600;color:#1d3b36;">${topKey} — ${data[topKey]}</div>
-                    </div>
-                `;
+            var html = '';
 
-                container.innerHTML = html;
-            } catch (e) {
-                container.innerHTML = '<p style="color:#8a9e99;font-size:14px;">Data error.</p>';
+            // Tanggal
+            if (tanggal) {
+                html += '<div style="font-size:12px;color:#b0c2bd;margin-bottom:12px;text-align:center;">📅 ' +
+                    tanggal.toLocaleDateString('id-ID') + ' · ' +
+                    tanggal.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) +
+                    '</div>';
             }
+
+            // Chart bars
+            sorted.forEach(function(key, i) {
+                var percent = parseInt(data[key]) || 0;
+                var color = colors[key] || '#b8a9c9';
+                var icon = emoji[key] || '📌';
+                var delay = 0.1 + i * 0.1;
+
+                html += '<div class="ll-profil-item" style="animation-delay:' + delay + 's;">';
+                html += '  <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0;">';
+                html += '    <span style="font-size:16px;">' + icon + '</span>';
+                html += '    <span style="font-size:13px;font-weight:500;color:#4a3a40;white-space:nowrap;">' + key + '</span>';
+                html += '  </div>';
+                html += '  <div class="ll-profil-bar-wrap">';
+                html += '    <div class="ll-profil-bar-fill" style="background:' + color + ';" data-width="' + percent + '"></div>';
+                html += '  </div>';
+                html += '  <span class="ll-profil-percent" data-target="' + percent + '">0%</span>';
+                html += '</div>';
+            });
+
+            // Primary box
+            html += '<div class="ll-profil-primary">';
+            html += '  <span style="font-size:12px;color:#8a7a80;">🌟 Love Language Utamamu</span>';
+            html += '  <div style="font-size:20px;font-weight:700;color:#e8879f;margin-top:2px;">' +
+                (emoji[primaryKey] || '💖') + ' ' + primaryKey +
+                ' <small style="font-size:13px;color:#8a7a80;font-weight:400;">· ' + data[primaryKey] + '%</small></div>';
+            html += '</div>';
+
+            container.innerHTML = html;
+
+            // ⏱️ Animate bars & counters
+            setTimeout(function() {
+                var bars = container.querySelectorAll('.ll-profil-bar-fill');
+                for (var i = 0; i < bars.length; i++) {
+                    bars[i].style.width = bars[i].dataset.width + '%';
+                }
+                var counters = container.querySelectorAll('.ll-profil-percent');
+                for (var j = 0; j < counters.length; j++) {
+                    animateLLProfilCounter(counters[j], parseInt(counters[j].dataset.target) || 0);
+                }
+            }, 300);
+        }
+
+        // Helper: counter animasi
+        function animateLLProfilCounter(el, target) {
+            var start = null;
+            var duration = 800;
+            function step(ts) {
+                if (!start) start = ts;
+                var p = Math.min((ts - start) / duration, 1);
+                var eased = 1 - Math.pow(1 - p, 3);
+                el.textContent = Math.round(target * eased) + '%';
+                if (p < 1) requestAnimationFrame(step);
+                else el.textContent = target + '%';
+            }
+            requestAnimationFrame(step);
         }
 
         // ============================================================
