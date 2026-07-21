@@ -1013,62 +1013,91 @@
                         var updatedAt = userData.updatedAt || userData.createdAt || null;
                         var data = {};
 
-                        // Extract dari all array
-                        if (loveLanguageData && loveLanguageData.all && Array.isArray(loveLanguageData.all)) {
+                        // Helper: cek apakah key adalah nama love language
+                        var LL_KEYS = ['Words of Affirmation', 'Acts of Service', 'Quality Time', 'Physical Touch', 'Receiving Gifts'];
+                        function isLoveLanguageKey(k) {
+                            return LL_KEYS.indexOf(k) !== -1;
+                        }
+
+                        // ── 1. Ekstrak dari all array ──
+                        if (loveLanguageData && loveLanguageData.all && Array.isArray(loveLanguageData.all) && loveLanguageData.all.length > 0) {
                             for (var i = 0; i < loveLanguageData.all.length; i++) {
                                 var item = loveLanguageData.all[i];
-                                data[item.label] = item.score;
-                            }
-                        } else if (loveLanguageData && typeof loveLanguageData === 'object') {
-                            var possibleKeys = ['Words of Affirmation', 'Acts of Service', 'Quality Time',
-                                'Physical Touch', 'Receiving Gifts'
-                            ];
-                            var found = false;
-                            for (var k = 0; k < possibleKeys.length; k++) {
-                                if (loveLanguageData[possibleKeys[k]] !== undefined) {
-                                    data[possibleKeys[k]] = loveLanguageData[possibleKeys[k]];
-                                    found = true;
+                                if (item.label && item.score !== undefined) {
+                                    data[item.label] = item.score;
                                 }
                             }
-                            if (!found) data = loveLanguageData;
                         }
 
-                        // Fallback primary/secondary
-                        if (!data || Object.keys(data).length === 0) {
-                            if (userData.primary) {
-                                var label = userData.primary.label || userData.primary.key || 'Primary';
-                                data[label] = userData.primary.score || 60;
+                        // ── 2. Ekstrak dari primary/secondary (jika all kosong) ──
+                        if (Object.keys(data).length === 0 && loveLanguageData && typeof loveLanguageData === 'object') {
+                            if (loveLanguageData.primary && loveLanguageData.primary.label) {
+                                data[loveLanguageData.primary.label] = loveLanguageData.primary.score || 0;
                             }
-                            if (userData.secondary) {
-                                var label2 = userData.secondary.label || userData.secondary.key || 'Secondary';
-                                data[label2] = userData.secondary.score || 40;
+                            if (loveLanguageData.secondary && loveLanguageData.secondary.label) {
+                                data[loveLanguageData.secondary.label] = loveLanguageData.secondary.score || 0;
                             }
                         }
 
-                        // Fallback localStorage
-                        if (!data || Object.keys(data).length === 0) {
+                        // ── 3. Cek direct keys (format lama: { "Words of Affirmation": 80, ... }) ──
+                        if (Object.keys(data).length === 0 && loveLanguageData && typeof loveLanguageData === 'object') {
+                            for (var k = 0; k < LL_KEYS.length; k++) {
+                                if (loveLanguageData[LL_KEYS[k]] !== undefined) {
+                                    data[LL_KEYS[k]] = loveLanguageData[LL_KEYS[k]];
+                                }
+                            }
+                        }
+
+                        // ── 4. Fallback primary/secondary dari root userData ──
+                        if (Object.keys(data).length === 0) {
+                            if (userData.primary && userData.primary.label) {
+                                data[userData.primary.label] = userData.primary.score || 60;
+                            }
+                            if (userData.secondary && userData.secondary.label) {
+                                data[userData.secondary.label] = userData.secondary.score || 40;
+                            }
+                        }
+
+                        // ── 5. Fallback localStorage ──
+                        if (Object.keys(data).length === 0) {
                             try {
                                 var raw = localStorage.getItem('loveLanguageResult');
                                 if (raw) {
                                     var parsed = JSON.parse(raw);
                                     if (parsed && typeof parsed === 'object') {
-                                        // Format: { all: [{label, score}, ...], primary, secondary, ... }
-                                        if (parsed.all && Array.isArray(parsed.all)) {
-                                            var extracted = {};
-                                            parsed.all.forEach(function(item) {
-                                                extracted[item.label] = item.score;
-                                            });
-                                            if (Object.keys(extracted).length > 0) {
-                                                data = extracted;
+                                        // all array
+                                        if (parsed.all && Array.isArray(parsed.all) && parsed.all.length > 0) {
+                                            for (var a = 0; a < parsed.all.length; a++) {
+                                                var ai = parsed.all[a];
+                                                if (ai.label && ai.score !== undefined) {
+                                                    data[ai.label] = ai.score;
+                                                }
                                             }
                                         }
-                                        // Format: { scores: { label: score, ... } }
-                                        else if (parsed.scores && typeof parsed.scores === 'object') {
-                                            data = parsed.scores;
+                                        // scores object
+                                        if (Object.keys(data).length === 0 && parsed.scores && typeof parsed.scores === 'object') {
+                                            for (var sk in parsed.scores) {
+                                                if (parsed.scores.hasOwnProperty(sk) && isLoveLanguageKey(sk)) {
+                                                    data[sk] = parsed.scores[sk];
+                                                }
+                                            }
                                         }
-                                        // Format flat: { "Words of Affirmation": 80, ... }
-                                        else if (Object.keys(parsed).some(function(k) { return k.indexOf('Words') !== -1 || k.indexOf('Acts') !== -1 || k.indexOf('Quality') !== -1 || k.indexOf('Physical') !== -1 || k.indexOf('Receiving') !== -1; })) {
-                                            data = parsed;
+                                        // primary/secondary
+                                        if (Object.keys(data).length === 0) {
+                                            if (parsed.primary && typeof parsed.primary === 'string') {
+                                                data[parsed.primary] = parsed.scores ? (parsed.scores[parsed.primary] || 50) : 50;
+                                            }
+                                            if (parsed.secondary && typeof parsed.secondary === 'string') {
+                                                data[parsed.secondary] = parsed.scores ? (parsed.scores[parsed.secondary] || 40) : 40;
+                                            }
+                                        }
+                                        // flat keys
+                                        if (Object.keys(data).length === 0) {
+                                            for (var pk in parsed) {
+                                                if (parsed.hasOwnProperty(pk) && isLoveLanguageKey(pk)) {
+                                                    data[pk] = parsed[pk];
+                                                }
+                                            }
                                         }
                                     }
                                 }
