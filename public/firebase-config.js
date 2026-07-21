@@ -589,11 +589,11 @@ auth.onAuthStateChanged(async (user) => {
     if (!alreadyLogged) {
       await logUserLogin();
       console.log("👤 User logged in:", user.email);
-      // 🔥 Mulai idle timeout (hanya saat login baru)
-      IdleTimeout.start();
     } else {
       console.log("👤 User already logged in this session");
     }
+    // 🔥 Mulai idle timeout (setiap kali halaman load dengan user login)
+    IdleTimeout.start();
 
     // Update lastLogin di Firestore
     try {
