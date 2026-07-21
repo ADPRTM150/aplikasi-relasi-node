@@ -5,6 +5,7 @@
 
 /* ─── ROOT VARIABLES ─── */
 :root {
+    color-scheme: light only;
     --sage: #3a7d76;
     --sage-light: #e6f2f0;
     --krem: #f7f3eb;
