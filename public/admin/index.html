@@ -1429,32 +1429,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>💕 Love Language Primary</label>
-                    <select id="userLoveLanguagePrimary">
-                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
-                        <option value="Acts of Service">Acts of Service 🤝</option>
-                        <option value="Quality Time">Quality Time ⏰</option>
-                        <option value="Physical Touch">Physical Touch 🫂</option>
-                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>💕 Love Language Secondary</label>
-                    <select id="userLoveLanguageSecondary">
-                        <option value="Words of Affirmation">Words of Affirmation 💬</option>
-                        <option value="Acts of Service">Acts of Service 🤝</option>
-                        <option value="Quality Time">Quality Time ⏰</option>
-                        <option value="Physical Touch">Physical Touch 🫂</option>
-                        <option value="Receiving Gifts">Receiving Gifts 🎁</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Skor Primary (0-100)</label>
-                    <input type="number" id="userPrimaryScore" placeholder="80" min="0" max="100" value="80" />
-                </div>
-                <div class="form-group">
-                    <label>Skor Secondary (0-100)</label>
-                    <input type="number" id="userSecondaryScore" placeholder="60" min="0" max="100" value="60" />
+                    <label>💕 Love Language</label>
+                    <div id="userLoveLanguageInfo" style="padding:10px 14px;background:#fdf8f0;border-radius:8px;font-size:13px;color:#8a7a80;">
+                        <span id="userLoveLangDisplay">📭 Belum ada data</span>
+                    </div>
+                    <p style="font-size:11px;color:#8a9e99;margin-top:4px;">ℹ️ Data Love Language otomatis dari tes user (read-only).</p>
                 </div>
                 <div class="btn-group">
                     <button type="submit" class="btn-save"><span>💾</span> Simpan</button>
@@ -2069,23 +2048,32 @@
             document.getElementById('userStatus').value = data ? (data.status === 'active' ? 'active' : 'inactive') :
                 'active';
 
+            // 🔥 Tampilkan love language dari data aktual (read-only)
+            var llDisplay = document.getElementById('userLoveLangDisplay');
             if (data && data.loveLanguage) {
                 var loveLang = data.loveLanguage;
-                if (loveLang.primary) {
-                    document.getElementById('userLoveLanguagePrimary').value = loveLang.primary.key || loveLang.primary
-                        .label || 'Words of Affirmation';
-                    document.getElementById('userPrimaryScore').value = loveLang.primary.score || 80;
+                var displayHtml = '';
+                // Dari all array
+                if (loveLang.all && Array.isArray(loveLang.all) && loveLang.all.length > 0) {
+                    var sorted = loveLang.all.slice().sort(function (a, b) {
+                        return (b.score || 0) - (a.score || 0);
+                    });
+                    displayHtml = sorted.map(function (l) {
+                        return (l.label || l.key || 'N/A') + ' <strong>' + (l.score || 0) + '%</strong>';
+                    }).join(' &nbsp;|&nbsp; ');
+                } else if (loveLang.primary) {
+                    var p = loveLang.primary;
+                    var s = loveLang.secondary;
+                    displayHtml = '🌟 <strong>' + (p.label || p.key || 'N/A') + ' ' + (p.score || 0) + '%</strong>';
+                    if (s) {
+                        displayHtml += ' &nbsp;|&nbsp; ' + (s.label || s.key || 'N/A') + ' <strong>' + (s.score || 0) + '%</strong>';
+                    }
+                } else {
+                    displayHtml = '📭 Data tidak lengkap';
                 }
-                if (loveLang.secondary) {
-                    document.getElementById('userLoveLanguageSecondary').value = loveLang.secondary.key || loveLang
-                        .secondary.label || 'Acts of Service';
-                    document.getElementById('userSecondaryScore').value = loveLang.secondary.score || 60;
-                }
+                llDisplay.innerHTML = displayHtml;
             } else {
-                document.getElementById('userLoveLanguagePrimary').value = 'Words of Affirmation';
-                document.getElementById('userLoveLanguageSecondary').value = 'Acts of Service';
-                document.getElementById('userPrimaryScore').value = 80;
-                document.getElementById('userSecondaryScore').value = 60;
+                llDisplay.innerHTML = '📭 Belum ada data';
             }
 
             openModal('userModal');
@@ -2132,10 +2120,6 @@
             var name = document.getElementById('userName').value.trim();
             var email = document.getElementById('userEmail').value.trim();
             var status = document.getElementById('userStatus').value;
-            var lovePrimary = document.getElementById('userLoveLanguagePrimary').value;
-            var loveSecondary = document.getElementById('userLoveLanguageSecondary').value;
-            var primaryScore = parseInt(document.getElementById('userPrimaryScore').value) || 80;
-            var secondaryScore = parseInt(document.getElementById('userSecondaryScore').value) || 60;
 
             if (!name || !email) {
                 alert('❌ Nama dan Email harus diisi!');
@@ -2153,19 +2137,8 @@
                 email: email,
                 status: status,
                 lastLogin: status === 'active',
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                loveLanguage: {
-                    primary: {
-                        key: lovePrimary,
-                        label: lovePrimary,
-                        score: primaryScore
-                    },
-                    secondary: {
-                        key: loveSecondary,
-                        label: loveSecondary,
-                        score: secondaryScore
-                    }
-                }
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                // 🔥 JANGAN overwrite loveLanguage! Data dari tes user!
             };
 
             try {
