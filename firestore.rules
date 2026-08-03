@@ -1,0 +1,73 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // 📁 ARTICLES — Publik baca, HANYA SERVER tulis
+    // ============================================================
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create, update, delete: if false;  // Server Admin SDK only
+    }
+
+    // ============================================================
+    // 📁 EBOOKS — Publik baca, HANYA SERVER tulis
+    // ============================================================
+    match /ebooks/{ebookId} {
+      allow read: if true;
+      allow create, update, delete: if false;  // Server Admin SDK only
+    }
+
+    // ============================================================
+    // 📁 VIDEOS — Publik baca, HANYA SERVER tulis
+    // ============================================================
+    match /videos/{videoId} {
+      allow read: if true;
+      allow create, update, delete: if false;  // Server Admin SDK only
+    }
+
+    // ============================================================
+    // 📁 USERS — Auth baca, tulis sendiri
+    // ============================================================
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+                           && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    // ============================================================
+    // 📁 ACTIVITIES — Auth baca, buat sendiri
+    // ============================================================
+    match /activities/{activityId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                  && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    // ============================================================
+    // 📁 WELLNESS_TESTS — Auth baca, HANYA SERVER tulis
+    //    (Server API sudah punya access control per userId)
+    // ============================================================
+    match /wellness_tests/{testId} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if false;  // Server Admin SDK only
+    }
+
+    // ============================================================
+    // 📁 ADMIN SETTINGS — HANYA SERVER
+    // ============================================================
+    match /admin/{docId} {
+      allow read, write: if false;
+    }
+
+    // ============================================================
+    // 🚫 DEFAULT: Tolak semua
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

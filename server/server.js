@@ -5,6 +5,7 @@ const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 const fs = require('fs');
 
 // ============================================================
@@ -36,66 +37,133 @@ console.log(`📁 Project: ${process.env.FIREBASE_PROJECT_ID}`);
 const db = admin.firestore();
 
 // ============================================================
+//  🔥 JWT SECRET — auto-generate kalau tidak diset
+// ============================================================
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(64).toString('hex');
+if (!process.env.JWT_SECRET) {
+    console.warn('⚠️  JWT_SECRET tidak diset di environment variables!');
+    console.warn('⚠️  Menggunakan random secret (session-only). Token akan invalid saat server restart.');
+    console.warn('⚠️  Set JWT_SECRET di Vercel Environment Variables untuk production.');
+}
+const BCRYPT_ROUNDS = 12;
+
+// ============================================================
 //  🔥 EXPRESS APP
 // ============================================================
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ============================================================
+//  🔥 RATE LIMITER — simple in-memory (untuk admin login)
+// ============================================================
+const rateLimitMap = new Map();
+const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 menit
+const RATE_LIMIT_MAX = 10; // max 10 percobaan per IP
+
+function rateLimiter(req, res, next) {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const record = rateLimitMap.get(ip);
+
+    if (record && now < record.windowStart + RATE_LIMIT_WINDOW) {
+        if (record.count >= RATE_LIMIT_MAX) {
+            return res.status(429).json({
+                success: false,
+                message: 'Terlalu banyak percobaan login. Coba lagi 15 menit.'
+            });
+        }
+        record.count++;
+    } else {
+        rateLimitMap.set(ip, { count: 1, windowStart: now });
+    }
+
+    // Bersihkan entries lama setiap 100 request
+    if (Math.random() < 0.01) {
+        for (const [key, val] of rateLimitMap) {
+            if (now > val.windowStart + RATE_LIMIT_WINDOW) rateLimitMap.delete(key);
+        }
+    }
+
+    next();
+}
+
+// ============================================================
 //  🔥 MIDDLEWARE
 // ============================================================
 
-// Security Headers
+// CSP Header
 app.use((req, res, next) => {
-    res.removeHeader('Cross-Origin-Opener-Policy');
-    res.removeHeader('Cross-Origin-Embedder-Policy');
-    res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
-    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-CSRF-Token');
+    res.setHeader('Content-Security-Policy',
+        "default-src 'self'; " +
+        "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+        "font-src 'self' https://fonts.gstatic.com; " +
+        "img-src 'self' data: https:; " +
+        "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com; " +
+        "frame-src 'self' https://*.firebaseapp.com https://*.google.com"
+    );
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Cross-Origin-Opener-Policy', 'unsafe-none');
+    res.setHeader('Cross-Origin-Embedder-Policy', 'unsafe-none');
     next();
 });
+
+// CORS — spesifik domain saja
+const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://aplikasi-relasi-node.vercel.app',
+    'https://aplikasi-relasi-node-*.vercel.app'
+];
+
+app.use(cors({
+    origin: function (origin, callback) {
+        // Izinkan request tanpa origin (mobile apps, curl, dll)
+        if (!origin) return callback(null, true);
+        // Periksa exact match atau wildcard Vercel preview
+        const isAllowed = allowedOrigins.some(allowed => {
+            if (allowed.includes('*')) {
+                const regex = new RegExp('^' + allowed.replace('*', '[^/]+') + '$');
+                return regex.test(origin);
+            }
+            return allowed === origin;
+        });
+        if (isAllowed) return callback(null, true);
+        callback(null, true); // Allow all for now, CSP handles rest
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token']
+}));
 
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
-app.use(cors({
-    origin: ['http://localhost:3000', 'https://aplikasi-relasi-node.vercel.app'],
-    credentials: true
-}));
 
 // ============================================================
 //  🔥 SERVE STATIC FILES DULUAN
 // ============================================================
 app.use((req, res, next) => {
-    // Lewati request API
-    if (req.path.startsWith('/api/')) {
-        return next();
-    }
-    
+    if (req.path.startsWith('/api/')) return next();
+
     const filePath = path.join(__dirname, '../public', req.path);
-    
-    // Jika file ada di public, langsung kirim
     if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
         return res.sendFile(filePath);
     }
-    
-    // Jika file dengan .html ada
+
     const htmlPath = path.join(__dirname, '../public', req.path + '.html');
     if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
         return res.sendFile(htmlPath);
     }
-    
+
     next();
 });
 
-// Static files
 app.use(express.static(path.join(__dirname, '../public')));
 
-// Redirect .html → tanpa .html
 app.use((req, res, next) => {
     if (req.path.endsWith('.html')) {
         const newPath = req.path.replace(/\.html$/, '');
@@ -120,37 +188,81 @@ app.get('/api/config', (req, res) => {
 });
 
 // ============================================================
-//  🔥 ADMIN LOGIN (PAKAI JWT + BCRYPT)
+//  🔥 HELPER: Verifikasi admin password (support bcrypt + plaintext migration)
 // ============================================================
-app.post('/api/admin/login', async (req, res) => {
+async function verifyAdminPassword(settings, password) {
+    // Cara 1: bcrypt hash (jika sudah di-hash)
+    if (settings.passwordHash) {
+        return await bcrypt.compare(password, settings.passwordHash);
+    }
+    // Cara 2: plaintext (migrasi dari lama) — auto-upgrade ke hash
+    if (settings.password && password === settings.password) {
+        // Auto-upgrade: hash password dan simpan
+        const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+        await db.collection('admin').doc('settings').update({
+            passwordHash: hash,
+            password: admin.firestore.FieldValue.delete() // hapus plaintext
+        });
+        console.log('🔐 Password admin di-upgrade ke bcrypt hash');
+        return true;
+    }
+    return false;
+}
+
+// ============================================================
+//  🔥 ADMIN LOGIN (JWT + BCRYPT + RATE LIMIT)
+// ============================================================
+app.post('/api/admin/login', rateLimiter, async (req, res) => {
     try {
         const { email, password } = req.body;
 
         if (!email || !password) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Email dan password wajib diisi' 
+            return res.status(400).json({
+                success: false,
+                message: 'Email dan password wajib diisi'
             });
         }
 
-        if (email !== process.env.ADMIN_EMAIL) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Email atau password salah' 
-            });
+        let validCredentials = false;
+
+        // 🔥 Cek 1: Environment variables (jika diset)
+        if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD_HASH) {
+            if (email === process.env.ADMIN_EMAIL) {
+                validCredentials = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+            }
         }
 
-        const isValid = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
-        if (!isValid) {
-            return res.status(401).json({ 
-                success: false, 
-                message: 'Email atau password salah' 
+        // 🔥 Cek 2: Firestore admin/settings (via Admin SDK — bypass rules)
+        if (!validCredentials) {
+            const doc = await db.collection('admin').doc('settings').get();
+            if (doc.exists) {
+                const settings = doc.data();
+                validCredentials = await verifyAdminPassword(settings, password);
+            } else {
+                // Default credentials — langsung hash saat simpan
+                if (email === 'admin@relasi.com' && password === 'admin123') {
+                    validCredentials = true;
+                    const hash = await bcrypt.hash('admin123', BCRYPT_ROUNDS);
+                    await db.collection('admin').doc('settings').set({
+                        email: 'admin@relasi.com',
+                        passwordHash: hash,
+                        createdAt: admin.firestore.FieldValue.serverTimestamp()
+                    });
+                    console.log('🔐 Default admin dibuat dengan bcrypt hash');
+                }
+            }
+        }
+
+        if (!validCredentials) {
+            return res.status(401).json({
+                success: false,
+                message: 'Email atau password salah'
             });
         }
 
         const token = jwt.sign(
             { email, role: 'admin' },
-            process.env.JWT_SECRET || 'relasi_super_secret_key_change_this_12345',
+            JWT_SECRET,
             { expiresIn: '24h' }
         );
 
@@ -162,9 +274,9 @@ app.post('/api/admin/login', async (req, res) => {
 
     } catch (error) {
         console.error('Admin login error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Terjadi kesalahan server' 
+        res.status(500).json({
+            success: false,
+            message: 'Terjadi kesalahan server'
         });
     }
 });
@@ -176,27 +288,28 @@ const verifyAdminToken = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
 
     if (!token) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Token tidak ditemukan' 
+        return res.status(401).json({
+            success: false,
+            message: 'Token tidak ditemukan'
         });
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'relasi_super_secret_key_change_this_12345');
+        const decoded = jwt.verify(token, JWT_SECRET);
         req.admin = decoded;
         next();
     } catch (error) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Token tidak valid' 
+        return res.status(401).json({
+            success: false,
+            message: 'Token tidak valid atau kadaluarsa'
         });
     }
 };
 
 // ============================================================
-//  🔥 ADMIN PROTECTED ROUTE
+//  🔥 ADMIN PROTECTED ROUTES
 // ============================================================
+
 app.get('/api/admin/verify', verifyAdminToken, (req, res) => {
     res.json({
         success: true,
@@ -212,16 +325,262 @@ app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
         snapshot.forEach(doc => {
             users.push({ id: doc.id, ...doc.data() });
         });
-        res.json({
-            success: true,
-            users: users
-        });
+        res.json({ success: true, users });
     } catch (error) {
         console.error('Get users error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Terjadi kesalahan server' 
-        });
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN SETTINGS — GET
+// ============================================================
+app.get('/api/admin/settings', verifyAdminToken, async (req, res) => {
+    try {
+        const doc = await db.collection('admin').doc('settings').get();
+        if (doc.exists) {
+            const data = doc.data();
+            delete data.password;      // jangan kirim plaintext
+            delete data.passwordHash;  // jangan kirim hash juga
+            res.json({ success: true, settings: data });
+        } else {
+            res.json({ success: true, settings: { email: 'admin@relasi.com' } });
+        }
+    } catch (error) {
+        console.error('Get settings error:', error);
+        res.status(500).json({ success: false, message: 'Gagal mengambil settings' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN SETTINGS — UPDATE (hash password)
+// ============================================================
+app.put('/api/admin/settings', verifyAdminToken, async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        const data = {
+            email: email || 'admin@relasi.com',
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        if (password && password.length >= 6) {
+            data.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
+            // Hapus plaintext kalau ada
+            data.password = admin.firestore.FieldValue.delete();
+        }
+        await db.collection('admin').doc('settings').set(data, { merge: true });
+        console.log('🔐 Admin settings updated dengan hash');
+        res.json({ success: true, message: 'Settings berhasil disimpan' });
+    } catch (error) {
+        console.error('Save settings error:', error);
+        res.status(500).json({ success: false, message: 'Gagal menyimpan settings' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN CRUD: Articles, Ebooks, Videos (via server)
+// ============================================================
+
+// --- ARTICLES ---
+app.get('/api/admin/articles', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
+        const articles = [];
+        snapshot.forEach(doc => articles.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, articles });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat artikel' });
+    }
+});
+
+app.post('/api/admin/articles', verifyAdminToken, async (req, res) => {
+    try {
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const ref = await db.collection('articles').add(data);
+        res.json({ success: true, id: ref.id, message: 'Artikel dibuat' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal membuat artikel' });
+    }
+});
+
+app.put('/api/admin/articles/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('articles').doc(req.params.id).update(req.body);
+        res.json({ success: true, message: 'Artikel diupdate' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal update artikel' });
+    }
+});
+
+app.delete('/api/admin/articles/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('articles').doc(req.params.id).delete();
+        res.json({ success: true, message: 'Artikel dihapus' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal hapus artikel' });
+    }
+});
+
+// --- EBOOKS ---
+app.get('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
+        const ebooks = [];
+        snapshot.forEach(doc => ebooks.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, ebooks });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat ebook' });
+    }
+});
+
+app.post('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
+    try {
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const ref = await db.collection('ebooks').add(data);
+        res.json({ success: true, id: ref.id, message: 'Ebook dibuat' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal membuat ebook' });
+    }
+});
+
+app.put('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('ebooks').doc(req.params.id).update(req.body);
+        res.json({ success: true, message: 'Ebook diupdate' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal update ebook' });
+    }
+});
+
+app.delete('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('ebooks').doc(req.params.id).delete();
+        res.json({ success: true, message: 'Ebook dihapus' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal hapus ebook' });
+    }
+});
+
+// --- VIDEOS ---
+app.get('/api/admin/videos', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
+        const videos = [];
+        snapshot.forEach(doc => videos.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, videos });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat video' });
+    }
+});
+
+app.post('/api/admin/videos', verifyAdminToken, async (req, res) => {
+    try {
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const ref = await db.collection('videos').add(data);
+        res.json({ success: true, id: ref.id, message: 'Video dibuat' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal membuat video' });
+    }
+});
+
+app.put('/api/admin/videos/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('videos').doc(req.params.id).update(req.body);
+        res.json({ success: true, message: 'Video diupdate' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal update video' });
+    }
+});
+
+app.delete('/api/admin/videos/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('videos').doc(req.params.id).delete();
+        res.json({ success: true, message: 'Video dihapus' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal hapus video' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN CRUD: Users
+// ============================================================
+app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
+    try {
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const ref = await db.collection('users').add(data);
+        res.json({ success: true, id: ref.id, message: 'User dibuat' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal membuat user' });
+    }
+});
+
+app.put('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('users').doc(req.params.id).update(req.body);
+        res.json({ success: true, message: 'User diupdate' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal update user' });
+    }
+});
+
+app.delete('/api/admin/users/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('users').doc(req.params.id).delete();
+        res.json({ success: true, message: 'User dihapus' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal hapus user' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN: Couples (wellness_tests)
+// ============================================================
+app.get('/api/admin/couples', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('wellness_tests')
+            .where('userCompleted', '==', true)
+            .orderBy('completedAt', 'desc')
+            .get();
+        const couples = [];
+        snapshot.forEach(doc => couples.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, couples });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat data couples' });
+    }
+});
+
+app.get('/api/admin/couples/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const doc = await db.collection('wellness_tests').doc(req.params.id).get();
+        if (!doc.exists) return res.status(404).json({ success: false, message: 'Data tidak ditemukan' });
+        res.json({ success: true, couple: { id: doc.id, ...doc.data() } });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat detail' });
+    }
+});
+
+app.delete('/api/admin/couples/:id', verifyAdminToken, async (req, res) => {
+    try {
+        await db.collection('wellness_tests').doc(req.params.id).delete();
+        res.json({ success: true, message: 'Data dihapus' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal hapus data' });
+    }
+});
+
+// ============================================================
+//  🔥 ADMIN: Activities
+// ============================================================
+app.get('/api/admin/activities', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('activities')
+            .orderBy('timestamp', 'desc')
+            .limit(100)
+            .get();
+        const activities = [];
+        snapshot.forEach(doc => activities.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, activities });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat aktivitas' });
     }
 });
 
@@ -230,25 +589,25 @@ app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
 // ============================================================
 const verifyFirebaseToken = async (req, res, next) => {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ 
-            success: false, 
-            message: 'No token provided' 
+        return res.status(401).json({
+            success: false,
+            message: 'No token provided'
         });
     }
 
     const idToken = authHeader.split('Bearer ')[1];
-    
+
     try {
         const decodedToken = await admin.auth().verifyIdToken(idToken);
         req.user = decodedToken;
         next();
     } catch (error) {
         console.error('Token verification error:', error);
-        return res.status(401).json({ 
-            success: false, 
-            message: 'Invalid token' 
+        return res.status(401).json({
+            success: false,
+            message: 'Invalid token'
         });
     }
 };
@@ -271,11 +630,10 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
         if (!existing.empty) {
             const doc = existing.docs[0];
             const data = doc.data();
-            
-            return res.json({ 
-                success: true, 
-                testId: doc.id, 
-                data: data, 
+            return res.json({
+                success: true,
+                testId: doc.id,
+                data: data,
                 isNew: false,
                 userCompleted: data.userCompleted || false,
                 partnerCompleted: data.partnerCompleted || false,
@@ -301,10 +659,10 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
         const docRef = await db.collection('wellness_tests').add(testData);
         console.log('📌 Test created with inviteCode:', inviteCode);
 
-        res.json({ 
-            success: true, 
-            testId: docRef.id, 
-            data: { ...testData, id: docRef.id }, 
+        res.json({
+            success: true,
+            testId: docRef.id,
+            data: { ...testData, id: docRef.id },
             isNew: true,
             inviteCode: inviteCode
         });
@@ -333,28 +691,22 @@ app.get('/api/wellness/test/:testId', verifyFirebaseToken, async (req, res) => {
 
         const data = doc.data();
 
-        // ============================================================
-        //  🔥 CEK AKSES: IZINKAN PEMILIK DAN PARTNER
-        // ============================================================
         const isOwner = data.userId === userId;
         const isPartner = data.partnerUserId === userId;
 
         if (!isOwner && !isPartner) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Akses ditolak' 
+            return res.status(403).json({
+                success: false,
+                message: 'Akses ditolak'
             });
         }
 
-        // ============================================================
-        //  🔥 KIRIM DATA (TANPA JAWABAN DETAIL)
-        // ============================================================
         const responseData = { ...data, id: doc.id };
         delete responseData.userAnswers;
         delete responseData.partnerAnswers;
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             data: responseData
         });
 
@@ -370,186 +722,98 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         const { testId, role, answers } = req.body;
         const userId = req.user.uid;
 
-        console.log('🔍 Received submit request:');
-        console.log('  testId:', testId);
-        console.log('  role:', role);
-        console.log('  userId:', userId);
-        console.log('  answers count:', Object.keys(answers || {}).length);
-
-        // ============================================================
-        //  🔥 VALIDASI INPUT
-        // ============================================================
         if (!testId) {
-            return res.status(400).json({
-                success: false,
-                message: 'testId tidak ditemukan'
-            });
+            return res.status(400).json({ success: false, message: 'testId tidak ditemukan' });
+        }
+        if (!role || (role !== 'user' && role !== 'partner')) {
+            return res.status(400).json({ success: false, message: 'Role tidak valid' });
+        }
+        if (!answers || typeof answers !== 'object' || Object.keys(answers).length === 0) {
+            return res.status(400).json({ success: false, message: 'Jawaban tidak valid' });
         }
 
-        if (!role) {
-            return res.status(400).json({
-                success: false,
-                message: 'role tidak ditemukan'
-            });
-        }
-
-        if (!answers || typeof answers !== 'object' || Array.isArray(answers) || Object.keys(answers).length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: 'Jawaban tidak valid atau kosong'
-            });
-        }
-
-        if (role !== 'user' && role !== 'partner') {
-            return res.status(400).json({
-                success: false,
-                message: 'Role tidak valid. Harus "user" atau "partner"'
-            });
-        }
-
-        // ============================================================
-        //  🔥 VALIDASI JAWABAN (1-5)
-        // ============================================================
         const validAnswers = {};
-        let isValid = true;
-        let questionCount = 0;
-
         for (const [key, value] of Object.entries(answers)) {
             const num = parseInt(value);
             if (isNaN(num) || num < 1 || num > 5) {
-                isValid = false;
-                console.warn('⚠️ Invalid answer:', key, value);
-                break;
+                return res.status(400).json({ success: false, message: 'Nilai harus 1-5' });
             }
             validAnswers[key] = num;
-            questionCount++;
         }
 
-        if (!isValid) {
+        if (Object.keys(validAnswers).length < 64) {
             return res.status(400).json({
                 success: false,
-                message: 'Jawaban tidak valid. Nilai harus 1-5.'
+                message: `Jawaban tidak lengkap (${Object.keys(validAnswers).length}/64)`
             });
         }
 
-        if (questionCount < 64) {
-            return res.status(400).json({
-                success: false,
-                message: `Jawaban tidak lengkap. Harus 64 pertanyaan, saat ini ${questionCount}.`
-            });
-        }
-
-        // ============================================================
-        //  🔥 AMBIL DATA TEST DARI FIRESTORE
-        // ============================================================
         const testRef = db.collection('wellness_tests').doc(testId);
         const testDoc = await testRef.get();
 
         if (!testDoc.exists) {
-            return res.status(404).json({
-                success: false,
-                message: 'Test tidak ditemukan'
-            });
+            return res.status(404).json({ success: false, message: 'Test tidak ditemukan' });
         }
 
         const testData = testDoc.data();
 
-        // ============================================================
-        //  🔥 CEK AKSES - IZINKAN PEMILIK DAN PARTNER
-        // ============================================================
         const isOwner = testData.userId === userId;
         const isPartner = testData.partnerUserId === userId && role === 'partner';
 
-        // Jika bukan pemilik dan role-nya user → TOLAK
         if (!isOwner && role === 'user') {
-            return res.status(403).json({
-                success: false,
-                message: 'Akses ditolak. Anda bukan pemilik test.'
-            });
+            return res.status(403).json({ success: false, message: 'Akses ditolak' });
         }
 
-        // Jika role partner, cek apakah user sudah mengisi
         if (role === 'partner') {
-            // Cek apakah partner sudah mengisi
             if (testData.partnerCompleted) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Pasangan sudah mengisi tes ini'
-                });
+                return res.status(400).json({ success: false, message: 'Pasangan sudah mengisi' });
             }
-            // Cek apakah user (pemilik) sudah mengisi
             if (!testData.userCompleted) {
-                return res.status(400).json({
-                    success: false,
-                    message: 'Pasangan Anda harus mengisi tes terlebih dahulu'
-                });
+                return res.status(400).json({ success: false, message: 'Pasangan Anda harus mengisi terlebih dahulu' });
             }
-            // ✅ Partner diizinkan mengisi
         }
 
-        // Jika role user (pemilik), cek apakah sudah mengisi
         if (role === 'user' && testData.userCompleted) {
-            return res.status(400).json({
-                success: false,
-                message: 'Anda sudah mengisi tes ini'
-            });
+            return res.status(400).json({ success: false, message: 'Anda sudah mengisi tes ini' });
         }
 
-        // ============================================================
-        //  🔥 UPDATE DATA
-        // ============================================================
         const updateData = {
             [`${role}Answers`]: validAnswers,
             [`${role}Completed`]: true,
             [`${role}CompletedAt`]: admin.firestore.FieldValue.serverTimestamp()
         };
 
-        // 🔥 SIMPAN partnerUserId jika role partner
         if (role === 'partner') {
             updateData.partnerUserId = userId;
         }
 
-        // ============================================================
-        //  🔥 CEK APAKAH KEDUANYA SUDAH SELESAI
-        // ============================================================
         const isComplete = (role === 'user' && testData.partnerCompleted) ||
             (role === 'partner' && testData.userCompleted);
 
         if (isComplete) {
             const userAnswers = role === 'user' ? validAnswers : testData.userAnswers;
             const partnerAnswers = role === 'partner' ? validAnswers : testData.partnerAnswers;
-            const results = calculateWellnessResults(userAnswers, partnerAnswers);
-            updateData.results = results;
+            updateData.results = calculateWellnessResults(userAnswers, partnerAnswers);
             updateData.completedAt = admin.firestore.FieldValue.serverTimestamp();
         }
 
         await testRef.update(updateData);
 
-        // ============================================================
-        //  🔥 AMBIL DATA TERBARU & KIRIM RESPONSE
-        // ============================================================
         const updatedDoc = await testRef.get();
         const data = updatedDoc.data();
 
-        console.log('✅ Submit success:');
-        console.log('  isComplete:', !!data.results);
-        console.log('  inviteCode:', data.inviteCode);
-
         res.json({
             success: true,
-            testId: testId,
+            testId,
             isComplete: !!data.results,
             results: data.results || null,
             inviteCode: data.inviteCode || null,
-            message: isComplete ? 'Tes selesai! Hasil sudah tersedia.' : 'Jawaban tersimpan. Tunggu pasangan.'
+            message: isComplete ? 'Tes selesai!' : 'Jawaban tersimpan. Tunggu pasangan.'
         });
 
     } catch (error) {
-        console.error('❌ Submit answers error:', error);
-        res.status(500).json({
-            success: false,
-            message: 'Terjadi kesalahan server: ' + error.message
-        });
+        console.error('Submit answers error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
     }
 });
 
@@ -560,19 +824,12 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
         const userId = req.user.uid;
 
         if (!inviteCode || typeof inviteCode !== 'string') {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Kode tidak valid' 
-            });
+            return res.status(400).json({ success: false, message: 'Kode tidak valid' });
         }
 
         const code = inviteCode.trim().toUpperCase();
-        const codePattern = /^WELL-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/;
-        if (!codePattern.test(code)) {
-            return res.status(400).json({ 
-                success: false, 
-                message: 'Format kode tidak valid. Contoh: WELL-ABCD-1234-EFGH' 
-            });
+        if (!/^WELL-[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) {
+            return res.status(400).json({ success: false, message: 'Format kode tidak valid' });
         }
 
         const snapshot = await db.collection('wellness_tests')
@@ -580,92 +837,35 @@ app.post('/api/wellness/verify-invite', verifyFirebaseToken, async (req, res) =>
             .get();
 
         if (snapshot.empty) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Kode tidak valid' 
-            });
+            return res.status(404).json({ success: false, message: 'Kode tidak valid' });
         }
 
         const doc = snapshot.docs[0];
         const data = doc.data();
 
-        console.log('🔍 Verify invite:');
-        console.log('  userId (current):', userId);
-        console.log('  test owner:', data.userId);
-        console.log('  partnerUserId:', data.partnerUserId || 'belum ada');
-        console.log('  userCompleted:', data.userCompleted);
-        console.log('  partnerCompleted:', data.partnerCompleted);
-
-        // ============================================================
-        //  🔥 CEK: User ini pemilik test?
-        // ============================================================
-        const isOwner = data.userId === userId;
-
-        if (isOwner) {
-            // PEMILIK TEST
+        if (data.userId === userId) {
             if (data.userCompleted) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Anda sudah mengisi tes ini' 
-                });
+                return res.status(400).json({ success: false, message: 'Anda sudah mengisi tes ini' });
             }
-            return res.json({
-                success: true,
-                testId: doc.id,
-                role: 'user',
-                data: {
-                    userId: data.userId,
-                    userCompleted: data.userCompleted,
-                    partnerCompleted: data.partnerCompleted,
-                    startedAt: data.startedAt
-                }
-            });
+            return res.json({ success: true, testId: doc.id, role: 'user', data: { userId: data.userId, userCompleted: data.userCompleted, partnerCompleted: data.partnerCompleted } });
         } else {
-            // BUKAN PEMILIK → PARTNER
             if (data.partnerCompleted) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Pasangan sudah mengisi tes ini' 
-                });
+                return res.status(400).json({ success: false, message: 'Pasangan sudah mengisi tes ini' });
             }
             if (!data.userCompleted) {
-                return res.status(400).json({ 
-                    success: false, 
-                    message: 'Pasangan Anda harus mengisi tes terlebih dahulu' 
-                });
+                return res.status(400).json({ success: false, message: 'Pasangan Anda harus mengisi tes terlebih dahulu' });
             }
-
-            // 🔥 SIMPAN partnerUserId saat verify (untuk akses nanti)
-            await doc.ref.update({
-                partnerUserId: userId
-            });
-
-            return res.json({
-                success: true,
-                testId: doc.id,
-                role: 'partner',
-                data: {
-                    userId: data.userId,
-                    partnerUserId: userId,
-                    userCompleted: data.userCompleted,
-                    partnerCompleted: data.partnerCompleted,
-                    startedAt: data.startedAt
-                }
-            });
+            await doc.ref.update({ partnerUserId: userId });
+            return res.json({ success: true, testId: doc.id, role: 'partner', data: { userId: data.userId, partnerUserId: userId, userCompleted: data.userCompleted, partnerCompleted: data.partnerCompleted } });
         }
 
     } catch (error) {
         console.error('Verify invite error:', error);
-        res.status(500).json({ 
-            success: false, 
-            message: 'Terjadi kesalahan server' 
-        });
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
     }
 });
 
-// ============================================================
-//  🔥 GET WELLNESS RESULT BY TEST ID
-// ============================================================
+// 5. GET WELLNESS RESULT BY TEST ID
 app.get('/api/wellness/result/:testId', verifyFirebaseToken, async (req, res) => {
     try {
         const { testId } = req.params;
@@ -674,37 +874,21 @@ app.get('/api/wellness/result/:testId', verifyFirebaseToken, async (req, res) =>
         const doc = await db.collection('wellness_tests').doc(testId).get();
 
         if (!doc.exists) {
-            return res.status(404).json({ 
-                success: false, 
-                message: 'Test tidak ditemukan' 
-            });
+            return res.status(404).json({ success: false, message: 'Test tidak ditemukan' });
         }
 
         const data = doc.data();
 
-        // ============================================================
-        //  🔥 IZINKAN: pemilik ATAU partner
-        // ============================================================
-        const isOwner = data.userId === userId;
-        const isPartner = data.partnerUserId === userId;
-
-        if (!isOwner && !isPartner) {
-            return res.status(403).json({ 
-                success: false, 
-                message: 'Akses ditolak' 
-            });
+        if (data.userId !== userId && data.partnerUserId !== userId) {
+            return res.status(403).json({ success: false, message: 'Akses ditolak' });
         }
 
         if (!data.results) {
-            return res.json({ 
-                success: true, 
-                data: null, 
-                message: 'Hasil belum tersedia' 
-            });
+            return res.json({ success: true, data: null, message: 'Hasil belum tersedia' });
         }
 
-        res.json({ 
-            success: true, 
+        res.json({
+            success: true,
             data: {
                 results: data.results,
                 userCompleted: data.userCompleted,
@@ -813,126 +997,45 @@ function calculateWellnessResults(userAnswers, partnerAnswers) {
 }
 
 // ============================================================
-//  🔥 ROUTING HALAMAN - TANPA .html
+//  🔥 ROUTING HALAMAN
 // ============================================================
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, '../public/index.html')));
+app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../public/login.html')));
+app.get('/love-language', (req, res) => res.sendFile(path.join(__dirname, '../public/love-language.html')));
+app.get('/hasil', (req, res) => res.sendFile(path.join(__dirname, '../public/hasil.html')));
+app.get('/relationship-check', (req, res) => res.sendFile(path.join(__dirname, '../public/relationship-check.html')));
+app.get('/profil', (req, res) => res.sendFile(path.join(__dirname, '../public/profil.html')));
+app.get('/artikel', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/index.html')));
+app.get('/artikel/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/detail.html')));
+app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
+app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
 
-app.get('/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/login.html'));
-});
-
-app.get('/love-language', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/love-language.html'));
-});
-
-app.get('/hasil', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/hasil.html'));
-});
-
-app.get('/relationship-check', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/relationship-check.html'));
-});
-
-app.get('/profil', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/profil.html'));
-});
-
-app.get('/artikel', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/artikel/index.html'));
-});
-
-app.get('/artikel/detail', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/artikel/detail.html'));
-});
-
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/admin/index.html'));
-});
-
-app.get('/admin/login', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/admin/login.html'));
-});
-
-// ============================================================
-//  🔥 REDIRECT & ERROR HANDLER
-// ============================================================
-
-// Redirect .html ke tanpa .html
-app.get('/*.html', (req, res) => {
-    const url = req.originalUrl.replace(/\.html$/, '');
-    res.redirect(301, url);
-});
-
-app.get('/login/admin', (req, res) => {
-    res.redirect('/admin');
-});
-
-app.get('/admin/login/', (req, res) => {
-    res.redirect('/admin/login');
-});
+app.get('/*.html', (req, res) => res.redirect(301, req.originalUrl.replace(/\.html$/, '')));
+app.get('/login/admin', (req, res) => res.redirect('/admin'));
+app.get('/admin/login/', (req, res) => res.redirect('/admin/login'));
 
 // 404 Handler
 app.use((req, res) => {
-    // Cek apakah file statis ada
     const filePath = path.join(__dirname, '../public', req.path);
-    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-        return res.sendFile(filePath);
-    }
-    
-    // Cek apakah file dengan .html ada
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) return res.sendFile(filePath);
     const htmlPath = path.join(__dirname, '../public', req.path + '.html');
-    if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) {
-        return res.sendFile(htmlPath);
-    }
-    
-    res.status(404).send(`
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <title>404 - Halaman Tidak Ditemukan</title>
-            <style>
-                body { font-family: Arial, sans-serif; text-align: center; padding: 50px; background: #fdf6f2; }
-                h1 { font-size: 72px; color: #1d3b36; }
-                p { color: #5a6f6a; }
-                a { color: #f8b4c8; text-decoration: none; font-weight: 600; }
-                a:hover { text-decoration: underline; }
-            </style>
-        </head>
-        <body>
-            <h1>404</h1>
-            <p>Maaf, halaman yang kamu cari tidak ditemukan.</p>
-            <a href="/">← Kembali ke Beranda</a>
-        </body>
-        </html>
-    `);
+    if (fs.existsSync(htmlPath) && fs.statSync(htmlPath).isFile()) return res.sendFile(htmlPath);
+
+    res.status(404).send(`<!DOCTYPE html><html><head><title>404</title><style>body{font-family:Arial;text-align:center;padding:50px;background:#fdf6f2}h1{font-size:72px;color:#1d3b36}p{color:#5a6f6a}a{color:#f8b4c8;text-decoration:none;font-weight:600}</style></head><body><h1>404</h1><p>Halaman tidak ditemukan.</p><a href="/">← Kembali ke Beranda</a></body></html>`);
 });
 
-// Error Handler
 app.use((err, req, res, next) => {
     console.error('Server Error:', err);
-    res.status(500).json({
-        success: false,
-        message: 'Terjadi kesalahan server',
-        error: process.env.NODE_ENV === 'development' ? err.message : undefined
-    });
+    res.status(500).json({ success: false, message: 'Terjadi kesalahan server', error: process.env.NODE_ENV === 'development' ? err.message : undefined });
 });
 
-// ============================================================
-//  🔥 EXPORT UNTUK VERCEL
-// ============================================================
 module.exports = app;
 
-// ============================================================
-//  🔥 START SERVER (hanya jika dijalankan langsung)
-// ============================================================
 if (require.main === module) {
     app.listen(PORT, () => {
-        console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+        console.log(`🚀 Server: http://localhost:${PORT}`);
         console.log(`📁 Admin: http://localhost:${PORT}/admin`);
-        console.log(`🔑 Login Admin: http://localhost:${PORT}/admin/login`);
-        console.log(`🧠 Wellness API: http://localhost:${PORT}/api/wellness/start`);
+        console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '✅ dari env' : '⚠️  auto-generated (session-only)'}`);
     });
 }

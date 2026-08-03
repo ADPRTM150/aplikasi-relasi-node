@@ -14,6 +14,58 @@
 
     <!-- CSS Login Admin (Khusus) -->
     <link rel="stylesheet" href="/admin/css/login.css" />
+
+    <style>
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            background: #fff;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 16px;
+        }
+        .google-btn:hover {
+            border-color: #6C63FF;
+            box-shadow: 0 4px 16px rgba(108,99,255,0.15);
+        }
+        .google-btn img {
+            width: 22px;
+            height: 22px;
+        }
+        .divider-text {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            margin: 12px 0;
+            position: relative;
+        }
+        .divider-text::before,
+        .divider-text::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 35%;
+            height: 1px;
+            background: #e0e0e0;
+        }
+        .divider-text::before { left: 0; }
+        .divider-text::after { right: 0; }
+        .step-section {
+            display: none;
+        }
+        .step-section.active {
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
@@ -22,37 +74,106 @@
             <div class="logo">❤️ Relasi<span>Admin</span></div>
             <p class="subtitle">Login untuk mengelola konten & data</p>
 
-            <div class="error-message" id="errorMessage">
-                ⚠️ <span id="errorText">Email atau password salah.</span>
+            <!-- 🔥 STEP 1: Login Google dulu -->
+            <div id="stepGoogle" class="step-section active">
+                <p style="text-align:center;color:#666;font-size:14px;margin-bottom:16px;">
+                    Login dengan Google dulu untuk akses database
+                </p>
+                <button class="google-btn" onclick="loginGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" />
+                    Login dengan Google
+                </button>
             </div>
 
-            <form id="loginForm" onsubmit="loginAdmin(event)">
-                <div class="form-group">
-                    <label>📧 Email Admin</label>
-                    <input type="email" id="adminEmail" placeholder="admin@relasi.com" required />
+            <!-- 🔥 STEP 2: Baru login admin -->
+            <div id="stepAdmin" class="step-section">
+                <div id="userInfo" style="background:#e6f2f0;padding:8px 14px;border-radius:8px;margin-bottom:12px;font-size:13px;color:#2d635e;"></div>
+
+                <div class="divider-text">Login Admin</div>
+
+                <div class="error-message" id="errorMessage">
+                    ⚠️ <span id="errorText">Email atau password salah.</span>
                 </div>
-                <div class="form-group">
-                    <label>🔑 Password</label>
-                    <input type="password" id="adminPassword" placeholder="Masukkan password" required />
-                </div>
-                <button type="submit" class="btn-login">
-                    <span>🚪</span> Login
-                </button>
-            </form>
+
+                <form id="loginForm" onsubmit="loginAdmin(event)">
+                    <div class="form-group">
+                        <label>📧 Email Admin</label>
+                        <input type="email" id="adminEmail" placeholder="admin@relasi.com" required />
+                    </div>
+                    <div class="form-group">
+                        <label>🔑 Password</label>
+                        <input type="password" id="adminPassword" placeholder="Masukkan password" required />
+                    </div>
+                    <button type="submit" class="btn-login">
+                        <span>🚪</span> Masuk Dashboard
+                    </button>
+                </form>
+            </div>
 
             <a href="/" class="back-link">← Kembali ke Beranda</a>
             <div class="footer-note">💡 Default: admin@relasi.com / admin123</div>
         </div>
     </div>
 
-    <script>
-        // ============================================================
-        //  LOGIN ADMIN (PAKAI SETTINGS DARI LOCALSTORAGE / FIRESTORE)
-        // ============================================================
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
 
-        // 🔥 Load admin settings dari localStorage atau Firestore
+    <script>
+        const errorDiv = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const stepGoogle = document.getElementById('stepGoogle');
+        const stepAdmin = document.getElementById('stepAdmin');
+
+        // ============================================================
+        //  🔥 CEK FIREBASE AUTH SAAT HALAMAN LOAD
+        // ============================================================
+        firebase.auth().onAuthStateChanged(function(user) {
+            if (user) {
+                // Sudah login Google → langsung tampilkan form admin
+                stepGoogle.classList.remove('active');
+                stepAdmin.classList.add('active');
+                document.getElementById('userInfo').textContent = '✅ ' + (user.displayName || user.email);
+
+                // Kalau sudah login admin sebelumnya → langsung ke dashboard
+                if (localStorage.getItem('isAdmin') === 'true') {
+                    window.location.href = '/admin';
+                }
+            } else {
+                // Belum login Google → tampilkan tombol Google
+                stepGoogle.classList.add('active');
+                stepAdmin.classList.remove('active');
+            }
+        });
+
+        // ============================================================
+        //  🔥 LOGIN GOOGLE
+        // ============================================================
+        function loginGoogle() {
+            var btn = document.querySelector('.google-btn');
+            btn.disabled = true;
+            btn.textContent = 'Memproses...';
+
+            var provider = new firebase.auth.GoogleAuthProvider();
+            firebase.auth().signInWithPopup(provider)
+                .catch(function(error) {
+                    console.error('Google login error:', error);
+                    btn.disabled = false;
+                    btn.innerHTML = '<img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" /> Login dengan Google';
+
+                    errorText.textContent = 'Gagal login Google: ' + error.message;
+                    errorDiv.classList.add('show');
+                    setTimeout(function() { errorDiv.classList.remove('show'); }, 5000);
+                });
+        }
+
+        // ============================================================
+        //  LOGIN ADMIN
+        // ============================================================
         function getAdminSettings() {
-            const saved = localStorage.getItem('adminSettings');
+            var saved = localStorage.getItem('adminSettings');
             if (saved) {
                 try {
                     return JSON.parse(saved);
@@ -66,37 +187,65 @@
         function loginAdmin(e) {
             e.preventDefault();
 
-            const email = document.getElementById('adminEmail').value;
-            const password = document.getElementById('adminPassword').value;
-            const errorDiv = document.getElementById('errorMessage');
-            const errorText = document.getElementById('errorText');
-
-            const settings = getAdminSettings();
-
-            if (email === settings.email && password === settings.password) {
-                // ✅ Login berhasil
-                localStorage.setItem('isAdmin', 'true');
-                localStorage.setItem('adminEmail', email);
-                
-                // 🔥 Simpan nama admin (untuk createdBy)
-                const adminName = email.split('@')[0] || 'Admin';
-                localStorage.setItem('adminName', adminName);
-                
-                // 🔥 Simpan UID sementara (untuk tracking)
-                localStorage.setItem('adminUid', 'admin_' + Date.now());
-
-                window.location.href = '/admin';
-            } else {
-                // ❌ Login gagal
-                errorText.textContent = 'Email atau password salah. Coba lagi!';
+            if (!firebase.auth().currentUser) {
+                errorText.textContent = 'Login Google dulu sebelum masuk admin!';
                 errorDiv.classList.add('show');
-                setTimeout(() => errorDiv.classList.remove('show'), 4000);
+                stepGoogle.classList.add('active');
+                stepAdmin.classList.remove('active');
+                return;
             }
+
+            var email = document.getElementById('adminEmail').value;
+            var password = document.getElementById('adminPassword').value;
+            var btn = document.querySelector('.btn-login');
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Memproses...';
+
+            // 🔥 Panggil server API untuk verifikasi admin
+            fetch('/api/admin/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data.success) {
+                    // Simpan token JWT
+                    localStorage.setItem('adminToken', data.token);
+                    localStorage.setItem('isAdmin', 'true');
+                    localStorage.setItem('adminEmail', email);
+                    localStorage.setItem('adminName', email.split('@')[0] || 'Admin');
+                    window.location.href = '/admin';
+                } else {
+                    btn.disabled = false;
+                    btn.innerHTML = '<span>🚪</span> Masuk Dashboard';
+                    errorText.textContent = data.message || 'Email atau password salah!';
+                    errorDiv.classList.add('show');
+                    setTimeout(function() { errorDiv.classList.remove('show'); }, 4000);
+                }
+            })
+            .catch(function(err) {
+                console.error('Login error:', err);
+                btn.disabled = false;
+                btn.innerHTML = '<span>🚪</span> Masuk Dashboard';
+                // Fallback ke cara lama kalau server error
+                fallbackLogin(email, password);
+            });
         }
 
-        // 🔥 Cek jika sudah login, langsung redirect ke dashboard
-        if (localStorage.getItem('isAdmin') === 'true') {
-            window.location.href = '/admin';
+        // Fallback login kalau server tidak tersedia
+        function fallbackLogin(email, password) {
+            var settings = getAdminSettings();
+            if (email === settings.email && password === settings.password) {
+                localStorage.setItem('isAdmin', 'true');
+                localStorage.setItem('adminEmail', email);
+                localStorage.setItem('adminName', email.split('@')[0] || 'Admin');
+                window.location.href = '/admin';
+            } else {
+                errorText.textContent = 'Email atau password salah. Coba lagi!';
+                errorDiv.classList.add('show');
+                setTimeout(function() { errorDiv.classList.remove('show'); }, 4000);
+            }
         }
     </script>
 

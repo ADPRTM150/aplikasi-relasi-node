@@ -1564,20 +1564,42 @@
 
     <script>
         // ============================================================
-        //  CEK AKSES ADMIN
+        //  🔥 AUTH GUARD: Wajib Firebase + Admin
         // ============================================================
-        if (localStorage.getItem('isAdmin') !== 'true') {
-            window.location.href = '/admin/login.html';
-        }
+        (function() {
+            var adminChecked = false;
 
-        document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') ||
-            'admin@relasi.com';
-        document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
+            function checkAccess() {
+                if (adminChecked) return;
+                var isAdmin = localStorage.getItem('isAdmin') === 'true';
+                var hasFirebase = typeof firebase !== 'undefined';
 
-        // ============================================================
-        //  REFERENSI FIRESTORE
-        // ============================================================
-        // db sudah tersedia dari firebase-config.js
+                if (!hasFirebase) {
+                    window.location.href = '/admin/login.html';
+                    return;
+                }
+
+                firebase.auth().onAuthStateChanged(function(user) {
+                    if (adminChecked) return;
+                    if (!user) {
+                        alert('⚠️ Kamu harus login dengan Google dulu untuk mengakses Admin.\n\nRedirect ke halaman login...');
+                        window.location.href = '/admin/login.html';
+                        return;
+                    }
+                    if (!isAdmin) {
+                        window.location.href = '/admin/login.html';
+                        return;
+                    }
+                    // ✅ Akses OK
+                    adminChecked = true;
+                    document.getElementById('adminEmailDisplay').textContent = localStorage.getItem('adminEmail') || 'admin@relasi.com';
+                    document.getElementById('adminNameDisplay').textContent = localStorage.getItem('adminName') || 'Admin';
+                    init();
+                });
+            }
+
+            checkAccess();
+        })();
 
         // ============================================================
         //  LOGOUT
@@ -1586,8 +1608,47 @@
             if (confirm('Yakin ingin logout?')) {
                 localStorage.removeItem('isAdmin');
                 localStorage.removeItem('adminEmail');
-                window.location.href = '/admin/login.html';
+                localStorage.removeItem('adminName');
+                localStorage.removeItem('adminToken');
+                if (typeof firebase !== 'undefined' && firebase.auth().currentUser) {
+                    firebase.auth().signOut().then(function() {
+                        window.location.href = '/admin/login.html';
+                    });
+                } else {
+                    window.location.href = '/admin/login.html';
+                }
             }
+        }
+
+        // ============================================================
+        //  🔥 API HELPER — semua admin CRUD via server
+        // ============================================================
+        function getToken() {
+            return localStorage.getItem('adminToken') || '';
+        }
+
+        async function apiGet(path) {
+            var res = await fetch(path, { headers: { 'Authorization': 'Bearer ' + getToken() } });
+            if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href = '/admin/login'; return; }
+            return res.json();
+        }
+
+        async function apiPost(path, data) {
+            var res = await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }, body: JSON.stringify(data) });
+            if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href = '/admin/login'; return; }
+            return res.json();
+        }
+
+        async function apiPut(path, data) {
+            var res = await fetch(path, { method: 'PUT', headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }, body: JSON.stringify(data) });
+            if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href = '/admin/login'; return; }
+            return res.json();
+        }
+
+        async function apiDelete(path) {
+            var res = await fetch(path, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + getToken() } });
+            if (res.status === 401) { localStorage.removeItem('adminToken'); localStorage.removeItem('isAdmin'); window.location.href = '/admin/login'; return; }
+            return res.json();
         }
 
         // ============================================================
@@ -1726,17 +1787,21 @@
         //  🔥 LOAD AKTIVITAS TERBARU - LOGIN HANYA 1 KALI PER USER
         // ============================================================
 
+        // 🔥 Helper: convert serialized Firestore timestamp
+        function toDate(ts) {
+            if (!ts) return new Date();
+            if (typeof ts.toDate === 'function') return ts.toDate();
+            if (ts._seconds) return new Date(ts._seconds * 1000);
+            return new Date(ts);
+        }
+
         async function loadRecentActivities() {
             var container = document.getElementById('recentActivity');
-
             try {
-                // Ambil 30 aktivitas terbaru
-                var snapshot = await db.collection('activities')
-                    .orderBy('timestamp', 'desc')
-                    .limit(30)
-                    .get();
-
-                if (snapshot.empty) {
+                var result = await apiGet('/api/admin/activities');
+                if (!result || !result.success) throw new Error('API error');
+                var raw = result.activities || [];
+                if (raw.length === 0) {
                     container.innerHTML = `
                 <div class="empty-state">
                     <div class="icon">📭</div>
@@ -1746,45 +1811,28 @@
                     return;
                 }
 
-                // 🔥 TRACKING: Hanya 1 login per user
                 var loginSeen = {};
                 var articleSeen = {};
                 var activities = [];
 
-                snapshot.forEach(function (doc) {
-                    var activity = doc.data();
-                    activity.id = doc.id;
-
+                raw.forEach(function (activity) {
                     var userId = activity.userId || 'unknown';
                     var type = activity.type;
-
-                    // 🔥 LOGIN: Hanya 1 per user (yang terbaru otomatis karena order desc)
                     if (type === 'user_login') {
-                        if (loginSeen[userId]) {
-                            return; // Skip login yang sudah ada
-                        }
+                        if (loginSeen[userId]) return;
                         loginSeen[userId] = true;
                     }
-
-                    // 🔥 ARTICLE_READ: Hanya 1 per artikel per user
                     if (type === 'article_read') {
-                        var articleId = (activity.details && activity.details.articleId) ? activity.details
-                            .articleId : 'unknown';
+                        var articleId = (activity.details && activity.details.articleId) ? activity.details.articleId : 'unknown';
                         var key = userId + '_' + articleId;
-                        if (articleSeen[key]) {
-                            return; // Skip artikel yang sudah dibaca
-                        }
+                        if (articleSeen[key]) return;
                         articleSeen[key] = true;
                     }
-
                     activities.push(activity);
                 });
 
-                // Urutkan berdasarkan timestamp (desc)
                 activities.sort(function (a, b) {
-                    var timeA = a.timestamp && a.timestamp.toDate ? a.timestamp.toDate() : new Date(0);
-                    var timeB = b.timestamp && b.timestamp.toDate ? b.timestamp.toDate() : new Date(0);
-                    return timeB - timeA;
+                    return toDate(b.timestamp) - toDate(a.timestamp);
                 });
 
                 // Ambil 10 teratas
@@ -1804,8 +1852,7 @@
                 var html = '<div class="activity-timeline">';
 
                 activities.forEach(function (activity) {
-                    var time = activity.timestamp && activity.timestamp.toDate ? activity.timestamp
-                        .toDate() : new Date();
+                    var time = toDate(activity.timestamp);
                     var timeAgo = getTimeAgo(time);
                     var detailText = formatActivityDetails(activity);
 
@@ -1947,11 +1994,10 @@
         async function loadUsers() {
             var tbody = document.getElementById('userTableBody');
             try {
-                var snapshot = await db.collection('users')
-                    .orderBy('createdAt', 'desc')
-                    .get();
-
-                if (snapshot.empty) {
+                var result = await apiGet('/api/admin/users');
+                if (!result || !result.success) throw new Error('API error');
+                var users = result.users || [];
+                if (users.length === 0) {
                     tbody.innerHTML = `
                         <tr>
                             <td colspan="6" class="empty-state">
@@ -1968,14 +2014,13 @@
                 }
 
                 var html = '';
-                snapshot.forEach(function (doc) {
-                    var u = doc.data();
-                    var userId = doc.id;
+                users.forEach(function (u) {
+                    var userId = u.id;
 
                     var primaryLove = getPrimaryLoveLanguage(u.loveLanguage);
                     var fullLove = formatLoveLanguage(u.loveLanguage);
 
-                    var isActive = u.status === 'active' || u.lastLogin === true;
+                    var isActive = u.status === 'active';
                     var statusClass = isActive ? 'active' : 'inactive';
                     var statusText = isActive ? '✅ Aktif' : '⏸️ Tidak Aktif';
 
@@ -2020,8 +2065,8 @@
                 });
 
                 tbody.innerHTML = html;
-                document.getElementById('userCount').textContent = snapshot.size + ' user';
-                document.getElementById('statUsers').textContent = snapshot.size;
+                document.getElementById('userCount').textContent = users.length + ' user';
+                document.getElementById('statUsers').textContent = users.length;
 
             } catch (error) {
                 console.error('Error loading users:', error);
@@ -2103,7 +2148,7 @@
             if (!confirm('Yakin ingin menghapus user ini? Data tidak bisa dikembalikan!')) return;
 
             try {
-                await db.collection('users').doc(userId).delete();
+                await apiDelete('/api/admin/users/' + userId);
                 alert('✅ User berhasil dihapus!');
                 loadUsers();
                 updateStats();
@@ -2144,12 +2189,12 @@
 
             try {
                 if (id) {
-                    await db.collection('users').doc(id).update(data);
+                    await apiPut('/api/admin/users/' + id, data);
                     alert('✅ User berhasil diupdate!');
                 } else {
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     data.uid = 'user_' + Date.now();
-                    await db.collection('users').add(data);
+                    await apiPost('/api/admin/users', data);
                     alert('✅ User berhasil ditambahkan!');
                 }
 
@@ -2169,27 +2214,20 @@
         // ============================================================
         async function fetchAllUsersWithLoveLanguage() {
             try {
-                var snapshot = await db.collection('users')
-                    .orderBy('createdAt', 'desc')
-                    .get();
+                var result = await apiGet('/api/admin/users');
+                var raw = result && result.success ? result.users : [];
 
                 var users = [];
-                snapshot.forEach(function (doc) {
-                    var data = doc.data();
+                raw.forEach(function (data) {
                     users.push({
-                        id: doc.id,
+                        id: data.id,
                         nama: data.nama || data.name || 'Pengguna',
                         email: data.email || '-',
-                        status: data.status === 'active' || data.lastLogin === true ? 'Aktif' :
-                            'Tidak Aktif',
+                        status: data.status === 'active' ? 'Aktif' : 'Tidak Aktif',
                         joinDate: data.createdAt ?
-                            (data.createdAt.toDate ?
-                                new Date(data.createdAt.toDate()).toLocaleDateString('id-ID', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                }) :
-                                '-') : '-',
+                            new Date(data.createdAt._seconds ? data.createdAt._seconds * 1000 : data.createdAt).toLocaleDateString('id-ID', {
+                                day: '2-digit', month: '2-digit', year: 'numeric'
+                            }) : '-',
                         loveLanguage: data.loveLanguage || null
                     });
                 });
@@ -2314,17 +2352,15 @@
         async function loadArticles() {
             var tbody = document.getElementById('articleTableBody');
             try {
-                var snapshot = await db.collection('articles').orderBy('createdAt', 'desc').get();
-                if (snapshot.empty) {
+                var result = await apiGet("/api/admin/articles");
+                var articles = (result && result.success) ? result.articles : [];
+                if (!articles || articles.length === 0) {
                     tbody.innerHTML =
                         '<tr><td colspan="6" class="empty-state"><div class="icon">📰</div>Belum ada artikel.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function (doc) {
-                    var a = doc.data();
-                    var id = doc.id;
-
+                articles.forEach(function (a) {
                     var statusBadge = a.status === 'published' ?
                         '<span style="background:#e6f2f0;color:#3a7d76;padding:2px 10px;border-radius:20px;font-size:11px;">✅ Published</span>' :
                         '<span style="background:#fdf8f0;color:#d4a373;padding:2px 10px;border-radius:20px;font-size:11px;">⏳ Draft</span>';
@@ -2345,16 +2381,16 @@
                             <td><span class="badge active">${a.category || 'Lainnya'}</span></td>
                             <td>${statusBadge}</td>
                             <td>👤 ${createdBy}</td>
-                            <td>${a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${a.createdAt ? toDate(a.createdAt).toLocaleDateString('id-ID') : '-'}</td>
                             <td>
-                                <button class="btn-edit" onclick="editArticle('${id}')"><span>✏️</span> Edit</button>
-                                <button class="btn-delete" onclick="deleteArticle('${id}')"><span>🗑️</span> Hapus</button>
+                                <button class="btn-edit" onclick="editArticle('${a.id}')"><span>✏️</span> Edit</button>
+                                <button class="btn-delete" onclick="deleteArticle('${a.id}')"><span>🗑️</span> Hapus</button>
                             </td>
                         </tr>
                     `;
                 });
                 tbody.innerHTML = html;
-                document.getElementById('statArticles').textContent = snapshot.size;
+                document.getElementById('statArticles').textContent = articles.length;
             } catch (error) {
                 console.error('Error loading articles:', error);
                 tbody.innerHTML =
@@ -2393,7 +2429,7 @@
 
             try {
                 if (id) {
-                    await db.collection('articles').doc(id).update(data);
+                    await apiPut('/api/admin/articles/' + id, data);
                 } else {
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
                     data.createdBy = {
@@ -2401,7 +2437,7 @@
                         name: adminName,
                         uid: localStorage.getItem('adminUid') || ''
                     };
-                    await db.collection('articles').add(data);
+                    await apiPost('/api/admin/articles', data);
                 }
                 closeModal('articleModal');
                 loadArticles();
@@ -2431,7 +2467,7 @@
         async function deleteArticle(id) {
             if (confirm('Yakin hapus artikel ini?')) {
                 try {
-                    await db.collection('articles').doc(id).delete();
+                    await apiDelete('/api/admin/articles/' + id);
                     loadArticles();
                     updateStats();
                 } catch (error) {
@@ -2447,23 +2483,23 @@
         async function loadEbooks() {
             var tbody = document.getElementById('ebookTableBody');
             try {
-                var snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
-                if (snapshot.empty) {
+                var result = await apiGet("/api/admin/ebooks");
+                var ebooks = (result && result.success) ? result.ebooks : [];
+                if (!ebooks || ebooks.length === 0) {
                     tbody.innerHTML =
                         '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function (doc) {
-                    var e = doc.data();
-                    var id = doc.id;
+                ebooks.forEach(function (e) {
+                    var id = e.id;
                     var harga = e.price > 0 ? 'Rp ' + e.price.toLocaleString() : '🆓 Gratis';
                     html += `
                         <tr>
                             <td><strong>${e.title}</strong></td>
                             <td>${e.pages || 0} halaman</td>
                             <td>${harga}</td>
-                            <td>${e.createdAt ? new Date(e.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${e.createdAt ? toDate(e.createdAt).toLocaleDateString('id-ID') : '-'}</td>
                             <td>
                                 <button class="btn-edit" onclick="editEbook('${id}')"><span>✏️</span> Edit</button>
                                 <button class="btn-delete" onclick="deleteEbook('${id}')"><span>🗑️</span> Hapus</button>
@@ -2472,7 +2508,7 @@
                     `;
                 });
                 tbody.innerHTML = html;
-                document.getElementById('statEbooks').textContent = snapshot.size;
+                document.getElementById('statEbooks').textContent = ebooks.length;
             } catch (error) {
                 console.error('Error loading ebooks:', error);
                 tbody.innerHTML =
@@ -2517,10 +2553,10 @@
 
             try {
                 if (id) {
-                    await db.collection('ebooks').doc(id).update(data);
+                    await apiPut('/api/admin/ebooks/' + id, data);
                 } else {
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('ebooks').add(data);
+                    await apiPost('/api/admin/ebooks', data);
                 }
                 closeModal('ebookModal');
                 loadEbooks();
@@ -2550,7 +2586,7 @@
         async function deleteEbook(id) {
             if (confirm('Yakin hapus ebook ini?')) {
                 try {
-                    await db.collection('ebooks').doc(id).delete();
+                    await apiDelete('/api/admin/ebooks/' + id);
                     loadEbooks();
                     updateStats();
                 } catch (error) {
@@ -2566,24 +2602,23 @@
         async function loadVideos() {
             var tbody = document.getElementById('videoTableBody');
             try {
-                var snapshot = await db.collection('videos').orderBy('createdAt', 'desc').get();
-                if (snapshot.empty) {
+                var result = await apiGet("/api/admin/videos");
+                var videos = (result && result.success) ? result.videos : [];
+                if (!videos || videos.length === 0) {
                     tbody.innerHTML =
                         '<tr><td colspan="4" class="empty-state"><div class="icon">🎥</div>Belum ada video.</td></tr>';
                     return;
                 }
                 var html = '';
-                snapshot.forEach(function (doc) {
-                    var v = doc.data();
-                    var id = doc.id;
+                videos.forEach(function (v) {
                     html += `
                         <tr>
                             <td><strong>${v.title}</strong></td>
                             <td>${v.duration || '-'}</td>
-                            <td>${v.createdAt ? new Date(v.createdAt.toDate()).toLocaleDateString('id-ID') : '-'}</td>
+                            <td>${v.createdAt ? toDate(v.createdAt).toLocaleDateString('id-ID') : '-'}</td>
                             <td>
-                                <button class="btn-edit" onclick="editVideo('${id}')"><span>✏️</span> Edit</button>
-                                <button class="btn-delete" onclick="deleteVideo('${id}')"><span>🗑️</span> Hapus</button>
+                                <button class="btn-edit" onclick="editVideo('${v.id}')"><span>✏️</span> Edit</button>
+                                <button class="btn-delete" onclick="deleteVideo('${v.id}')"><span>🗑️</span> Hapus</button>
                             </td>
                         </tr>
                     `;
@@ -2619,10 +2654,10 @@
 
             try {
                 if (id) {
-                    await db.collection('videos').doc(id).update(data);
+                    await apiPut('/api/admin/videos/' + id, data);
                 } else {
                     data.createdAt = firebase.firestore.FieldValue.serverTimestamp();
-                    await db.collection('videos').add(data);
+                    await apiPost('/api/admin/videos', data);
                 }
                 closeModal('videoModal');
                 loadVideos();
@@ -2651,7 +2686,7 @@
         async function deleteVideo(id) {
             if (confirm('Yakin hapus video ini?')) {
                 try {
-                    await db.collection('videos').doc(id).delete();
+                    await apiDelete('/api/admin/videos/' + id);
                     loadVideos();
                 } catch (error) {
                     console.error('Error deleting video:', error);
@@ -2668,13 +2703,15 @@
             tbody.innerHTML = '<tr><td colspan="7" class="loading-text">⏳ Memuat data pasangan...</td></tr>';
 
             try {
-                var snapshot = await db.collection('wellness_tests')
-                    .where('userCompleted', '==', true)
-                    .where('partnerCompleted', '==', true)
-                    .orderBy('completedAt', 'desc')
-                    .get();
+                var couplesResult = await apiGet('/api/admin/couples');
+                var usersResult = await apiGet('/api/admin/users');
+                var couples = (couplesResult && couplesResult.success) ? couplesResult.couples : [];
+                var allUsers = (usersResult && usersResult.success) ? usersResult.users : [];
+                // Build user lookup map
+                var userMap = {};
+                (allUsers || []).forEach(function(u) { userMap[u.id] = u; });
 
-                if (snapshot.empty) {
+                if (!couples || couples.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="7" class="empty-state">' +
                         '<div class="icon">💑</div>' +
                         '<p>Belum ada pasangan terhubung.</p>' +
@@ -2688,30 +2725,12 @@
                 var html = '';
                 var totalCouples = 0;
 
-                for (var i = 0; i < snapshot.docs.length; i++) {
-                    var doc = snapshot.docs[i];
-                    var data = doc.data();
-                    var testId = doc.id;
+                for (var i = 0; i < couples.length; i++) {
+                    var data = couples[i];
+                    var testId = data.id;
 
-                    var userAName = 'Unknown';
-                    if (data.userId) {
-                        try {
-                            var userDoc = await db.collection('users').doc(data.userId).get();
-                            if (userDoc.exists) {
-                                userAName = userDoc.data().nama || userDoc.data().name || 'Unknown';
-                            }
-                        } catch (e) {}
-                    }
-
-                    var userBName = 'Unknown';
-                    if (data.partnerUserId) {
-                        try {
-                            var userDoc = await db.collection('users').doc(data.partnerUserId).get();
-                            if (userDoc.exists) {
-                                userBName = userDoc.data().nama || userDoc.data().name || 'Unknown';
-                            }
-                        } catch (e) {}
-                    }
+                    var userAName = (userMap[data.userId] && (userMap[data.userId].nama || userMap[data.userId].name)) || 'Unknown';
+                    var userBName = (userMap[data.partnerUserId] && (userMap[data.partnerUserId].nama || userMap[data.partnerUserId].name)) || 'Unknown';
                     if (userBName === 'Unknown' && data.partnerName) {
                         userBName = data.partnerName;
                     }
@@ -2721,8 +2740,7 @@
                         '<span class="badge active" style="background:#e6f2f0;color:#3a7d76;">✅ Selesai</span>' :
                         '<span class="badge" style="background:#fdf8f0;color:#d4a373;">⏳ Menunggu</span>';
 
-                    var tanggal = data.completedAt && data.completedAt.toDate ? data.completedAt.toDate() : (data
-                        .startedAt && data.startedAt.toDate ? data.startedAt.toDate() : new Date());
+                    var tanggal = toDate(data.completedAt || data.startedAt);
                     var tanggalStr = tanggal.toLocaleDateString('id-ID', {
                         day: 'numeric',
                         month: 'short',
@@ -2770,13 +2788,12 @@
         // ============================================================
         async function viewCoupleDetail(testId) {
             try {
-                var doc = await db.collection('wellness_tests').doc(testId).get();
-                if (!doc.exists) {
+                var detailResult = await apiGet('/api/admin/couples/' + testId);
+                if (!detailResult || !detailResult.success || !detailResult.couple) {
                     alert('Data tidak ditemukan!');
                     return;
                 }
-
-                var data = doc.data();
+                var data = detailResult.couple;
                 var results = data.results || {};
                 var modalId = 'modal-' + Date.now();
 
@@ -2859,7 +2876,7 @@
             if (!confirm('Yakin ingin menghapus data pasangan ini? Data tidak bisa dikembalikan!')) return;
 
             try {
-                await db.collection('wellness_tests').doc(testId).delete();
+                await apiDelete('/api/admin/couples/' + testId);
                 alert('✅ Data pasangan berhasil dihapus!');
                 loadCouples();
                 updateStats();
@@ -3350,19 +3367,23 @@
         };
 
         async function loadSettings() {
-            try {
-                var doc = await db.collection('admin').doc('settings').get();
-                if (doc.exists) {
-                    var data = doc.data();
-                    document.getElementById('settingsEmail').value = data.email || '';
-                } else {
-                    await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
-                    document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+            var token = localStorage.getItem('adminToken');
+            if (token) {
+                try {
+                    var res = await fetch('/api/admin/settings', {
+                        headers: { 'Authorization': 'Bearer ' + token }
+                    });
+                    var data = await res.json();
+                    if (data.success) {
+                        document.getElementById('settingsEmail').value = data.settings.email || DEFAULT_ADMIN.email;
+                        return;
+                    }
+                } catch (e) {
+                    console.warn('Gagal fetch settings dari server, pakai default');
                 }
-            } catch (error) {
-                console.error('Error loading settings:', error);
-                document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
             }
+            // Fallback
+            document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
         }
 
         async function saveSettings(e) {
@@ -3394,52 +3415,81 @@
                 data.password = password;
             }
 
-            try {
-                await db.collection('admin').doc('settings').set(data, {
-                    merge: true
-                });
-
-                document.getElementById('adminEmailDisplay').textContent = email;
-                localStorage.setItem('adminEmail', email);
-
-                showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
-                document.getElementById('settingsPassword').value = '';
-
-                setTimeout(function () {
-                    if (confirm('Pengaturan berhasil disimpan. Login ulang dengan email baru?')) {
-                        localStorage.removeItem('isAdmin');
-                        window.location.href = '/admin/login';
+            var token = localStorage.getItem('adminToken');
+            if (token) {
+                try {
+                    var res = await fetch('/api/admin/settings', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({
+                            email: email,
+                            password: password || undefined
+                        })
+                    });
+                    var result = await res.json();
+                    if (result.success) {
+                        document.getElementById('adminEmailDisplay').textContent = email;
+                        localStorage.setItem('adminEmail', email);
+                        showSettingsAlert('✅ Pengaturan berhasil disimpan!', 'success');
+                        document.getElementById('settingsPassword').value = '';
+                        setTimeout(function () {
+                            if (confirm('Pengaturan berhasil disimpan. Login ulang dengan email baru?')) {
+                                localStorage.removeItem('isAdmin');
+                                localStorage.removeItem('adminToken');
+                                window.location.href = '/admin/login';
+                            }
+                        }, 1500);
+                        return;
+                    } else {
+                        showSettingsAlert('❌ ' + (result.message || 'Gagal menyimpan'), 'error');
+                        return;
                     }
-                }, 1500);
-
-            } catch (error) {
-                console.error('Error saving settings:', error);
-                showSettingsAlert('❌ Gagal menyimpan pengaturan: ' + error.message, 'error');
+                } catch (e) {
+                    console.error('Error saving settings via server:', e);
+                }
             }
+            // Fallback: kalau server tidak tersedia
+            showSettingsAlert('⚠️ Token admin tidak ditemukan. Silakan login ulang.', 'error');
         }
 
         async function resetSettings() {
             if (!confirm('Yakin reset ke default (admin@relasi.com / admin123)?')) return;
 
-            try {
-                await db.collection('admin').doc('settings').set(DEFAULT_ADMIN);
-                localStorage.setItem('adminEmail', DEFAULT_ADMIN.email);
-                document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
-                document.getElementById('settingsPassword').value = '';
-                document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
-                showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
-
-                setTimeout(function () {
-                    if (confirm('Reset berhasil. Login ulang dengan default?')) {
-                        localStorage.removeItem('isAdmin');
-                        window.location.href = '/admin/login';
+            var token = localStorage.getItem('adminToken');
+            if (token) {
+                try {
+                    var res = await fetch('/api/admin/settings', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + token
+                        },
+                        body: JSON.stringify({ email: 'admin@relasi.com', password: 'admin123' })
+                    });
+                    var result = await res.json();
+                    if (result.success) {
+                        localStorage.setItem('adminEmail', DEFAULT_ADMIN.email);
+                        document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+                        document.getElementById('settingsPassword').value = '';
+                        document.getElementById('adminEmailDisplay').textContent = DEFAULT_ADMIN.email;
+                        showSettingsAlert('🔄 Reset ke default berhasil!', 'success');
+                        setTimeout(function () {
+                            if (confirm('Reset berhasil. Login ulang dengan default?')) {
+                                localStorage.removeItem('isAdmin');
+                                localStorage.removeItem('adminToken');
+                                window.location.href = '/admin/login';
+                            }
+                        }, 1500);
+                        return;
                     }
-                }, 1500);
-
-            } catch (error) {
-                console.error('Error resetting settings:', error);
-                showSettingsAlert('❌ Gagal reset pengaturan: ' + error.message, 'error');
+                } catch (e) {
+                    console.error('Error resetting settings via server:', e);
+                }
             }
+            showSettingsAlert('⚠️ Gagal reset. Silakan login ulang.', 'error');
         }
 
         function showSettingsAlert(message, type) {
@@ -3469,7 +3519,8 @@
             renderAdsense();
         }
 
-        init();
+        // init() dipanggil dari auth guard di atas
+        // Jangan panggil init() di sini!
 
         // Auto refresh setiap 30 detik
         setInterval(function () {
