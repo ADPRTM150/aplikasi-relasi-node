@@ -1426,7 +1426,7 @@
                     }
                 });
                 state.currentStep = step;
-                document.querySelector('.wellness-container') ? .scrollIntoView({
+                document.querySelector('.wellness-container') ?.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
                 });
@@ -1741,7 +1741,7 @@
                             }
                         }
                     } else {
-                        alert('❌ ' + (data ? .message || 'Gagal menyimpan jawaban.'));
+                        alert('❌ ' + (data ?.message || 'Gagal menyimpan jawaban.'));
                     }
                 } catch (error) {
                     console.error('Submit error:', error);
@@ -1875,7 +1875,7 @@
             };
 
             window.copyInviteCode = function () {
-                const code = state.inviteCode || document.getElementById('generated-invite-code') ? .textContent ||
+                const code = state.inviteCode || document.getElementById('generated-invite-code') ?.textContent ||
                     '';
                 console.log('📋 Copying code:', code);
 
@@ -1898,7 +1898,7 @@
             };
 
             window.shareInviteCode = function () {
-                const code = state.inviteCode || document.getElementById('generated-invite-code') ? .textContent ||
+                const code = state.inviteCode || document.getElementById('generated-invite-code') ?.textContent ||
                     '';
                 console.log('📤 Sharing code:', code);
 
@@ -1965,8 +1965,8 @@
                     return;
                 }
 
-                const dimLabel = (id) => wellnessDimensions.find(d => d.id === id) ? .label || id;
-                const dimIcon = (id) => wellnessDimensions.find(d => d.id === id) ? .icon || '📌';
+                const dimLabel = (id) => wellnessDimensions.find(d => d.id === id) ?.label || id;
+                const dimIcon = (id) => wellnessDimensions.find(d => d.id === id) ?.icon || '📌';
                 const getRec = (id) => wellnessRecommendations[id] ||
                     'Coba diskusikan dengan pasangan untuk memperkuat area ini.';
 
@@ -1986,7 +1986,7 @@
                     categoryEmoji = '⚠️';
                 }
 
-                const riskHtml = results.riskDetected ? .detected ? `
+                const riskHtml = results.riskDetected ?.detected ? `
                     <div class="risk-alert">
                         <div class="risk-header">
                             <span style="font-size:24px;">⚠️</span>
@@ -2155,7 +2155,7 @@
                 }, 15000);
             }
 
-            document.getElementById('logout-link') ? .addEventListener('click', async (e) => {
+            document.getElementById('logout-link') ?.addEventListener('click', async (e) => {
                 e.preventDefault();
                 try {
                     await firebase.auth().signOut();
@@ -2196,7 +2196,7 @@
                     await db.collection('activities').add({
                         userId: user.uid,
                         userEmail: user.email || '-',
-                        userName: user.displayName || user.email ? .split('@')[0] || 'Pengguna',
+                        userName: user.displayName || user.email ?.split('@')[0] || 'Pengguna',
                         type: 'test_completed',
                         icon: '📝',
                         priority: 'high',
