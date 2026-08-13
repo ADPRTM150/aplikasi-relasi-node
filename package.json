@@ -1,7 +1,7 @@
 {
   "name": "aplikasi-relasi-node",
   "version": "1.0.0",
-  "description": "Website Relasi dengan Node.js",
+  "description": "Website QUALITY OF LOVE dengan Node.js",
   "homepage": "https://adprtm150.github.io/aplikasi-relasi-node/",
   "main": "server/server.js",
   "scripts": {
