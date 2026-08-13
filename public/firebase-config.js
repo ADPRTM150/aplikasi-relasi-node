@@ -46,11 +46,11 @@ const SessionLog = {
 };
 
 // ============================================================
-//  🔥 IDLE TIMEOUT - AUTO LOGOUT (15 MENIT)
+//  🔥 IDLE TIMEOUT - AUTO LOGOUT (10 MENIT)
 //  Pakai polling lastActivity biar reliable
 // ============================================================
 const IdleTimeout = {
-  IDLE_MS: 15 * 60 * 1000,         // 15 menit
+  IDLE_MS: 10 * 60 * 1000,         // 10 menit
   WARNING_MS: 60 * 1000,            // Peringatan 60 detik
   CHECK_INTERVAL: 10 * 1000,        // Cek tiap 10 detik
 
@@ -76,10 +76,10 @@ const IdleTimeout = {
     var warnThreshold = IdleTimeout.IDLE_MS - IdleTimeout.WARNING_MS;
 
     if (idleDuration >= IdleTimeout.IDLE_MS && !IdleTimeout.isWarningShown) {
-      // Udah 15 menit idle, langsung logout
+      // Udah 10 menit idle, langsung logout
       IdleTimeout.forceLogout();
     } else if (idleDuration >= warnThreshold && !IdleTimeout.isWarningShown) {
-      // 14 menit idle, tampilkan warning
+      // 9 menit idle, tampilkan warning
       IdleTimeout.showWarning();
     }
   },
@@ -134,7 +134,7 @@ const IdleTimeout = {
             '</div>' +
           '</div>' +
           '<h3 style="margin:0 0 6px;color:#1d3b36;font-size:18px;font-weight:700;">Sesi Hampir Berakhir</h3>' +
-          '<p style="color:#5a6f6a;font-size:13px;margin:0 0 18px;line-height:1.6;">Kamu tidak aktif selama 15 menit.<br>Klik tombol di bawah untuk melanjutkan sesi.</p>' +
+          '<p style="color:#5a6f6a;font-size:13px;margin:0 0 18px;line-height:1.6;">Kamu tidak aktif selama 10 menit.<br>Klik tombol di bawah untuk melanjutkan sesi.</p>' +
           '<div style="width:100%;height:4px;background:#f0eefc;border-radius:4px;margin-bottom:20px;overflow:hidden;">' +
             '<div id="idleProgressBar" style="height:100%;background:linear-gradient(90deg,#6C63FF,#a78bfa);border-radius:4px;width:100%;transition:width 0.9s linear;"></div>' +
           '</div>' +
@@ -206,7 +206,7 @@ const IdleTimeout = {
   forceLogout: function() {
     this.hideWarning();
     this.stop();
-    console.log('⏰ Auto-logout: user tidak aktif 15 menit');
+    console.log('⏰ Auto-logout: user tidak aktif 10 menit');
     var user = firebase.auth().currentUser;
     if (user) {
       logUserLogout().finally(function() {
@@ -242,7 +242,7 @@ const IdleTimeout = {
     this.lastActivity = Date.now();
     // Polling tiap 10 detik
     this.pollInterval = setInterval(function() { self.check(); }, this.CHECK_INTERVAL);
-    console.log('⏰ Idle timeout aktif — 15 menit (polling tiap ' + (this.CHECK_INTERVAL/1000) + 's)');
+    console.log('⏰ Idle timeout aktif — 10 menit (polling tiap ' + (this.CHECK_INTERVAL/1000) + 's)');
   },
 
   stop: function() {
@@ -271,9 +271,22 @@ function loginWithGoogle() {
 }
 
 // ============================================================
-//  🔥 HANDLE REDIRECT RESULT
+//  🔥 AUTH PERSISTENCE - SESSION
+//  Login hanya bertahan selama tab/browser terbuka.
+//  Browser ditutup = sesi hilang = harus login lagi.
 // ============================================================
-auth.getRedirectResult()
+auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+  .catch(function (error) {
+    console.error("❌ Gagal set persistence:", error);
+  })
+  .then(function () {
+    console.log("✅ Auth persistence: SESSION — logout otomatis saat browser/tab ditutup");
+
+    // ============================================================
+    //  🔥 HANDLE REDIRECT RESULT
+    // ============================================================
+    return auth.getRedirectResult();
+  })
   .then((result) => {
     if (result.user) {
       const user = result.user;
