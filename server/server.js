@@ -96,11 +96,11 @@ app.use((req, res, next) => {
     res.setHeader('Content-Security-Policy',
         "default-src 'self'; " +
         "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; " +
-        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
-        "font-src 'self' https://fonts.gstatic.com; " +
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
+        "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
         "img-src 'self' data: https:; " +
         "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com; " +
-        "frame-src 'self' https://*.firebaseapp.com https://*.google.com"
+        "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://www.youtube.com"
     );
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
