@@ -2,13 +2,10 @@
   "name": "aplikasi-relasi-node",
   "version": "1.0.0",
   "description": "Website QUALITY OF LOVE dengan Node.js",
-  "homepage": "https://adprtm150.github.io/aplikasi-relasi-node/",
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
     "dev": "nodemon server/server.js",
-    "predeploy": "echo 'Deploying...'",
-    "deploy": "gh-pages -d public",
     "vercel-build": "echo 'Hello from Vercel!'"
   },
   "dependencies": {
@@ -22,7 +19,6 @@
   },
   "devDependencies": {
     "firebase-tools": "^15.25.1",
-    "gh-pages": "^6.3.0",
     "nodemon": "^3.1.0"
   }
 }
