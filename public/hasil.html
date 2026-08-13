@@ -1282,11 +1282,11 @@
                     .where('userId', '==', uid)
                     .where('userCompleted', '==', true)
                     .where('partnerCompleted', '==', true)
-                    .limit(1)
+                    .limit(20)
                     .get()
                     .then(function (snapshot) {
                         if (!snapshot.empty) {
-                            var doc = snapshot.docs[0];
+                            var doc = pickLatestWellnessDoc(snapshot.docs);
                             var docData = doc.data();
                             var role = 'user';
                             processWellnessData(docData, role, container, userName);
@@ -1297,13 +1297,13 @@
                                 .where('partnerUserId', '==', uid)
                                 .where('userCompleted', '==', true)
                                 .where('partnerCompleted', '==', true)
-                                .limit(1)
+                                .limit(20)
                                 .get();
                         }
                     })
                     .then(function (snapshot) {
                         if (snapshot && !snapshot.empty) {
-                            var doc = snapshot.docs[0];
+                            var doc = pickLatestWellnessDoc(snapshot.docs);
                             var docData = doc.data();
                             var role = 'partner';
                             processWellnessData(docData, role, container, userName);
@@ -1328,6 +1328,25 @@
                             err.message +
                             '</p><button onclick="tampilkanWellness()" class="btn-secondary" style="margin-top:12px;">🔄 Coba Lagi</button></div>';
                     });
+            }
+
+            // ============================================================
+            //  🔥 AMBIL DATA TES PALING BARU (berdasarkan completedAt)
+            // ============================================================
+            function pickLatestWellnessDoc(docs) {
+                return docs.slice().sort(function (a, b) {
+                    return wellnessTime(b.data().completedAt) - wellnessTime(a.data().completedAt);
+                })[0];
+            }
+
+            function wellnessTime(ts) {
+                if (!ts) return 0;
+                if (ts.toMillis) return ts.toMillis();
+                if (ts.toDate) return ts.toDate().getTime();
+                if (ts._seconds) return ts._seconds * 1000;
+                if (ts.seconds) return ts.seconds * 1000;
+                var t = new Date(ts).getTime();
+                return isNaN(t) ? 0 : t;
             }
 
             // ============================================================
