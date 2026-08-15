@@ -99,7 +99,7 @@ app.use((req, res, next) => {
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
         "img-src 'self' data: https:; " +
-        "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com https://app.midtrans.com https://app.sandbox.midtrans.com; " +
+        "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://apis.google.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com https://app.midtrans.com https://app.sandbox.midtrans.com; " +
         "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://www.youtube.com https://app.midtrans.com https://app.sandbox.midtrans.com"
     );
     res.setHeader('X-Frame-Options', 'DENY');
