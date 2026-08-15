@@ -36,7 +36,7 @@
 
         <!-- ===== KONTEN DETAIL EBOOK ===== -->
         <div class="artikel-detail" id="detailContainer">
-            <a href="/ebook" class="back-link" onclick="kembaliKeEbook(event)">← Kembali ke Ebook</a>
+            <a href="/artikel" class="back-link" onclick="kembaliKeEbook(event)">← Kembali ke Artikel &amp; Ebook</a>
             <div id="ebookContent">
                 <div class="loading-text">⏳ Memuat ebook...</div>
             </div>
@@ -61,7 +61,7 @@
                 <span class="nav-icon">📰</span>
                 Artikel
             </a>
-            <a href="/ebook" class="active">
+            <a href="/artikel#ebook" class="active">
                 <span class="nav-icon">📚</span>
                 Ebook
             </a>
@@ -128,7 +128,7 @@
         // ============================================================
         function kembaliKeEbook(e) {
             e.preventDefault();
-            window.location.replace('/ebook');
+            window.location.replace('/artikel');
         }
 
         // ============================================================

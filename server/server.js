@@ -164,7 +164,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(express.static(path.join(__dirname, '../public')));
+// redirect:false — biarkan route eksplisit (mis. /ebook → /artikel) yang menangani direktori
+app.use(express.static(path.join(__dirname, '../public'), { redirect: false }));
 
 app.use((req, res, next) => {
     if (req.path.endsWith('.html')) {
@@ -1246,7 +1247,7 @@ app.get('/relationship-check', (req, res) => res.sendFile(path.join(__dirname, '
 app.get('/profil', (req, res) => res.sendFile(path.join(__dirname, '../public/profil.html')));
 app.get('/artikel', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/index.html')));
 app.get('/artikel/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/detail.html')));
-app.get('/ebook', (req, res) => res.sendFile(path.join(__dirname, '../public/ebook/index.html')));
+app.get('/ebook', (req, res) => res.redirect(301, '/artikel'));
 app.get('/ebook/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/ebook/detail.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
