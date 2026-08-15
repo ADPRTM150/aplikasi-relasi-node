@@ -116,7 +116,9 @@ const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:5000',
     'https://aplikasi-relasi-node.vercel.app',
-    'https://aplikasi-relasi-node-*.vercel.app'
+    'https://aplikasi-relasi-node-*.vercel.app',
+    'https://qualityoflove.com',
+    'https://www.qualityoflove.com'
 ];
 
 app.use(cors({
