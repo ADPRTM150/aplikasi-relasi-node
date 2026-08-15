@@ -933,6 +933,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="/firebase-config.js"></script>
+    <!-- Mammoth (self-hosted) — parse .docx di sisi klien -->
+    <script src="/vendor/mammoth.browser.min.js"></script>
 </head>
 
 <body>
@@ -1385,6 +1387,13 @@
                         <p style="font-size:11px;color:var(--medium);margin-top:4px;">Kosongkan jika tidak ingin
                             mengubah password.</p>
                     </div>
+                    <div class="form-group">
+                        <label><span>🖍</span> Highlight Kata Kunci</label>
+                        <input type="text" id="settingsKeywords"
+                            placeholder="komunikasi, kepercayaan, konflik, quality time" />
+                        <p style="font-size:11px;color:var(--medium);margin-top:4px;">Pisahkan dengan koma. Otomatis
+                            di-highlight saat upload artikel dari Word.</p>
+                    </div>
                     <div class="btn-group">
                         <button type="submit" class="btn-save">
                             <span>💾</span> Simpan Pengaturan
@@ -1480,7 +1489,12 @@
                 </div>
                 <div class="form-group">
                     <label>Konten</label>
+                    <button type="button" class="btn-word" id="btnUploadWord"><span>📤</span> Upload Word</button>
+                    <button type="button" class="btn-word btn-preview" id="btnPreview"><span>👁</span> Pratinjau</button>
+                    <input type="file" id="wordFileInput" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden />
+                    <span class="word-status" id="wordUploadStatus"></span>
                     <textarea id="articleContent" rows="4" placeholder="Isi artikel..."></textarea>
+                    <iframe id="articlePreview" class="article-preview" title="Pratinjau konten" hidden></iframe>
                 </div>
                 <div class="form-group">
                     <label>Thumbnail URL</label>
@@ -2409,6 +2423,14 @@
             document.getElementById('articleDesc').value = data ? data.desc : '';
             document.getElementById('articleContent').value = data ? data.content : '';
             document.getElementById('articleThumb').value = data ? data.thumb : '';
+            // Reset UI Upload Word & pratinjau
+            document.getElementById('wordFileInput').value = '';
+            document.getElementById('btnUploadWord').disabled = false;
+            document.getElementById('btnUploadWord').innerHTML = '<span>📤</span> Upload Word';
+            document.getElementById('btnPreview').innerHTML = '<span>👁</span> Pratinjau';
+            document.getElementById('wordUploadStatus').textContent = '';
+            document.getElementById('articlePreview').hidden = true;
+            document.getElementById('articlePreview').srcdoc = '';
             openModal('articleModal');
         }
 
@@ -2448,6 +2470,333 @@
             } catch (error) {
                 console.error('Error saving article:', error);
                 alert('❌ Gagal menyimpan artikel.');
+            }
+        });
+
+        // ============================================================
+        //  📤 UPLOAD WORD (.docx) — PARSE MAMMOTH + BEAUTIFY CLIENT-SIDE
+        // ============================================================
+        var btnUploadWord = document.getElementById('btnUploadWord');
+        var wordFileInput = document.getElementById('wordFileInput');
+        var wordUploadStatus = document.getElementById('wordUploadStatus');
+        var btnPreview = document.getElementById('btnPreview');
+        var doc = null; // DOM hasil parse .docx (dipakai fungsi-fungsi di bawah)
+
+        // Pola angka penting: "5 cara", "3 tips", "7 langkah", dst (ID/EN)
+        var NUM_PHRASES = 'cara|tips|langkah|jenis|tanda|faktor|tahap|fase|kunci|alasan|kebiasaan|trik|strategi|sinyal|pertanda|tanda-tanda|ways|steps|types|signs|factors|keys';
+
+        // Emoji untuk item list love language (ID/EN)
+        var LI_EMOJI_MAP = [
+            { re: /words?\s+of\s+affirmation|kata[\s-]?kata\s+penegasan|kata\s+penegasan|pujian/i, emoji: '💬' },
+            { re: /acts?\s+of\s+service|tindakan\s+(kasih|pelayanan)|pelayanan/i, emoji: '👐' },
+            { re: /receiving\s+gifts?|menerima\s+hadiah|\bhadiah\b/i, emoji: '🎁' },
+            { re: /quality\s+time|waktu\s+berkualitas|waktu\s+bersama/i, emoji: '⏰' },
+            { re: /physical\s+touch|sentuhan\s+fisik/i, emoji: '🤝' }
+        ];
+
+        // Sanitasi HTML hasil mammoth: hanya elemen teks yang diizinkan
+        // (img, table, script, style, iframe dll dibongkar menjadi teks)
+        function sanitizeWordHtml() {
+            var allowed = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+                'STRONG', 'B', 'EM', 'I', 'U', 'S', 'UL', 'OL', 'LI', 'BR', 'A'];
+
+            function cleanNode(node) {
+                var children = Array.prototype.slice.call(node.childNodes);
+                for (var i = 0; i < children.length; i++) {
+                    var child = children[i];
+                    if (child.nodeType === 1) { // ELEMENT_NODE
+                        if (allowed.indexOf(child.tagName) !== -1) {
+                            // Hapus semua atribut, kecuali href http(s) pada <a>
+                            var attrs = Array.prototype.slice.call(child.attributes);
+                            for (var j = 0; j < attrs.length; j++) {
+                                var attr = attrs[j];
+                                if (child.tagName === 'A' && attr.name === 'href' &&
+                                    /^https?:\/\//i.test(attr.value)) {
+                                    continue;
+                                }
+                                child.removeAttribute(attr.name);
+                            }
+                            cleanNode(child);
+                        } else {
+                            // Elemen tidak diizinkan → bongkar, sisakan teks di dalamnya
+                            var parent = child.parentNode;
+                            while (child.firstChild) parent.insertBefore(child.firstChild, child);
+                            parent.removeChild(child);
+                        }
+                    } else if (child.nodeType === 8) { // COMMENT_NODE
+                        child.parentNode.removeChild(child);
+                    }
+                }
+            }
+
+            cleanNode(doc.body);
+        }
+
+        // Word Heading1 = judul dokumen → turunkan satu tingkat agar
+        // tidak dobel <h1> dengan judul halaman artikel
+        function demoteHeadings() {
+            var map = { 'H1': 'H2', 'H2': 'H3', 'H3': 'H4' };
+            ['H1', 'H2', 'H3'].forEach(function (tag) {
+                var els = doc.querySelectorAll(tag);
+                for (var i = 0; i < els.length; i++) {
+                    var el = els[i];
+                    var newEl = doc.createElement(map[tag]);
+                    while (el.firstChild) newEl.appendChild(el.firstChild);
+                    el.parentNode.replaceChild(newEl, el);
+                }
+            });
+        }
+
+        // Paragraf utuh yang diapit tanda kutip → kotak kutipan
+        function convertQuoteParagraphs() {
+            var ps = doc.querySelectorAll('p');
+            for (var i = 0; i < ps.length; i++) {
+                var p = ps[i];
+                var t = (p.textContent || '').trim();
+                if (t.length <= 20) continue;
+                var first = t.charAt(0);
+                var last = t.charAt(t.length - 1);
+                var isQuote = (first === '"' && last === '"') ||
+                    (first === '“' && last === '”') ||
+                    (first === '„' && last === '“') ||
+                    (first === '«' && last === '»');
+                if (!isQuote) continue;
+                var bq = doc.createElement('blockquote');
+                bq.className = 'quote-box';
+                while (p.firstChild) bq.appendChild(p.firstChild);
+                // Buang tanda kutip pembuka/penutup dari teks (diganti CSS)
+                var kids = bq.childNodes;
+                if (kids.length && kids[0].nodeType === 3) {
+                    kids[0].nodeValue = kids[0].nodeValue.replace(/^\s*["“„«]\s*/, '');
+                }
+                if (kids.length && kids[kids.length - 1].nodeType === 3) {
+                    kids[kids.length - 1].nodeValue = kids[kids.length - 1].nodeValue.replace(/\s*["”“»]\s*$/, '');
+                }
+                p.parentNode.replaceChild(bq, p);
+            }
+        }
+
+        // Kumpulkan text node yang boleh diproses (lewati elemen tertentu)
+        function collectTextNodes(root, skipTags) {
+            var result = [];
+            var walker = doc.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+            var node;
+            while ((node = walker.nextNode())) {
+                var parent = node.parentNode;
+                if (!parent || skipTags.indexOf(parent.tagName) !== -1) continue;
+                if (!node.nodeValue || !node.nodeValue.trim()) continue;
+                result.push(node);
+            }
+            return result;
+        }
+
+        // Bungkus semua kecocokan regex utuh di text node dengan elemen baru
+        function wrapMatchesInNode(textNode, regex, tagName, className) {
+            var text = textNode.nodeValue;
+            regex.lastIndex = 0;
+            var m = regex.exec(text);
+            if (!m) return false;
+            var frag = doc.createDocumentFragment();
+            var last = 0;
+            while (m) {
+                if (m.index > last) frag.appendChild(doc.createTextNode(text.substring(last, m.index)));
+                var el = doc.createElement(tagName);
+                el.className = className;
+                el.textContent = m[0];
+                frag.appendChild(el);
+                last = m.index + m[0].length;
+                m = regex.exec(text);
+            }
+            if (last < text.length) frag.appendChild(doc.createTextNode(text.substring(last)));
+            textNode.parentNode.replaceChild(frag, textNode);
+            return true;
+        }
+
+        // Highlight kata kunci dari Settings (bungkus hanya kata yang cocok)
+        function highlightKeywordInTextNode(textNode, re) {
+            var text = textNode.nodeValue;
+            re.lastIndex = 0;
+            var m = re.exec(text);
+            if (!m) return false;
+            var frag = doc.createDocumentFragment();
+            var last = 0;
+            var found = false;
+            while (m) {
+                var kwStart = m.index + m[1].length;
+                var kwEnd = kwStart + m[2].length;
+                if (kwStart > last) frag.appendChild(doc.createTextNode(text.substring(last, kwStart)));
+                var mark = doc.createElement('mark');
+                mark.className = 'hl';
+                mark.textContent = text.substring(kwStart, kwEnd);
+                frag.appendChild(mark);
+                last = kwEnd;
+                found = true;
+                m = re.exec(text);
+            }
+            if (!found) return false;
+            if (last < text.length) frag.appendChild(doc.createTextNode(text.substring(last)));
+            textNode.parentNode.replaceChild(frag, textNode);
+            return true;
+        }
+
+        // "5 cara" dst di heading → badge menonjol
+        function badgeNumberPhrasesInHeadings() {
+            var re = new RegExp('\\b\\d+(?:[.,]\\d+)?\\s*(?::|-|–)?\\s*(?:' + NUM_PHRASES + ')\\b', 'gi');
+            ['H2', 'H3', 'H4'].forEach(function (tag) {
+                var els = doc.querySelectorAll(tag);
+                for (var i = 0; i < els.length; i++) {
+                    var nodes = collectTextNodes(els[i], ['SPAN', 'MARK', 'A']);
+                    for (var j = 0; j < nodes.length; j++) {
+                        wrapMatchesInNode(nodes[j], new RegExp(re.source, 'gi'), 'span', 'badge');
+                    }
+                }
+            });
+        }
+
+        // Angka & pola di paragraf/li → highlight kuning
+        function highlightNumbers() {
+            var rePhrase = new RegExp('\\b\\d+(?:[.,]\\d+)?\\s*(?::|-|–)?\\s*(?:' + NUM_PHRASES + ')\\b', 'gi');
+            var rePercent = /\b\d+(?:[.,]\d+)?\s*%/g;
+            var nodes = collectTextNodes(doc.body, ['MARK', 'A', 'SPAN', 'H2', 'H3', 'H4']);
+            for (var i = 0; i < nodes.length; i++) {
+                wrapMatchesInNode(nodes[i], new RegExp(rePhrase.source, 'gi'), 'mark', 'hl');
+                wrapMatchesInNode(nodes[i], new RegExp(rePercent.source, 'g'), 'mark', 'hl');
+            }
+        }
+
+        // Kata kunci dari Settings → highlight kuning
+        function highlightKeywordsFromSettings() {
+            var keywords = window.highlightKeywords || [];
+            if (!keywords.length) return;
+            var sorted = keywords.slice().sort(function (a, b) { return b.length - a.length; });
+            for (var k = 0; k < sorted.length; k++) {
+                var kw = sorted[k];
+                if (!kw) continue;
+                var escaped = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                var re = new RegExp('(^|[^\\w])(' + escaped + ')(?=[^\\w]|$)', 'gi');
+                var nodes = collectTextNodes(doc.body, ['MARK', 'A', 'SPAN']);
+                for (var i = 0; i < nodes.length; i++) {
+                    highlightKeywordInTextNode(nodes[i], re);
+                }
+            }
+        }
+
+        // Item list love language → emoji khusus di depan
+        function decorateListItems() {
+            var lis = doc.querySelectorAll('li');
+            for (var i = 0; i < lis.length; i++) {
+                var li = lis[i];
+                if (li.querySelector('.li-emoji')) continue;
+                var t = (li.textContent || '').trim().toLowerCase();
+                for (var j = 0; j < LI_EMOJI_MAP.length; j++) {
+                    if (LI_EMOJI_MAP[j].re.test(t)) {
+                        var span = doc.createElement('span');
+                        span.className = 'li-emoji';
+                        span.textContent = LI_EMOJI_MAP[j].emoji;
+                        li.insertBefore(span, li.firstChild);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Divider grafis sebelum setiap heading topik, kecuali heading pertama
+        function insertDividers() {
+            var headings = doc.querySelectorAll('h2, h3');
+            for (var i = 0; i < headings.length; i++) {
+                if (i === 0) continue;
+                var div = doc.createElement('div');
+                div.className = 'divider';
+                div.textContent = '💜';
+                headings[i].parentNode.insertBefore(div, headings[i]);
+            }
+        }
+
+        btnUploadWord.addEventListener('click', function () {
+            wordUploadStatus.textContent = '';
+            wordFileInput.click();
+        });
+
+        wordFileInput.addEventListener('change', async function () {
+            var file = this.files[0];
+            if (!file) return;
+
+            // Validasi ekstensi .docx (mammoth tidak mendukung .doc lama)
+            if (!/\.docx$/i.test(file.name) &&
+                file.type !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                alert('❌ File harus berformat .docx');
+                this.value = '';
+                return;
+            }
+
+            if (!window.mammoth) {
+                alert('❌ Pustaka Word belum termuat. Muat ulang halaman.');
+                this.value = '';
+                return;
+            }
+
+            var existing = document.getElementById('articleContent').value;
+            if (existing.trim() && !confirm('Isi Word akan MENGGANTI konten saat ini. Lanjutkan?')) {
+                this.value = '';
+                return;
+            }
+
+            btnUploadWord.disabled = true;
+            btnUploadWord.innerHTML = '<span>⏳</span> Mengurai file...';
+            wordUploadStatus.textContent = '';
+
+            try {
+                var arrayBuffer = await file.arrayBuffer();
+                var result = await mammoth.convertToHtml(
+                    { arrayBuffer: arrayBuffer },
+                    { ignoreEmptyParagraphs: true }
+                );
+
+                doc = new DOMParser().parseFromString(result.value, 'text/html');
+
+                // Pipeline: bersihkan → rapikan → simpan ke editor
+                sanitizeWordHtml();
+                demoteHeadings();
+                convertQuoteParagraphs();
+                badgeNumberPhrasesInHeadings();
+                highlightNumbers();
+                highlightKeywordsFromSettings();
+                decorateListItems();
+                insertDividers();
+
+                document.getElementById('articleContent').value = doc.body.innerHTML;
+                wordUploadStatus.textContent = '✅ Berhasil diimpor: ' + file.name;
+            } catch (err) {
+                console.error('Error parsing docx:', err);
+                wordUploadStatus.textContent = '❌ Gagal mengurai file. Pastikan file .docx valid.';
+            } finally {
+                btnUploadWord.disabled = false;
+                btnUploadWord.innerHTML = '<span>📤</span> Upload Word';
+            }
+        });
+
+        // Pratinjau render konten (isolasi via iframe srcdoc)
+        btnPreview.addEventListener('click', function () {
+            var iframe = document.getElementById('articlePreview');
+            if (iframe.hidden) {
+                var html = '<!doctype html><html><head><meta charset="utf-8"><style>' +
+                    'body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.8;max-width:700px;margin:0 auto;padding:20px;color:#333}' +
+                    'h2,h3,h4{margin:20px 0 8px}' +
+                    'ul{list-style:none;padding-left:6px}ul>li::before{content:"💜";margin-right:10px}' +
+                    'mark.hl{background:#fff3b0;padding:2px 6px;border-radius:6px}' +
+                    'span.badge{background:#e0567a;color:#fff;border-radius:999px;padding:4px 14px;font-size:.85em;font-weight:700;display:inline-block;margin:2px 0}' +
+                    'blockquote.quote-box{margin:20px 0;padding:14px 18px;background:#faf5ff;border-left:4px solid #7ba892;border-radius:0 12px 12px 0;font-style:italic}' +
+                    '.divider{display:flex;align-items:center;gap:12px;margin:26px 0;color:#b0a8c0}.divider::before,.divider::after{content:"";flex:1;border-top:2px dashed #e5e0f0}' +
+                    '</style></head><body>' +
+                    document.getElementById('articleContent').value +
+                    '</body></html>';
+                iframe.srcdoc = html;
+                iframe.hidden = false;
+                btnPreview.innerHTML = '<span>🙈</span> Tutup Pratinjau';
+            } else {
+                iframe.hidden = true;
+                iframe.srcdoc = '';
+                btnPreview.innerHTML = '<span>👁</span> Pratinjau';
             }
         });
 
@@ -3378,6 +3727,9 @@
                     var data = await res.json();
                     if (data.success) {
                         document.getElementById('settingsEmail').value = data.settings.email || DEFAULT_ADMIN.email;
+                        var kw = data.settings.highlightKeywords || [];
+                        document.getElementById('settingsKeywords').value = kw.join(', ');
+                        window.highlightKeywords = kw;
                         return;
                     }
                 } catch (e) {
@@ -3386,6 +3738,8 @@
             }
             // Fallback
             document.getElementById('settingsEmail').value = DEFAULT_ADMIN.email;
+            document.getElementById('settingsKeywords').value = '';
+            window.highlightKeywords = [];
         }
 
         async function saveSettings(e) {
@@ -3417,6 +3771,12 @@
                 data.password = password;
             }
 
+            // Kata kunci highlight untuk fitur Upload Word
+            var keywordsInput = document.getElementById('settingsKeywords').value.trim();
+            var highlightKeywords = keywordsInput
+                ? keywordsInput.split(',').map(function (k) { return k.trim().toLowerCase(); }).filter(function (k) { return k; })
+                : [];
+
             var token = localStorage.getItem('adminToken');
             if (token) {
                 try {
@@ -3428,7 +3788,8 @@
                         },
                         body: JSON.stringify({
                             email: email,
-                            password: password || undefined
+                            password: password || undefined,
+                            highlightKeywords: highlightKeywords
                         })
                     });
                     var result = await res.json();

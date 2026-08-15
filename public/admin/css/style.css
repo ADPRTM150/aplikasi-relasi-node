@@ -268,6 +268,62 @@ body {
     box-shadow: 0 6px 20px rgba(58, 125, 118, 0.25);
 }
 
+/* ─── UPLOAD WORD (.docx) ─── */
+.btn-word {
+    background: var(--sage-light);
+    color: var(--sage);
+    border: 2px solid var(--sage);
+    padding: 8px 18px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 12px;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Inter', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.btn-word:hover {
+    background: var(--sage);
+    color: white;
+}
+
+.btn-word:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-preview {
+    border-color: var(--medium);
+    color: var(--medium);
+    background: transparent;
+    margin-left: 8px;
+}
+
+.btn-preview:hover {
+    background: var(--medium);
+    color: white;
+}
+
+.word-status {
+    display: block;
+    font-size: 12px;
+    color: var(--medium);
+    margin: -4px 0 6px;
+}
+
+.article-preview {
+    width: 100%;
+    min-height: 300px;
+    border: 1px solid var(--light);
+    border-radius: 12px;
+    margin-top: 8px;
+    background: white;
+}
+
 .btn-edit {
     background: var(--light);
     color: var(--dark);

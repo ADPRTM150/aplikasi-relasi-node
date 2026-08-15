@@ -2386,6 +2386,118 @@ body.login-page {
     margin-bottom: 8px;
 }
 
+/* ─── KONTEN IMPORT DARI WORD (.docx) ─── */
+.artikel-detail .content h1,
+.artikel-detail .content h2,
+.artikel-detail .content h3,
+.artikel-detail .content h4,
+.artikel-detail .content h5,
+.artikel-detail .content h6 {
+    margin: 24px 0 10px;
+    line-height: 1.4;
+    color: var(--dark);
+}
+
+.artikel-detail .content h1 { font-size: 24px; color: var(--sage); }
+.artikel-detail .content h2 { font-size: 22px; color: var(--sage); }
+.artikel-detail .content h3 { font-size: 19px; }
+.artikel-detail .content h4 { font-size: 17px; }
+.artikel-detail .content h5 { font-size: 15px; }
+.artikel-detail .content h6 { font-size: 14px; }
+
+.artikel-detail .content p {
+    margin: 0 0 14px;
+    line-height: 1.8;
+    max-width: 700px;
+}
+
+.artikel-detail .content ul,
+.artikel-detail .content ol {
+    margin: 0 0 14px;
+    padding-left: 24px;
+    max-width: 700px;
+}
+
+.artikel-detail .content ul {
+    list-style: none;
+    padding-left: 6px;
+}
+
+.artikel-detail .content ul > li::before {
+    content: '💜';
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.artikel-detail .content ul > li:has(.li-emoji)::before {
+    display: none;
+}
+
+.artikel-detail .content li {
+    margin-bottom: 6px;
+}
+
+.artikel-detail .content .li-emoji {
+    margin-right: 8px;
+}
+
+.artikel-detail .content mark.hl {
+    background: #fff3b0;
+    color: inherit;
+    padding: 2px 6px;
+    border-radius: 6px;
+}
+
+.artikel-detail .content span.badge {
+    display: inline-block;
+    background: var(--pink-soft);
+    color: var(--white);
+    border-radius: 999px;
+    padding: 4px 14px;
+    font-size: 0.85em;
+    font-weight: 700;
+    margin: 2px 0;
+}
+
+.artikel-detail .content blockquote.quote-box {
+    margin: 20px 0;
+    padding: 16px 20px;
+    background: var(--light);
+    border-left: 4px solid var(--sage);
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    max-width: 700px;
+}
+
+.artikel-detail .content blockquote.quote-box p {
+    margin: 0;
+}
+
+.artikel-detail .content .divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 28px 0;
+    color: #b0a8c0;
+    max-width: 700px;
+}
+
+.artikel-detail .content .divider::before,
+.artikel-detail .content .divider::after {
+    content: '';
+    flex: 1;
+    border-top: 2px dashed #e5e0f0;
+}
+
+.artikel-detail .content a {
+    color: var(--sage);
+    text-decoration: underline;
+}
+
+.artikel-detail .content strong {
+    font-weight: 700;
+}
+
 /* ─── EMPTY & ERROR STATE ─── */
 .empty-state {
     text-align: center;

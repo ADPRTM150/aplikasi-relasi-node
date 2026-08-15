@@ -359,7 +359,7 @@ app.get('/api/admin/settings', verifyAdminToken, async (req, res) => {
 // ============================================================
 app.put('/api/admin/settings', verifyAdminToken, async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, highlightKeywords } = req.body;
         const data = {
             email: email || 'admin@relasi.com',
             updatedAt: admin.firestore.FieldValue.serverTimestamp()
@@ -368,6 +368,13 @@ app.put('/api/admin/settings', verifyAdminToken, async (req, res) => {
             data.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
             // Hapus plaintext kalau ada
             data.password = admin.firestore.FieldValue.delete();
+        }
+        // Kata kunci highlight untuk fitur Upload Word (admin bisa atur)
+        if (Array.isArray(highlightKeywords)) {
+            data.highlightKeywords = highlightKeywords
+                .map(k => String(k).trim().toLowerCase())
+                .filter(k => k && k.length <= 40)
+                .slice(0, 100);
         }
         await db.collection('admin').doc('settings').set(data, { merge: true });
         console.log('🔐 Admin settings updated dengan hash');
