@@ -95,12 +95,12 @@ function rateLimiter(req, res, next) {
 app.use((req, res, next) => {
     res.setHeader('Content-Security-Policy',
         "default-src 'self'; " +
-        "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com; " +
+        "script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://app.midtrans.com https://app.sandbox.midtrans.com; " +
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; " +
         "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; " +
         "img-src 'self' data: https:; " +
-        "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com; " +
-        "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://www.youtube.com"
+        "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com https://app.midtrans.com https://app.sandbox.midtrans.com; " +
+        "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://www.youtube.com https://app.midtrans.com https://app.sandbox.midtrans.com"
     );
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -179,13 +179,18 @@ app.use((req, res, next) => {
 //  🔥 ENDPOINT: KIRIM FIREBASE CONFIG KE FRONTEND
 // ============================================================
 app.get('/api/config', (req, res) => {
+    const midtransIsProduction = process.env.MIDTRANS_IS_PRODUCTION === 'true';
     res.json({
         apiKey: process.env.FIREBASE_API_KEY,
         authDomain: process.env.FIREBASE_AUTH_DOMAIN,
         projectId: process.env.FIREBASE_PROJECT_ID,
         storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
         messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-        appId: process.env.FIREBASE_APP_ID
+        appId: process.env.FIREBASE_APP_ID,
+        midtransClientKey: process.env.MIDTRANS_CLIENT_KEY || null,
+        midtransEnabled: !!(process.env.MIDTRANS_SERVER_KEY && process.env.MIDTRANS_CLIENT_KEY),
+        midtransIsProduction: midtransIsProduction,
+        midtransSnapUrl: (midtransIsProduction ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com') + '/snap/snap.js'
     });
 });
 
@@ -590,6 +595,230 @@ app.get('/api/admin/activities', verifyAdminToken, async (req, res) => {
         res.json({ success: true, activities });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal memuat aktivitas' });
+    }
+});
+
+// ============================================================
+//  🔥 PUBLIC EBOOKS: ORDER + STATUS + WEBHOOK MIDTRANS
+// ============================================================
+
+// Base URL API Snap Midtrans (sandbox / production)
+function midtransBaseUrl() {
+    return process.env.MIDTRANS_IS_PRODUCTION === 'true'
+        ? 'https://app.midtrans.com/snap/v1/transactions'
+        : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
+}
+
+// 🔥 BUAT ORDER EBOOK (PUBLIK — tanpa auth admin)
+app.post('/api/public/ebooks/order', async (req, res) => {
+    try {
+        const { ebookId } = req.body || {};
+        if (!ebookId) {
+            return res.json({ success: false, message: 'Ebook tidak ditemukan' });
+        }
+
+        const ebookDoc = await db.collection('ebooks').doc(ebookId).get();
+        if (!ebookDoc.exists) {
+            return res.json({ success: false, message: 'Ebook tidak ditemukan' });
+        }
+        const ebook = ebookDoc.data();
+        if (ebook.status !== 'published') {
+            return res.json({ success: false, message: 'Ebook belum dipublikasikan' });
+        }
+        const price = Number(ebook.price) || 0;
+        if (price <= 0) {
+            return res.json({ success: false, message: 'Ebook ini gratis — tidak perlu pembayaran' });
+        }
+        if (!process.env.MIDTRANS_SERVER_KEY) {
+            return res.json({ success: false, message: 'Pembayaran belum dikonfigurasi' });
+        }
+
+        // Ambil identitas user jika kirim Firebase ID token (opsional)
+        let userId = '', userName = '', userEmail = '';
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]);
+                userId = decoded.uid || '';
+                userEmail = decoded.email || '';
+                userName = decoded.name || (decoded.email || '').split('@')[0] || 'Pengguna';
+            } catch (e) { /* anggap guest */ }
+        }
+
+        // Order ID unik: ORD-<timestamp>-<rand> (≤ 50 karakter, aman untuk Midtrans)
+        const orderId = 'ORD-' + Date.now() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+        // Simpan order dulu (status pending)
+        await db.collection('orders').doc(orderId).set({
+            orderId: orderId,
+            ebookId: ebookId,
+            title: ebook.title || 'Ebook',
+            price: price,
+            status: 'pending',
+            userId: userId,
+            userName: userName,
+            userEmail: userEmail,
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+
+        // Panggil Midtrans Snap API
+        const payload = {
+            transaction_details: { order_id: orderId, gross_amount: price },
+            item_details: [{ id: ebookId, price: price, quantity: 1, name: String(ebook.title || 'Ebook').slice(0, 50) }],
+            customer_details: { first_name: userName || 'Pembeli', email: userEmail || undefined }
+        };
+        if (!payload.customer_details.email) delete payload.customer_details.email;
+
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), 15000);
+        let midtransResp;
+        try {
+            midtransResp = await fetch(midtransBaseUrl(), {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'Authorization': 'Basic ' + Buffer.from(process.env.MIDTRANS_SERVER_KEY + ':').toString('base64')
+                },
+                body: JSON.stringify(payload),
+                signal: controller.signal
+            });
+        } finally {
+            clearTimeout(timer);
+        }
+        const data = await midtransResp.json();
+
+        if (!midtransResp.ok || !data.token) {
+            console.error('Midtrans error:', midtransResp.status, JSON.stringify(data));
+            return res.status(502).json({ success: false, message: 'Gagal menghubungi payment gateway. Coba lagi.' });
+        }
+
+        res.json({ success: true, token: data.token, redirectUrl: data.redirect_url, orderId: orderId });
+    } catch (error) {
+        console.error('Create order error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+    }
+});
+
+// 🔥 CEK STATUS ORDER (PUBLIK) — fileUrl HANYA saat settlement
+app.get('/api/public/ebooks/order/:orderId', async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const doc = await db.collection('orders').doc(orderId).get();
+        if (!doc.exists) {
+            return res.status(404).json({ success: false, message: 'Order tidak ditemukan' });
+        }
+        const order = doc.data();
+        const result = {
+            success: true,
+            orderId: order.orderId,
+            status: order.status,
+            ebookId: order.ebookId,
+            title: order.title,
+            price: order.price
+        };
+        if (order.status === 'success') {
+            const ebookDoc = await db.collection('ebooks').doc(order.ebookId).get();
+            result.fileUrl = ebookDoc.exists ? (ebookDoc.data().fileUrl || '') : '';
+        }
+        res.json(result);
+    } catch (error) {
+        console.error('Get order error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+    }
+});
+
+// 🔥 WEBHOOK MIDTRANS — verifikasi signature, update status order
+app.post('/api/webhooks/midtrans', async (req, res) => {
+    try {
+        const body = req.body || {};
+        const orderId = String(body.order_id || '');
+        const statusCode = String(body.status_code || '');
+        const grossAmount = String(body.gross_amount || '');
+        const signatureKey = String(body.signature_key || '');
+        const transactionStatus = String(body.transaction_status || '');
+
+        // Verifikasi signature: SHA512(order_id + status_code + gross_amount + ServerKey)
+        if (process.env.MIDTRANS_SERVER_KEY) {
+            const expected = crypto.createHash('sha512')
+                .update(orderId + statusCode + grossAmount + process.env.MIDTRANS_SERVER_KEY)
+                .digest('hex');
+            if (expected !== signatureKey) {
+                console.warn('⚠️ Midtrans webhook signature invalid:', orderId);
+                return res.status(200).json({ status_code: 200, status_message: 'OK' });
+            }
+        }
+
+        const statusMap = {
+            capture: 'success',
+            settlement: 'success',
+            pending: 'pending',
+            deny: 'failed',
+            cancel: 'failed',
+            expire: 'failed',
+            failure: 'failed'
+        };
+        const newStatus = statusMap[transactionStatus] || 'pending';
+
+        const orderRef = db.collection('orders').doc(orderId);
+        const orderDoc = await orderRef.get();
+        if (orderDoc.exists) {
+            const prevStatus = orderDoc.data().status || 'pending';
+            if (prevStatus !== newStatus) {
+                await orderRef.update({
+                    status: newStatus,
+                    midtransStatus: transactionStatus,
+                    paymentType: String(body.payment_type || ''),
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+            }
+
+            // 🔥 LOG AKTIVITAS 'ebook_purchased' VIA SERVER (Admin SDK)
+            if (newStatus === 'success' && prevStatus !== 'success') {
+                const order = orderDoc.data();
+                try {
+                    await db.collection('activities').add({
+                        userId: order.userId || 'guest',
+                        userEmail: order.userEmail || '-',
+                        userName: order.userName || 'Pembeli',
+                        type: 'ebook_purchased',
+                        icon: '📚',
+                        priority: 'high',
+                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                        details: {
+                            ebookId: order.ebookId || 'unknown',
+                            ebookTitle: order.title || 'Ebook',
+                            price: order.price || 0
+                        }
+                    });
+                    console.log('✅ ebook_purchased activity logged:', order.title);
+                } catch (err) {
+                    console.error('❌ Gagal log activity:', err);
+                }
+            }
+        }
+
+        // SELALU return 200 supaya Midtrans tidak retry
+        res.status(200).json({ status_code: 200, status_message: 'OK' });
+    } catch (error) {
+        console.error('Midtrans webhook error:', error);
+        res.status(200).json({ status_code: 200, status_message: 'OK' });
+    }
+});
+
+// 🔥 ADMIN: DAFTAR SEMUA ORDER
+app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collection('orders')
+            .orderBy('createdAt', 'desc')
+            .limit(200)
+            .get();
+        const orders = [];
+        snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+        res.json({ success: true, orders });
+    } catch (error) {
+        console.error('Get orders error:', error);
+        res.status(500).json({ success: false, message: 'Gagal memuat orders' });
     }
 });
 
@@ -1017,6 +1246,8 @@ app.get('/relationship-check', (req, res) => res.sendFile(path.join(__dirname, '
 app.get('/profil', (req, res) => res.sendFile(path.join(__dirname, '../public/profil.html')));
 app.get('/artikel', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/index.html')));
 app.get('/artikel/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/detail.html')));
+app.get('/ebook', (req, res) => res.sendFile(path.join(__dirname, '../public/ebook/index.html')));
+app.get('/ebook/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/ebook/detail.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
 

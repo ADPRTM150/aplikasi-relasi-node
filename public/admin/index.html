@@ -1137,13 +1137,14 @@
                                 <th>Judul</th>
                                 <th>Halaman</th>
                                 <th>Harga</th>
+                                <th>Status</th>
                                 <th>Tanggal</th>
                                 <th>Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="ebookTableBody">
                             <tr>
-                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                                <td colspan="6" class="loading-text">⏳ Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1519,6 +1520,24 @@
                     <input type="text" id="ebookTitle" placeholder="Judul ebook" required />
                 </div>
                 <div class="form-group">
+                    <label>📌 Status</label>
+                    <select id="ebookStatus">
+                        <option value="draft">⏳ Draft (belum tampil di publik)</option>
+                        <option value="published">✅ Published (tampil di publik)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🗂️ Kategori</label>
+                    <select id="ebookCategory">
+                        <option value="Komunikasi">Komunikasi</option>
+                        <option value="Konflik">Konflik</option>
+                        <option value="Keuangan">Keuangan</option>
+                        <option value="Keintiman">Keintiman</option>
+                        <option value="Parenting">Parenting</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label>Jumlah Halaman</label>
                     <input type="number" id="ebookPages" placeholder="24" required />
                 </div>
@@ -1531,6 +1550,14 @@
                 <div class="form-group">
                     <label>Deskripsi</label>
                     <input type="text" id="ebookDesc" placeholder="Deskripsi ebook" />
+                </div>
+                <div class="form-group">
+                    <label>Ringkasan (Excerpt)</label>
+                    <input type="text" id="ebookExcerpt" placeholder="Ringkasan singkat untuk kartu rekomendasi" />
+                </div>
+                <div class="form-group">
+                    <label>File URL <span style="font-size:11px;color:#8a9e99;">(link Google Drive / PDF — untuk pembeli)</span></label>
+                    <input type="text" id="ebookFileUrl" placeholder="https://drive.google.com/... atau https://...pdf" />
                 </div>
                 <div class="form-group">
                     <label>Thumbnail URL</label>
@@ -2838,18 +2865,22 @@
                 var ebooks = (result && result.success) ? result.ebooks : [];
                 if (!ebooks || ebooks.length === 0) {
                     tbody.innerHTML =
-                        '<tr><td colspan="5" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
+                        '<tr><td colspan="6" class="empty-state"><div class="icon">📚</div>Belum ada ebook.</td></tr>';
                     return;
                 }
                 var html = '';
                 ebooks.forEach(function (e) {
                     var id = e.id;
                     var harga = e.price > 0 ? 'Rp ' + e.price.toLocaleString() : '🆓 Gratis';
+                    var statusBadge = e.status === 'published'
+                        ? '<span class="badge success">✅ Published</span>'
+                        : '<span class="badge pending">⏳ Draft</span>';
                     html += `
                         <tr>
                             <td><strong>${e.title}</strong></td>
                             <td>${e.pages || 0} halaman</td>
                             <td>${harga}</td>
+                            <td>${statusBadge}</td>
                             <td>${e.createdAt ? toDate(e.createdAt).toLocaleDateString('id-ID') : '-'}</td>
                             <td>
                                 <button class="btn-edit" onclick="editEbook('${id}')"><span>✏️</span> Edit</button>
@@ -2863,7 +2894,7 @@
             } catch (error) {
                 console.error('Error loading ebooks:', error);
                 tbody.innerHTML =
-                    '<tr><td colspan="5" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
+                    '<tr><td colspan="6" class="empty-state"><div class="icon">❌</div>Gagal memuat data ebook.</td></tr>';
             }
         }
 
@@ -2875,6 +2906,10 @@
             document.getElementById('ebookPrice').value = data ? data.price : '';
             document.getElementById('ebookDesc').value = data ? data.desc : '';
             document.getElementById('ebookThumb').value = data ? data.thumb : '';
+            document.getElementById('ebookStatus').value = data ? data.status : 'draft';
+            document.getElementById('ebookCategory').value = data ? data.category : 'Komunikasi';
+            document.getElementById('ebookExcerpt').value = data ? data.excerpt : '';
+            document.getElementById('ebookFileUrl').value = data ? data.fileUrl : '';
             openModal('ebookModal');
         }
 
@@ -2899,6 +2934,10 @@
                 price: price || 0,
                 desc: document.getElementById('ebookDesc').value,
                 thumb: document.getElementById('ebookThumb').value || '📘',
+                status: document.getElementById('ebookStatus').value,
+                category: document.getElementById('ebookCategory').value,
+                excerpt: document.getElementById('ebookExcerpt').value,
+                fileUrl: document.getElementById('ebookFileUrl').value,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             };
 
@@ -3532,46 +3571,20 @@
         }
 
         // ============================================================
-        //  DATA PENJUALAN & ADSENSE (DUMMY)
+        //  DATA PENJUALAN EBOOK (REAL DARI /api/admin/orders) & ADSENSE (DUMMY)
         // ============================================================
         var salesData = [];
         var adsenseData = [];
 
-        function generateSalesData() {
-            var ebooks = [{
-                    name: 'Panduan Komunikasi Sehat',
-                    price: 45000
-                },
-                {
-                    name: 'Love Language untuk Pasangan',
-                    price: 35000
-                },
-                {
-                    name: 'Mengelola Konflik',
-                    price: 0
-                },
-                {
-                    name: 'Keuangan Rumah Tangga',
-                    price: 25000
-                }
-            ];
-            var buyers = ['Monica', 'Budi', 'Siti', 'Andi', 'Rina', 'Dewi', 'Agus', 'Nina'];
-            var statuses = ['success', 'pending', 'success', 'success', 'failed', 'success', 'success'];
-
-            salesData = [];
-            for (var i = 0; i < 15; i++) {
-                var date = new Date();
-                date.setDate(date.getDate() - i);
-                var ebook = ebooks[Math.floor(Math.random() * ebooks.length)];
-                salesData.push({
-                    id: 'ORD-' + String(i + 1).padStart(4, '0'),
-                    buyer: buyers[Math.floor(Math.random() * buyers.length)],
-                    ebook: ebook.name,
-                    price: ebook.price > 0 ? ebook.price : Math.floor(Math.random() * 50000) + 25000,
-                    date: date.toISOString().split('T')[0],
-                    status: statuses[Math.floor(Math.random() * statuses.length)]
-                });
+        async function loadOrders() {
+            try {
+                var result = await apiGet('/api/admin/orders');
+                salesData = (result && result.success) ? result.orders : [];
+            } catch (error) {
+                console.error('Error loading orders:', error);
+                salesData = [];
             }
+            renderSales();
         }
 
         function generateAdsenseData() {
@@ -3594,20 +3607,14 @@
 
         function renderSales() {
             var tbody = document.getElementById('salesTableBody');
-            var totalSales = salesData.reduce(function (sum, s) {
-                return s.status === 'success' ? sum + s.price : sum;
-            }, 0);
-            var totalSold = salesData.filter(function (s) {
-                return s.status === 'success';
-            }).length;
-            var uniqueBuyers = new Set(salesData.filter(function (s) {
-                return s.status === 'success';
-            }).map(function (s) {
-                return s.buyer;
+            var successOrders = salesData.filter(function (s) { return s.status === 'success'; });
+            var totalSales = successOrders.reduce(function (sum, s) { return sum + (Number(s.price) || 0); }, 0);
+            var uniqueBuyers = new Set(successOrders.map(function (s) {
+                return s.userName || s.userEmail || s.userId || 'Guest';
             }));
 
-            document.getElementById('totalSales').textContent = 'Rp ' + totalSales.toLocaleString();
-            document.getElementById('totalEbooksSold').textContent = totalSold;
+            document.getElementById('totalSales').textContent = 'Rp ' + totalSales.toLocaleString('id-ID');
+            document.getElementById('totalEbooksSold').textContent = successOrders.length;
             document.getElementById('totalBuyers').textContent = uniqueBuyers.size;
             document.getElementById('salesCount').textContent = salesData.length + ' transaksi';
 
@@ -3624,14 +3631,17 @@
             };
 
             tbody.innerHTML = salesData.map(function (s) {
+                var tgl = s.createdAt ? toDate(s.createdAt).toLocaleString('id-ID', {
+                    day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                }) : '-';
                 return `
                     <tr>
-                        <td><code>${s.id}</code></td>
-                        <td><strong>${s.buyer}</strong></td>
-                        <td>${s.ebook}</td>
-                        <td>Rp ${s.price.toLocaleString()}</td>
-                        <td>${s.date}</td>
-                        <td><span class="badge ${s.status}">${statusMap[s.status] || s.status}</span></td>
+                        <td><code>${s.orderId || s.id}</code></td>
+                        <td><strong>${s.userName || s.userEmail || '—'}</strong></td>
+                        <td>${s.title || '-'}</td>
+                        <td>Rp ${(Number(s.price) || 0).toLocaleString('id-ID')}</td>
+                        <td>${tgl}</td>
+                        <td><span class="badge ${s.status || 'pending'}">${statusMap[s.status] || s.status}</span></td>
                     </tr>
                 `;
             }).join('');
@@ -3876,9 +3886,8 @@
             await loadCouples();
             await updateStats();
             await loadRecentActivities();
-            generateSalesData();
+            await loadOrders();
             generateAdsenseData();
-            renderSales();
             renderAdsense();
         }
 
@@ -3892,6 +3901,7 @@
             loadEbooks();
             loadVideos();
             loadCouples();
+            loadOrders();
             updateStats();
             loadRecentActivities();
         }, 30000);

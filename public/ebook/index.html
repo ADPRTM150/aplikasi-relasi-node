@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
     <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
-    <title>Artikel - QUALITY OF LOVE</title>
+    <title>Ebook - QUALITY OF LOVE</title>
 
     <!-- ===== CSS ===== -->
     <link rel="stylesheet" href="/css/style.css" />
@@ -32,13 +32,13 @@
             </div>
         </div>
 
-        <!-- ===== KONTEN ARTIKEL ===== -->
+        <!-- ===== KONTEN EBOOK ===== -->
         <div class="card">
-            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">📰 Artikel</h1>
-            <p style="color:#5a6f6a;font-size:14px;margin-bottom:16px;">Tips dan informasi seputar hubungan yang sehat</p>
+            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">📚 Ebook</h1>
+            <p style="color:#5a6f6a;font-size:14px;margin-bottom:16px;">Buku digital untuk memperkuat hubungan — gratis &amp; berbayar</p>
 
-            <div id="artikelContainer">
-                <div class="loading-text">⏳ Memuat artikel...</div>
+            <div id="ebookContainer">
+                <div class="loading-text">⏳ Memuat ebook...</div>
             </div>
         </div>
 
@@ -56,11 +56,11 @@
                 <span class="nav-icon">💕</span>
                 Health
             </a>
-            <a href="/artikel" class="active">
+            <a href="/artikel">
                 <span class="nav-icon">📰</span>
                 Artikel
             </a>
-            <a href="/ebook">
+            <a href="/ebook" class="active">
                 <span class="nav-icon">📚</span>
                 Ebook
             </a>
@@ -69,11 +69,6 @@
     </div>
 
     <script>
-
-        // ============================================================
-        //  🔥 INISIALISASI FIRESTORE
-        // ============================================================
-        // const db = firebase.firestore();  // ✅ Tambahkan ini!
 
         // ============================================================
         //  FIREBASE AUTH - RENDER USER
@@ -93,6 +88,7 @@
                         <a href="/love-language" class="dropdown-item">❤️ Love Language</a>
                         <a href="/relationship-check" class="dropdown-item">💕 Health Check</a>
                         <a href="/artikel" class="dropdown-item">📰 Artikel</a>
+                        <a href="/ebook" class="dropdown-item">📚 Ebook</a>
                         <div class="dropdown-divider"></div>
                         <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
                     </div>
@@ -128,14 +124,14 @@
         }
 
         // ============================================================
-        //  🔥 AMBIL ARTIKEL DARI FIRESTORE
+        //  🔥 AMBIL EBOOK DARI FIRESTORE
         // ============================================================
-        async function loadArticles() {
-            const container = document.getElementById('artikelContainer');
+        async function loadEbooks() {
+            const container = document.getElementById('ebookContainer');
 
-              try {
-                // 🔥 Filter hanya artikel dengan status "published"
-                const snapshot = await db.collection('articles')
+            try {
+                // 🔥 Filter hanya ebook dengan status "published"
+                const snapshot = await db.collection('ebooks')
                     .where('status', '==', 'published')
                     .orderBy('createdAt', 'desc')
                     .get();
@@ -144,7 +140,7 @@
                     container.innerHTML = `
                         <div class="empty-state">
                             <div class="icon">📭</div>
-                            <p>Belum ada artikel yang dipublikasikan.</p>
+                            <p>Belum ada ebook yang dipublikasikan.</p>
                         </div>
                     `;
                     return;
@@ -152,36 +148,39 @@
 
                 let html = '';
                 snapshot.forEach(doc => {
-                    const a = doc.data();
-                    const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
+                    const e = doc.data();
+                    const tanggal = e.createdAt ? new Date(e.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
+                    const harga = (Number(e.price) || 0) > 0
+                        ? '💰 Rp ' + Number(e.price).toLocaleString('id-ID')
+                        : '🆓 Gratis';
                     html += `
-                        <div class="artikel-card" onclick="bacaArtikel('${doc.id}')">
-                            <div class="thumb">${a.thumb || '📰'}</div>
-                            <span class="kategori">${a.category || 'Lainnya'}</span>
-                            <h3>${a.title}</h3>
-                            <div class="desc">${a.desc || ''}</div>
-                            <div class="meta">📅 ${tanggal}</div>
+                        <div class="artikel-card" onclick="bacaEbook('${doc.id}')">
+                            <div class="thumb">${e.thumb || '📘'}</div>
+                            <span class="kategori">${e.category || 'Lainnya'}</span>
+                            <h3>${e.title}</h3>
+                            <div class="desc">${e.excerpt || e.desc || ''}</div>
+                            <div class="meta">📅 ${tanggal} · 📄 ${e.pages || 0} halaman · ${harga}</div>
                         </div>
                     `;
                 });
                 container.innerHTML = html;
 
             } catch (error) {
-                console.error('Error loading articles:', error);
+                console.error('Error loading ebooks:', error);
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="icon">❌</div>
-                        <p>Gagal memuat artikel. Silakan refresh halaman.</p>
+                        <p>Gagal memuat ebook. Silakan refresh halaman.</p>
                     </div>
                 `;
             }
         }
 
-        function bacaArtikel(id) {
-            window.location.href = `/artikel/detail?id=${id}`;
+        function bacaEbook(id) {
+            window.location.href = `/ebook/detail?id=${id}`;
         }
 
-        loadArticles();
+        loadEbooks();
     </script>
 
 </body>
