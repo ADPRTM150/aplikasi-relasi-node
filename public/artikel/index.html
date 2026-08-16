@@ -35,15 +35,15 @@
 
         <!-- ===== KONTEN ARTIKEL & EBOOK ===== -->
         <div class="card">
-            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">📰 Artikel &amp; Ebook</h1>
+            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">Artikel &amp; Ebook</h1>
             <p style="color:#5a6f6a;font-size:14px;margin-bottom:16px;">Tips dan informasi seputar hubungan yang sehat + buku digital</p>
 
-            <h2 id="artikelSection" style="font-size:17px;font-weight:700;color:#3a7d76;margin:8px 0 12px;">📰 Artikel</h2>
+            <h2 id="artikelSection" style="font-size:14px;font-weight:700;color:#3a7d76;margin:8px 0 12px;padding-left:10px;border-left:4px solid #3a7d76;letter-spacing:1px;text-transform:uppercase;">Artikel</h2>
             <div id="artikelContainer">
                 <div class="loading-text">⏳ Memuat artikel...</div>
             </div>
 
-            <h2 id="ebookSection" style="font-size:17px;font-weight:700;color:#3a7d76;margin:28px 0 12px;">📚 Ebook</h2>
+            <h2 id="ebookSection" style="font-size:14px;font-weight:700;color:#c94a6e;margin:28px 0 12px;padding-left:10px;border-left:4px solid #c94a6e;letter-spacing:1px;text-transform:uppercase;">Ebook</h2>
             <div id="ebookContainer">
                 <div class="loading-text">⏳ Memuat ebook...</div>
             </div>
@@ -186,7 +186,6 @@
                     const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
                     html += `
                         <div class="artikel-card" onclick="bacaArtikel('${doc.id}')">
-                            <div class="thumb">${a.thumb || '📰'}</div>
                             <span class="kategori">${a.category || 'Lainnya'}</span>
                             <h3>${a.title}</h3>
                             <div class="desc">${a.desc || ''}</div>
@@ -243,7 +242,6 @@
                         : '🆓 Gratis';
                     html += `
                         <div class="artikel-card" onclick="bacaEbook('${doc.id}')">
-                            <div class="thumb">${e.thumb || '📘'}</div>
                             <span class="kategori">${e.category || 'Lainnya'}</span>
                             <h3>${e.title}</h3>
                             <div class="desc">${e.excerpt || e.desc || ''}</div>
