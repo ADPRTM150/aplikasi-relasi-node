@@ -140,6 +140,7 @@
         var pollTimer = null;
         var pollAttempts = 0;
         var lastRedirectUrl = null;
+        var lastToken = null;
 
         // ============================================================
         //  🔥 AMBIL KONFIGURASI (untuk Snap Midtrans)
@@ -275,6 +276,7 @@
 
                 sessionStorage.setItem('ebookOrder_' + ebookId, data.orderId);
                 lastRedirectUrl = data.redirectUrl || null;
+                lastToken = data.token || null;
 
                 // Tampilkan status menunggu + link cadangan (kalau popup bermasalah)
                 showWaitingWithLink();
@@ -370,21 +372,38 @@
             area.innerHTML = `<p style="color:${color};font-size:13px;text-align:center;font-weight:600;">${msg}</p>`;
         }
 
-        // Tampilkan status menunggu + link buka pembayaran di tab baru (cadangan kalau popup gagal)
+        // Tampilkan status menunggu + tombol tampilkan popup lagi + link tab baru (cadangan)
         function showWaitingWithLink() {
             var area = document.getElementById('buyArea');
+            var reopenHtml = (lastToken && typeof window.snap !== 'undefined')
+                ? `<button onclick="reopenSnapPopup()"
+                       style="display:inline-block;margin-top:10px;background:linear-gradient(135deg,#e0567a,#c94a6e);color:#fff;border:none;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;">
+                       🔄 Tampilkan Popup Pembayaran Lagi
+                   </button>`
+                : '';
             var linkHtml = lastRedirectUrl
                 ? `<a href="${lastRedirectUrl}" target="_blank" rel="noopener"
                        style="display:inline-block;margin-top:10px;background:linear-gradient(135deg,#3a7d76,#2d655f);color:#fff;border:none;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;">
                        💳 Buka halaman pembayaran di tab baru
                    </a>
-                   <p style="color:#8a9e99;font-size:11px;margin-top:8px;">Popup tidak muncul? Klik link di atas untuk membayar lewat halaman penuh.</p>`
+                   <p style="color:#8a9e99;font-size:11px;margin-top:8px;">Popup tertutup? Tampilkan lagi atau bayar lewat halaman penuh di atas.</p>`
                 : '';
             area.innerHTML = `
                 <div style="text-align:center;">
                     <p style="color:#d4a373;font-weight:600;font-size:14px;margin:0;">⏳ Menunggu pembayaran dikonfirmasi...</p>
+                    ${reopenHtml}
                     ${linkHtml}
                 </div>`;
+        }
+
+        // Buka ulang popup Snap dengan token yang sama
+        function reopenSnapPopup() {
+            if (!lastToken) return;
+            if (typeof window.snap === 'undefined') {
+                showBuyMessage('Popup belum siap. Gunakan link halaman pembayaran di atas.', 'error');
+                return;
+            }
+            snapPay(lastToken);
         }
 
         // ============================================================
