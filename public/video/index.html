@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
+    <title>Video E-Course - QUALITY OF LOVE</title>
+
+    <!-- ===== CSS ===== -->
+    <link rel="stylesheet" href="/css/style.css" />
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+</head>
+<body>
+
+    <div class="app">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="logo"><img src="/img/Quality.jpeg" alt="QUALITY OF LOVE" style="height:38px;width:38px;border-radius:10px;display:block;" /><strong>QUALITY OF LOVE</strong></div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span class="badge">Beta</span>
+                <div class="user-area" id="userArea">
+                    <!-- Akan diisi JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== KONTEN VIDEO ===== -->
+        <div class="card">
+            <h1 style="font-size:22px;font-weight:700;color:#1d3b36;margin-bottom:4px;">🎬 Video E-Course</h1>
+            <p style="color:#5a6f6a;font-size:14px;margin-bottom:16px;">Video pembelajaran praktis tentang komunikasi, konflik, keintiman, dan banyak lagi</p>
+
+            <div id="videoContainer">
+                <div class="loading-text">⏳ Memuat video...</div>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <div class="bottom-nav">
+            <a href="/">
+                <span class="nav-icon">🏠</span>
+                Beranda
+            </a>
+            <a href="/love-language">
+                <span class="nav-icon">❤️</span>
+                Love
+            </a>
+            <a href="/relationship-check">
+                <span class="nav-icon">💕</span>
+                Health
+            </a>
+            <a href="/artikel?tab=artikel">
+                <span class="nav-icon">📰</span>
+                Artikel
+            </a>
+            <a href="/artikel?tab=ebook">
+                <span class="nav-icon">📚</span>
+                Ebook
+            </a>
+            <a href="/video" class="active">
+                <span class="nav-icon">🎥</span>
+                Video
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+
+        // ============================================================
+        //  FIREBASE AUTH - RENDER USER
+        // ============================================================
+        firebase.auth().onAuthStateChanged((user) => {
+            const userArea = document.getElementById('userArea');
+            if (user) {
+                const foto = user.photoURL || '';
+                const nama = user.displayName || 'Pengguna';
+                userArea.innerHTML = `
+                    <button class="profile-trigger" onclick="toggleDropdown()">
+                        ${foto ? `<img src="${foto}" class="avatar" />` : `<div class="avatar-placeholder">👤</div>`}
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="/profil" class="dropdown-item">👤 Profil</a>
+                        <a href="/hasil" class="dropdown-item">📊 Hasil</a>
+                        <a href="/love-language" class="dropdown-item">❤️ Love Language</a>
+                        <a href="/relationship-check" class="dropdown-item">💕 Health Check</a>
+                        <a href="/artikel" class="dropdown-item">📰 Artikel</a>
+                        <a href="/artikel?tab=ebook" class="dropdown-item">📚 Ebook</a>
+                        <a href="/video" class="dropdown-item">🎥 Video</a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item logout" onclick="logout()">🚪 Logout</button>
+                    </div>
+                `;
+            } else {
+                userArea.innerHTML = `
+                    <button class="profile-trigger" onclick="window.location.href='/login'">
+                        <div class="avatar-placeholder">👤</div>
+                    </button>
+                `;
+            }
+        });
+
+        function toggleDropdown() {
+            const d = document.getElementById('userDropdown');
+            if (d) d.classList.toggle('show');
+        }
+
+        document.addEventListener('click', function(e) {
+            const area = document.getElementById('userArea');
+            if (area && !area.contains(e.target)) {
+                const d = document.getElementById('userDropdown');
+                if (d) d.classList.remove('show');
+            }
+        });
+
+        function logout() {
+            if (confirm('Yakin ingin logout?')) {
+                firebase.auth().signOut().then(() => {
+                    window.location.reload();
+                });
+            }
+        }
+
+        // ============================================================
+        //  🔥 AMBIL VIDEO DARI FIRESTORE (link YouTube)
+        // ============================================================
+        async function loadVideos() {
+            const container = document.getElementById('videoContainer');
+
+            try {
+                const snapshot = await db.collection('videos')
+                    .orderBy('createdAt', 'desc')
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="icon">🎬</div>
+                            <p>Belum ada video yang ditambahkan.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                let html = '';
+                snapshot.forEach(doc => {
+                    const v = doc.data();
+                    const tanggal = v.createdAt ? new Date(v.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
+                    const urlAman = (v.url || '').replace(/'/g, "\\'");
+                    html += `
+                        <div class="artikel-card" onclick="bukaVideo('${urlAman}')">
+                            <span class="kategori">🎥 Video · ⏱ ${v.duration || '-'}</span>
+                            <h3>${v.title}</h3>
+                            <div class="desc">${v.desc || ''}</div>
+                            <div class="meta">📅 ${tanggal}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+
+            } catch (error) {
+                console.error('Error loading videos:', error);
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="icon">❌</div>
+                        <p>Gagal memuat video. Silakan refresh halaman.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function bukaVideo(url) {
+            if (!url) {
+                alert('Link video belum tersedia.');
+                return;
+            }
+            window.open(url, '_blank', 'noopener');
+        }
+
+        loadVideos();
+    </script>
+
+</body>
+</html>

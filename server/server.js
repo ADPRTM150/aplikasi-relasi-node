@@ -1250,6 +1250,7 @@ app.get('/artikel', (req, res) => res.sendFile(path.join(__dirname, '../public/a
 app.get('/artikel/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/detail.html')));
 app.get('/ebook', (req, res) => res.redirect(301, '/artikel'));
 app.get('/ebook/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/ebook/detail.html')));
+app.get('/video', (req, res) => res.sendFile(path.join(__dirname, '../public/video/index.html')));
 app.get('/admin', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/index.html')));
 app.get('/admin/login', (req, res) => res.sendFile(path.join(__dirname, '../public/admin/login.html')));
 
