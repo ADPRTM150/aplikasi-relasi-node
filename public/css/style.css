@@ -4334,10 +4334,7 @@ body.love-page {
     font-size: 46px;
     font-weight: 800;
     line-height: 1;
-    background: linear-gradient(135deg, #3a7d76, #e0567a);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: #1d3b36;
 }
 
 .score-block .label {
