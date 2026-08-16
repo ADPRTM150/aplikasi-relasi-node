@@ -21,6 +21,19 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // ============================================================
+//  💾 OFFLINE PERSISTENCE — hemat read Firestore untuk
+//     pengunjung yang membuka halaman berulang (cache lokal)
+// ============================================================
+try {
+    db.enableIndexedDbPersistence().catch(function (err) {
+        // Gagal biasanya karena multi-tab/private mode — aman, lanjut tanpa cache
+        console.warn('⚠️ Offline persistence tidak aktif:', err.code);
+    });
+} catch (e) {
+    console.warn('⚠️ IndexedDB tidak didukung di browser ini');
+}
+
+// ============================================================
 //  🔥 SESSION STORAGE HELPER
 // ============================================================
 const SessionLog = {
