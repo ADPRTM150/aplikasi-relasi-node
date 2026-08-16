@@ -328,7 +328,7 @@ app.get('/api/admin/verify', verifyAdminToken, (req, res) => {
 
 app.get('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
-        const snapshot = await db.collection('users').get();
+        const snapshot = await db.collection('users').limit(200).get();
         const users = [];
         snapshot.forEach(doc => {
             users.push({ id: doc.id, ...doc.data() });
@@ -554,6 +554,7 @@ app.get('/api/admin/couples', verifyAdminToken, async (req, res) => {
         const snapshot = await db.collection('wellness_tests')
             .where('userCompleted', '==', true)
             .orderBy('completedAt', 'desc')
+            .limit(200)
             .get();
         const couples = [];
         snapshot.forEach(doc => couples.push({ id: doc.id, ...doc.data() }));
@@ -589,7 +590,7 @@ app.get('/api/admin/activities', verifyAdminToken, async (req, res) => {
     try {
         const snapshot = await db.collection('activities')
             .orderBy('timestamp', 'desc')
-            .limit(100)
+            .limit(30)
             .get();
         const activities = [];
         snapshot.forEach(doc => activities.push({ id: doc.id, ...doc.data() }));
@@ -812,7 +813,7 @@ app.get('/api/admin/orders', verifyAdminToken, async (req, res) => {
     try {
         const snapshot = await db.collection('orders')
             .orderBy('createdAt', 'desc')
-            .limit(200)
+            .limit(100)
             .get();
         const orders = [];
         snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));

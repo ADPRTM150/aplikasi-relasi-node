@@ -3894,17 +3894,18 @@
         // init() dipanggil dari auth guard di atas
         // Jangan panggil init() di sini!
 
-        // Auto refresh setiap 30 detik
+        // Auto refresh setiap 2 menit — hanya saat tab admin terlihat
+        // (hemat kuota read Firestore; updateStats hanya di init)
         setInterval(function () {
+            if (document.visibilityState === 'hidden') return;
             loadUsers();
             loadArticles();
             loadEbooks();
             loadVideos();
             loadCouples();
             loadOrders();
-            updateStats();
             loadRecentActivities();
-        }, 30000);
+        }, 120000);
     </script>
 
 </body>
