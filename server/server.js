@@ -11,9 +11,7 @@ const fs = require('fs');
 // ============================================================
 //  🔥 FIREBASE ADMIN
 // ============================================================
-const { initializeApp, cert } = require('firebase-admin/app');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
-const { getAuth } = require('firebase-admin/auth');
+const admin = require('firebase-admin');
 
 // Cek environment variables
 if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
@@ -28,15 +26,15 @@ const serviceAccount = {
     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
 };
 
-initializeApp({
-    credential: cert(serviceAccount),
+admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
     databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
 });
 
 console.log('✅ Firebase Admin initialized');
 console.log(`📁 Project: ${process.env.FIREBASE_PROJECT_ID}`);
 
-const db = getFirestore();
+const db = admin.firestore();
 
 // ============================================================
 //  🔥 JWT SECRET — auto-generate kalau tidak diset
@@ -242,7 +240,7 @@ async function verifyAdminPassword(settings, password) {
         const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
         await db.collection('admin').doc('settings').update({
             passwordHash: hash,
-            password: FieldValue.delete() // hapus plaintext
+            password: admin.firestore.FieldValue.delete() // hapus plaintext
         });
         console.log('🔐 Password admin di-upgrade ke bcrypt hash');
         return true;
@@ -298,7 +296,7 @@ app.post('/api/admin/login', rateLimiter, async (req, res) => {
                 await db.collection('admin').doc('settings').set({
                     email: 'admin@relasi.com',
                     passwordHash: hash,
-                    createdAt: FieldValue.serverTimestamp()
+                    createdAt: admin.firestore.FieldValue.serverTimestamp()
                 });
                 console.log('🔐 Default admin dibuat dengan bcrypt hash');
             }
@@ -411,12 +409,12 @@ app.put('/api/admin/settings', verifyAdminToken, async (req, res) => {
         const { email, password, highlightKeywords } = req.body;
         const data = {
             email: email || 'admin@relasi.com',
-            updatedAt: FieldValue.serverTimestamp()
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
         };
         if (password && password.length >= 8) {
             data.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
             // Hapus plaintext kalau ada
-            data.password = FieldValue.delete();
+            data.password = admin.firestore.FieldValue.delete();
         }
         // Kata kunci highlight untuk fitur Upload Word (admin bisa atur)
         if (Array.isArray(highlightKeywords)) {
@@ -452,7 +450,7 @@ app.get('/api/admin/articles', verifyAdminToken, async (req, res) => {
 
 app.post('/api/admin/articles', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
         const ref = await db.collection('articles').add(data);
         res.json({ success: true, id: ref.id, message: 'Artikel dibuat' });
     } catch (error) {
@@ -525,7 +523,7 @@ app.get('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
 app.post('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
     try {
         const fileUrl = typeof req.body.fileUrl === 'string' ? req.body.fileUrl.trim() : '';
-        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
         delete data.fileUrl; // jangan simpan di dokumen publik
         const ref = await db.collection('ebooks').add(data);
         if (fileUrl) {
@@ -542,7 +540,7 @@ app.put('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
         const fileUrl = typeof req.body.fileUrl === 'string' ? req.body.fileUrl.trim() : '';
         const data = { ...req.body };
         delete data.fileUrl;
-        data.fileUrl = FieldValue.delete(); // hapus field legacy di dokumen publik
+        data.fileUrl = admin.firestore.FieldValue.delete(); // hapus field legacy di dokumen publik
         await db.collection('ebooks').doc(req.params.id).update(data);
         if (fileUrl) {
             await db.collection('ebook_files').doc(req.params.id).set({ url: fileUrl });
@@ -579,7 +577,7 @@ app.get('/api/admin/videos', verifyAdminToken, async (req, res) => {
 
 app.post('/api/admin/videos', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
         const ref = await db.collection('videos').add(data);
         res.json({ success: true, id: ref.id, message: 'Video dibuat' });
     } catch (error) {
@@ -610,7 +608,7 @@ app.delete('/api/admin/videos/:id', verifyAdminToken, async (req, res) => {
 // ============================================================
 app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
         const ref = await db.collection('users').add(data);
         res.json({ success: true, id: ref.id, message: 'User dibuat' });
     } catch (error) {
@@ -730,7 +728,7 @@ app.post('/api/public/ebooks/order', orderRateLimiter, async (req, res) => {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith('Bearer ')) {
             try {
-                const decoded = await getAuth().verifyIdToken(authHeader.split('Bearer ')[1]);
+                const decoded = await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]);
                 userId = decoded.uid || '';
                 userEmail = decoded.email || '';
                 userName = decoded.name || (decoded.email || '').split('@')[0] || 'Pengguna';
@@ -750,7 +748,7 @@ app.post('/api/public/ebooks/order', orderRateLimiter, async (req, res) => {
             userId: userId,
             userName: userName,
             userEmail: userEmail,
-            createdAt: FieldValue.serverTimestamp()
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
         // Panggil Midtrans Snap API
@@ -895,7 +893,7 @@ app.post('/api/webhooks/midtrans', async (req, res) => {
                     status: newStatus,
                     midtransStatus: transactionStatus,
                     paymentType: String(body.payment_type || ''),
-                    updatedAt: FieldValue.serverTimestamp()
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
                 });
             }
 
@@ -910,7 +908,7 @@ app.post('/api/webhooks/midtrans', async (req, res) => {
                         type: 'ebook_purchased',
                         icon: '📚',
                         priority: 'high',
-                        timestamp: FieldValue.serverTimestamp(),
+                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
                         details: {
                             ebookId: order.ebookId || 'unknown',
                             ebookTitle: order.title || 'Ebook',
@@ -964,7 +962,7 @@ const verifyFirebaseToken = async (req, res, next) => {
     const idToken = authHeader.split('Bearer ')[1];
 
     try {
-        const decodedToken = await getAuth().verifyIdToken(idToken);
+        const decodedToken = await admin.auth().verifyIdToken(idToken);
         req.user = decodedToken;
         next();
     } catch (error) {
@@ -1011,7 +1009,7 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
         const testData = {
             userId,
             role: role || 'user',
-            startedAt: FieldValue.serverTimestamp(),
+            startedAt: admin.firestore.FieldValue.serverTimestamp(),
             userCompleted: false,
             partnerCompleted: false,
             userAnswers: {},
@@ -1144,7 +1142,7 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         const updateData = {
             [`${role}Answers`]: validAnswers,
             [`${role}Completed`]: true,
-            [`${role}CompletedAt`]: FieldValue.serverTimestamp()
+            [`${role}CompletedAt`]: admin.firestore.FieldValue.serverTimestamp()
         };
 
         if (role === 'partner') {
@@ -1158,7 +1156,7 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             const userAnswers = role === 'user' ? validAnswers : testData.userAnswers;
             const partnerAnswers = role === 'partner' ? validAnswers : testData.partnerAnswers;
             updateData.results = calculateWellnessResults(userAnswers, partnerAnswers);
-            updateData.completedAt = FieldValue.serverTimestamp();
+            updateData.completedAt = admin.firestore.FieldValue.serverTimestamp();
         }
 
         await testRef.update(updateData);
