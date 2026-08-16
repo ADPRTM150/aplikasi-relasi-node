@@ -483,31 +483,39 @@ async function tampilkanRiwayat() {
                             <span class="badge-wellness">🧠 Wellness</span>
                             <span class="tanggal">${tanggalStr}</span>
                         </div>
-                        <span style="font-size:12px;color:#b0c2bd;">${statusPartner}</span>
+                        <span style="font-size:11px;color:#3a7d76;background:#e6f2f0;padding:4px 10px;border-radius:999px;font-weight:600;white-space:nowrap;">${statusPartner}</span>
                     </div>
 
-                    <div class="riwayat-score">
-                        <span class="number animate" id="riwayatScoreNum">0</span>
-                        <span class="label">%</span>
-                        <span class="category">${results.category || 'Belum Terukur'}</span>
+                    <div style="display:flex;align-items:center;gap:18px;margin:16px 0 4px;">
+                        <div class="riwayat-score" style="flex-shrink:0;">
+                            <span class="number animate" id="riwayatScoreNum" style="font-size:44px;">0</span>
+                            <span class="label" style="font-size:18px;">%</span>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:7px;min-width:0;flex:1;">
+                            <span style="display:inline-block;align-self:flex-start;font-size:13px;font-weight:600;color:#3a7d76;background:#e6f2f0;padding:3px 14px;border-radius:20px;">${results.category || 'Belum Terukur'}</span>
+                            <div style="font-size:13px;color:#5a6f6a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">👤 ${userAName}</div>
+                            <div style="font-size:13px;color:#5a6f6a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">💞 ${userBName}</div>
+                        </div>
                     </div>
 
-                    <div class="riwayat-partner">
-                        <span>👤 ${userAName} & ${userBName}</span>
+                    <div style="border-top:1px dashed #e5e9e7;margin:14px 0 2px;padding-top:12px;">
+                        <div style="font-size:11px;font-weight:700;color:#3a7d76;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px;">🌟 Kekuatan</div>
+                        <div class="riwayat-tags" style="margin-top:0;">
+                            ${strengths.slice(0, 3).map((s, i) => `
+                                <span class="tag-strength" style="animation-delay:${0.3 + i * 0.08}s;">🌟 ${dimLabels[s.dimension] || s.dimension} ${s.score}%</span>
+                            `).join('')}
+                        </div>
+                        <div style="font-size:11px;font-weight:700;color:#d4a373;letter-spacing:1px;text-transform:uppercase;margin:14px 0 8px;">💡 Area Prioritas</div>
+                        <div class="riwayat-tags" style="margin-top:0;">
+                            ${priorities.slice(0, 3).map((p, i) => `
+                                <span class="tag-priority" style="animation-delay:${0.3 + (strengths.slice(0,3).length + i) * 0.08}s;">💡 ${dimLabels[p.dimension] || p.dimension} ${p.score}%</span>
+                            `).join('')}
+                        </div>
                     </div>
 
-                    <div class="riwayat-tags" id="riwayatTags">
-                        ${strengths.slice(0, 3).map((s, i) => `
-                            <span class="tag-strength" style="animation-delay:${0.3 + i * 0.08}s;">🌟 ${dimLabels[s.dimension] || s.dimension} ${s.score}%</span>
-                        `).join('')}
-                        ${priorities.slice(0, 3).map((p, i) => `
-                            <span class="tag-priority" style="animation-delay:${0.3 + (strengths.slice(0,3).length + i) * 0.08}s;">💡 ${dimLabels[p.dimension] || p.dimension} ${p.score}%</span>
-                        `).join('')}
-                    </div>
-
-                    <div class="riwayat-actions">
-                        <a href="/hasil?testId=${testId}" class="btn-riwayat primary">📊 Detail</a>
-                        <a href="/relationship-check" class="btn-riwayat outline">🔄 Ulangi</a>
+                    <div class="riwayat-actions" style="margin-top:16px;">
+                        <a href="/hasil?testId=${testId}" class="btn-riwayat primary" style="flex:1;justify-content:center;padding:9px 18px;">📊 Detail</a>
+                        <a href="/relationship-check" class="btn-riwayat outline" style="flex:1;justify-content:center;padding:9px 18px;">🔄 Ulangi</a>
                     </div>
                 </div>
             `;
