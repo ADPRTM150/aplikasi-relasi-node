@@ -63,7 +63,7 @@
                 <span class="nav-icon">💕</span>
                 Health
             </a>
-            <a href="/artikel" class="active">
+            <a href="/artikel?tab=artikel" class="active">
                 <span class="nav-icon">📰</span>
                 Artikel
             </a>
@@ -90,13 +90,22 @@
                 document.getElementById('ebookSection').style.marginTop = '0';
                 // Link untuk melihat artikel juga
                 var link = document.createElement('a');
-                link.href = '/artikel';
+                link.href = '/artikel?tab=artikel';
                 link.textContent = '📰 Lihat juga artikel kami →';
                 link.style.cssText = 'display:inline-block;margin-top:16px;color:#3a7d76;font-weight:600;font-size:13px;text-decoration:none;';
                 document.getElementById('ebookContainer').after(link);
+                // Sorot nav Ebook
+                document.querySelector('.bottom-nav a[href*="tab=artikel"]').classList.remove('active');
+                document.querySelector('.bottom-nav a[href*="tab=ebook"]').classList.add('active');
             } else if (tabMode === 'artikel') {
                 document.getElementById('ebookSection').style.display = 'none';
                 document.getElementById('ebookContainer').style.display = 'none';
+                // Link untuk melihat ebook juga
+                var linkArtikel = document.createElement('a');
+                linkArtikel.href = '/artikel?tab=ebook';
+                linkArtikel.textContent = '📚 Lihat juga ebook kami →';
+                linkArtikel.style.cssText = 'display:inline-block;margin-top:16px;color:#c94a6e;font-weight:600;font-size:13px;text-decoration:none;';
+                document.getElementById('artikelContainer').after(linkArtikel);
             }
         })();
 
