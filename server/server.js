@@ -239,31 +239,41 @@ app.post('/api/admin/login', rateLimiter, async (req, res) => {
 
         let validCredentials = false;
 
-        // 🔥 Cek 1: Environment variables (jika diset)
-        if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD_HASH) {
-            if (email === process.env.ADMIN_EMAIL) {
-                validCredentials = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
+        // 🔥 SUMBER UTAMA: Firestore admin/settings
+        // (email & password diubah dari panel Settings admin — langsung berlaku
+        //  di lokal maupun Vercel karena Firestore-nya sama)
+        const doc = await db.collection('admin').doc('settings').get();
+        if (doc.exists) {
+            const settings = doc.data();
+            const hasPassword = !!(settings.passwordHash || settings.password);
+            if (hasPassword) {
+                // Firestore punya kredensial → env diabaikan
+                if (email === (settings.email || '')) {
+                    validCredentials = await verifyAdminPassword(settings, password);
+                }
             }
         }
 
-        // 🔥 Cek 2: Firestore admin/settings (via Admin SDK — bypass rules)
-        if (!validCredentials) {
-            const doc = await db.collection('admin').doc('settings').get();
-            if (doc.exists) {
-                const settings = doc.data();
-                validCredentials = await verifyAdminPassword(settings, password);
-            } else {
-                // Default credentials — langsung hash saat simpan
-                if (email === 'admin@relasi.com' && password === 'admin123') {
-                    validCredentials = true;
-                    const hash = await bcrypt.hash('admin123', BCRYPT_ROUNDS);
-                    await db.collection('admin').doc('settings').set({
-                        email: 'admin@relasi.com',
-                        passwordHash: hash,
-                        createdAt: admin.firestore.FieldValue.serverTimestamp()
-                    });
-                    console.log('🔐 Default admin dibuat dengan bcrypt hash');
+        // 🔥 CADANGAN 1: Environment variables (hanya jika Firestore belum punya password)
+        if (!validCredentials && (!doc.exists || !(doc.data().passwordHash || doc.data().password))) {
+            if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD_HASH) {
+                if (email === process.env.ADMIN_EMAIL) {
+                    validCredentials = await bcrypt.compare(password, process.env.ADMIN_PASSWORD_HASH);
                 }
+            }
+        }
+
+        // 🔥 CADANGAN 2: Bootstrap default (dokumen belum ada sama sekali)
+        if (!validCredentials && !doc.exists) {
+            if (email === 'admin@relasi.com' && password === 'admin123') {
+                validCredentials = true;
+                const hash = await bcrypt.hash('admin123', BCRYPT_ROUNDS);
+                await db.collection('admin').doc('settings').set({
+                    email: 'admin@relasi.com',
+                    passwordHash: hash,
+                    createdAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                console.log('🔐 Default admin dibuat dengan bcrypt hash');
             }
         }
 
