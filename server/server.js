@@ -102,7 +102,13 @@ app.use((req, res, next) => {
         "connect-src 'self' https://*.firebaseio.com https://*.googleapis.com https://apis.google.com https://firestore.googleapis.com https://www.gstatic.com wss://*.firebaseio.com https://app.midtrans.com https://app.sandbox.midtrans.com; " +
         "frame-src 'self' https://*.firebaseapp.com https://*.google.com https://www.youtube.com https://app.midtrans.com https://app.sandbox.midtrans.com"
     );
-    res.setHeader('X-Frame-Options', 'DENY');
+    // Halaman hasil boleh di-frame oleh situs sendiri (embed di Profil),
+    // halaman lain tetap DENY
+    if (req.path === '/hasil' && req.query.embed === '1') {
+        res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    } else {
+        res.setHeader('X-Frame-Options', 'DENY');
+    }
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');

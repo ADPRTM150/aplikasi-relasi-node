@@ -78,19 +78,11 @@
                 <button type="submit" class="btn-save" id="btnSave">💾 Simpan Profil</button>
             </form>
 
-            <!-- ===== RIWAYAT LOVE LANGUAGE ===== -->
-            <div class="riwayat-section" id="riwayatSection">
-                <h3>📊 Riwayat Love Language</h3>
-                <div id="riwayatContainer">
-                    <p style="color:#8a9e99;font-size:14px;">Belum ada hasil tes.</p>
-                </div>
-            </div>
-
-            <!-- ===== HASIL WELLNESS CHECK (LANGSUNG TAMPIL) ===== -->
+            <!-- ===== HASIL TES (LANGSUNG TAMPIL — gabungan Love Language & Wellness) ===== -->
             <div class="riwayat-section" id="hasilWellnessSection">
-                <h3>💕 Hasil Wellness Check</h3>
-                <iframe src="/hasil?embed=1" title="Hasil Wellness Check"
-                    style="width:100%;height:640px;border:none;border-radius:12px;background:transparent;display:block;"></iframe>
+                <h3>📊 Hasil Tes Kamu</h3>
+                <iframe src="/hasil?embed=1" title="Hasil Tes Kamu"
+                    style="width:100%;height:700px;border:none;border-radius:12px;background:transparent;display:block;"></iframe>
             </div>
 
             <!-- ===== LOGOUT ===== -->
@@ -162,10 +154,8 @@
                     console.error('Gagal load profil:', err);
                 });
 
-            // Tampilkan riwayat Love Language
-            tampilkanRiwayat().catch(function(err) {
-                console.error('Gagal tampilkan riwayat:', err);
-            });
+            // Hasil tes (Love Language & Wellness) ditampilkan langsung
+            // lewat iframe /hasil?embed=1 di bawah form profil.
         }
 
         // ============================================================
