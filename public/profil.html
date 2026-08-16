@@ -139,6 +139,13 @@
 
             // Ambil data dari Firestore
             const db = firebase.firestore();
+
+            // Sinkronkan foto profil dari akun login ke Firestore
+            // (dipakai untuk menampilkan foto di hasil wellness check)
+            db.collection('users').doc(user.uid).set({
+                photoURL: user.photoURL || ''
+            }, { merge: true }).catch(() => {});
+
             db.collection('users').doc(user.uid).get()
                 .then((doc) => {
                     if (doc.exists) {

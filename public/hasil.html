@@ -363,6 +363,15 @@
             font-size: 16px;
         }
 
+        .wellness-partner-avatar-img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
         .wellness-date {
             text-align: center;
             font-size: 13px;
@@ -1370,7 +1379,7 @@
             // ============================================================
             //  🔥 PROCESS WELLNESS DATA (DENGAN ANIMASI)
             // ============================================================
-            function processWellnessData(docData, role, container, userName) {
+            async function processWellnessData(docData, role, container, userName) {
                 if (!docData.results) {
                     var statusMessage = '';
                     if (role === 'user' && docData.userCompleted && !docData.partnerCompleted) {
@@ -1414,8 +1423,45 @@
                     return '📌';
                 }
 
-                var userAName = (role === 'user') ? 'Anda' : 'Pasangan';
-                var userBName = (role === 'user') ? 'Pasangan' : 'Anda';
+                // 🔥 AMBIL PROFIL KEDUA USER (FOTO + NAMA) DARI FIRESTORE
+                var profileA = null;
+                var profileB = null;
+                try {
+                    if (docData.userId) {
+                        var docA = await db.collection('users').doc(docData.userId).get();
+                        if (docA.exists) profileA = docA.data();
+                    }
+                    if (docData.partnerUserId) {
+                        var docB = await db.collection('users').doc(docData.partnerUserId).get();
+                        if (docB.exists) profileB = docB.data();
+                    }
+                } catch (e) {}
+
+                var currentUser = firebase.auth().currentUser;
+
+                function namaDari(p) { return (p && (p.nama || p.name)) || ''; }
+                function fotoDari(p, uid) {
+                    if (p && p.photoURL) return p.photoURL;
+                    if (currentUser && uid && currentUser.uid === uid && currentUser.photoURL) return currentUser.photoURL;
+                    return '';
+                }
+
+                // userA = pemilik tes (docData.userId), userB = pasangan (docData.partnerUserId)
+                var userAName = namaDari(profileA) || (role === 'user' ? 'Anda' : 'Pasangan');
+                var userBName = namaDari(profileB) || (role === 'user' ? 'Pasangan' : 'Anda');
+                var userAPhoto = fotoDari(profileA, docData.userId);
+                var userBPhoto = fotoDari(profileB, docData.partnerUserId);
+
+                // Avatar: foto kalau ada, kalau tidak inisial di lingkaran gradien
+                function avatarHtml(foto, nama, fallback) {
+                    var label = (nama || fallback).charAt(0).toUpperCase();
+                    if (foto) {
+                        return '<img class="wellness-partner-avatar-img" src="' + foto + '" alt="' + (nama || fallback) + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';"/>' +
+                            '<div class="wellness-partner-avatar" style="display:none;">' + label + '</div>';
+                    }
+                    return '<div class="wellness-partner-avatar">' + label + '</div>';
+                }
+
                 var score = results.wellnessScore || 0;
 
                 var categoryColor = '#4CAF50';
@@ -1479,11 +1525,11 @@
                 html += '  </span>';
                 html += '</div>';
 
-                // ── PARTNER INFO ──
+                // ── PARTNER INFO (FOTO + NAMA ASLI) ──
                 html += '<div class="wellness-partner-info">';
-                html += '  <div class="wellness-partner-avatar">👤</div>';
+                html += '  ' + avatarHtml(userAPhoto, userAName, role === 'user' ? 'Anda' : 'Pasangan');
                 html += '  <span>' + userAName + ' <span style="color:#b0c2bd;">&</span> ' + userBName + '</span>';
-                html += '  <div class="wellness-partner-avatar">👤</div>';
+                html += '  ' + avatarHtml(userBPhoto, userBName, role === 'user' ? 'Pasangan' : 'Anda');
                 html += '</div>';
 
                 // ── DATE ──
