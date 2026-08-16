@@ -4136,8 +4136,8 @@ body.love-page {
 .riwayat-score {
     display: flex;
     align-items: baseline;
-    gap: 6px;
-    margin: 2px 0 4px;
+    gap: 8px;
+    margin: 10px 0 10px;
 }
 
 .riwayat-score .number {
@@ -4158,13 +4158,13 @@ body.love-page {
 
 .riwayat-score .category {
     font-size: 14px;
-    font-weight: 500;
-    color: #5a6f6a;
-    background: #f5f0ec;
-    padding: 2px 14px;
+    font-weight: 600;
+    color: #3a7d76;
+    background: #e6f2f0;
+    padding: 3px 14px;
     border-radius: 20px;
     margin-left: 8px;
-    -webkit-text-fill-color: #5a6f6a;
+    -webkit-text-fill-color: #3a7d76;
 }
 
 /* ─── STATUS PASANGAN ─── */
@@ -4174,7 +4174,7 @@ body.love-page {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-top: 2px;
+    margin-top: 8px;
 }
 
 .riwayat-partner .status-done {
@@ -4191,8 +4191,8 @@ body.love-page {
 .riwayat-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 /* Staggered entrance untuk tags */
