@@ -25,6 +25,7 @@
         <div class="header">
             <div class="logo"><strong>QUALITY OF LOVE</strong>🌱</div>
             <div style="display:flex;align-items:center;gap:10px;">
+                
                 <span class="badge">Beta</span>
                 <div class="user-area" id="userArea">
                     <!-- Akan diisi JavaScript -->
@@ -66,7 +67,7 @@
                 <span class="nav-icon">📰</span>
                 Artikel
             </a>
-            <a href="/artikel#ebook">
+            <a href="/artikel?tab=ebook">
                 <span class="nav-icon">📚</span>
                 Ebook
             </a>
@@ -75,6 +76,29 @@
     </div>
 
     <script>
+
+        // ============================================================
+        //  🔥 MODE TAB: ?tab=ebook → hanya bagian Ebook yang tampil
+        // ============================================================
+        (function () {
+            var urlParams = new URLSearchParams(window.location.search);
+            var tabMode = urlParams.get('tab');
+
+            if (tabMode === 'ebook') {
+                document.getElementById('artikelSection').style.display = 'none';
+                document.getElementById('artikelContainer').style.display = 'none';
+                document.getElementById('ebookSection').style.marginTop = '0';
+                // Link untuk melihat artikel juga
+                var link = document.createElement('a');
+                link.href = '/artikel';
+                link.textContent = '📰 Lihat juga artikel kami →';
+                link.style.cssText = 'display:inline-block;margin-top:16px;color:#3a7d76;font-weight:600;font-size:13px;text-decoration:none;';
+                document.getElementById('ebookContainer').after(link);
+            } else if (tabMode === 'artikel') {
+                document.getElementById('ebookSection').style.display = 'none';
+                document.getElementById('ebookContainer').style.display = 'none';
+            }
+        })();
 
         // ============================================================
         //  🔥 INISIALISASI FIRESTORE
