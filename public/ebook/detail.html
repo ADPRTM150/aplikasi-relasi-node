@@ -232,9 +232,13 @@
                     <p style="color:#8a9e99;font-size:11px;margin-top:8px;">Pembayaran aman via Midtrans (QRIS, VA, e-wallet)</p>
                 </div>`;
 
-            // Pulihkan order yang belum selesai
+            // Pulihkan order yang belum selesai (termasuk setelah reload halaman)
             var savedOrderId = sessionStorage.getItem('ebookOrder_' + ebookId);
-            if (savedOrderId) cekStatusOrder(savedOrderId, false);
+            if (savedOrderId) {
+                lastToken = sessionStorage.getItem('ebookToken_' + ebookId) || null;
+                lastRedirectUrl = sessionStorage.getItem('ebookRedirect_' + ebookId) || null;
+                cekStatusOrder(savedOrderId, false);
+            }
         }
 
         // ============================================================
@@ -275,6 +279,8 @@
                 }
 
                 sessionStorage.setItem('ebookOrder_' + ebookId, data.orderId);
+                sessionStorage.setItem('ebookToken_' + ebookId, data.token || '');
+                sessionStorage.setItem('ebookRedirect_' + ebookId, data.redirectUrl || '');
                 lastRedirectUrl = data.redirectUrl || null;
                 lastToken = data.token || null;
 
@@ -287,15 +293,7 @@
                     return;
                 }
 
-                if (typeof window.snap === 'undefined') {
-                    var s = document.createElement('script');
-                    s.src = snapConfig.midtransSnapUrl;
-                    s.setAttribute('data-client-key', snapConfig.midtransClientKey);
-                    s.onload = function() { snapPay(data.token); };
-                    document.head.appendChild(s);
-                } else {
-                    snapPay(data.token);
-                }
+                loadSnapThenPay(function() { snapPay(data.token); });
             } catch (error) {
                 console.error('Order error:', error);
                 showBuyMessage('Gagal membuat pesanan. Coba lagi.', 'error');
@@ -375,7 +373,7 @@
         // Tampilkan status menunggu + tombol tampilkan popup lagi + link tab baru (cadangan)
         function showWaitingWithLink() {
             var area = document.getElementById('buyArea');
-            var reopenHtml = (lastToken && typeof window.snap !== 'undefined')
+            var reopenHtml = lastToken
                 ? `<button onclick="reopenSnapPopup()"
                        style="display:inline-block;margin-top:10px;background:linear-gradient(135deg,#e0567a,#c94a6e);color:#fff;border:none;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;">
                        🔄 Tampilkan Popup Pembayaran Lagi
@@ -393,17 +391,43 @@
                     <p style="color:#d4a373;font-weight:600;font-size:14px;margin:0;">⏳ Menunggu pembayaran dikonfirmasi...</p>
                     ${reopenHtml}
                     ${linkHtml}
+                    <p style="margin-top:14px;">
+                        <a href="javascript:void(0)" onclick="batalkanOrder()"
+                           style="color:#8a9e99;font-size:12px;text-decoration:underline;">❌ Batalkan &amp; buat pesanan baru</a>
+                    </p>
                 </div>`;
+        }
+
+        // Muat snap.js bila belum ada, lalu jalankan callback
+        function loadSnapThenPay(callback) {
+            if (typeof window.snap !== 'undefined') { callback(); return; }
+            if (!snapConfig || !snapConfig.midtransEnabled) {
+                showBuyMessage('Pembayaran belum dikonfigurasi. Hubungi admin.', 'error');
+                return;
+            }
+            var s = document.createElement('script');
+            s.src = snapConfig.midtransSnapUrl;
+            s.setAttribute('data-client-key', snapConfig.midtransClientKey);
+            s.onload = callback;
+            document.head.appendChild(s);
         }
 
         // Buka ulang popup Snap dengan token yang sama
         function reopenSnapPopup() {
             if (!lastToken) return;
-            if (typeof window.snap === 'undefined') {
-                showBuyMessage('Popup belum siap. Gunakan link halaman pembayaran di atas.', 'error');
-                return;
-            }
-            snapPay(lastToken);
+            loadSnapThenPay(function () { snapPay(lastToken); });
+        }
+
+        // Batalkan order yang belum dibayar → tampilkan tombol beli lagi
+        function batalkanOrder() {
+            if (!confirm('Batalkan pesanan ini dan buat pesanan baru?')) return;
+            sessionStorage.removeItem('ebookOrder_' + ebookId);
+            sessionStorage.removeItem('ebookToken_' + ebookId);
+            sessionStorage.removeItem('ebookRedirect_' + ebookId);
+            lastToken = null;
+            lastRedirectUrl = null;
+            if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+            renderBuyArea();
         }
 
         // ============================================================
