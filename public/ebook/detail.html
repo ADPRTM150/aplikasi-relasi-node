@@ -139,6 +139,7 @@
         var snapConfig = null;
         var pollTimer = null;
         var pollAttempts = 0;
+        var lastRedirectUrl = null;
 
         // ============================================================
         //  🔥 AMBIL KONFIGURASI (untuk Snap Midtrans)
@@ -273,10 +274,13 @@
                 }
 
                 sessionStorage.setItem('ebookOrder_' + ebookId, data.orderId);
+                lastRedirectUrl = data.redirectUrl || null;
+
+                // Tampilkan status menunggu + link cadangan (kalau popup bermasalah)
+                showWaitingWithLink();
 
                 // Load Snap JS
                 if (!snapConfig || !snapConfig.midtransEnabled) {
-                    showBuyMessage('Pembayaran belum dikonfigurasi. Hubungi admin.', 'error');
                     if (btn) { btn.disabled = false; btn.textContent = '🛒 Beli Sekarang'; }
                     return;
                 }
@@ -349,7 +353,7 @@
                     return;
                 }
                 if (data.status === 'pending') {
-                    showBuyMessage('⏳ Menunggu pembayaran dikonfirmasi...', 'info');
+                    showWaitingWithLink();
                     return;
                 }
                 if (data.status === 'failed') {
@@ -364,6 +368,23 @@
             var area = document.getElementById('buyArea');
             var color = type === 'error' ? '#c94a6e' : (type === 'info' ? '#d4a373' : '#3a7d76');
             area.innerHTML = `<p style="color:${color};font-size:13px;text-align:center;font-weight:600;">${msg}</p>`;
+        }
+
+        // Tampilkan status menunggu + link buka pembayaran di tab baru (cadangan kalau popup gagal)
+        function showWaitingWithLink() {
+            var area = document.getElementById('buyArea');
+            var linkHtml = lastRedirectUrl
+                ? `<a href="${lastRedirectUrl}" target="_blank" rel="noopener"
+                       style="display:inline-block;margin-top:10px;background:linear-gradient(135deg,#3a7d76,#2d655f);color:#fff;border:none;padding:12px 24px;border-radius:50px;font-size:14px;font-weight:600;text-decoration:none;cursor:pointer;">
+                       💳 Buka halaman pembayaran di tab baru
+                   </a>
+                   <p style="color:#8a9e99;font-size:11px;margin-top:8px;">Popup tidak muncul? Klik link di atas untuk membayar lewat halaman penuh.</p>`
+                : '';
+            area.innerHTML = `
+                <div style="text-align:center;">
+                    <p style="color:#d4a373;font-weight:600;font-size:14px;margin:0;">⏳ Menunggu pembayaran dikonfirmasi...</p>
+                    ${linkHtml}
+                </div>`;
         }
 
         // ============================================================
