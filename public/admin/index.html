@@ -2949,12 +2949,12 @@
 
         async function editEbook(id) {
             try {
-                var doc = await db.collection('ebooks').doc(id).get();
-                if (doc.exists) {
-                    openEbookModal({
-                        id: id,
-                        ...doc.data()
-                    });
+                // File URL diambil lewat server (koleksi server-only ebook_files)
+                var result = await apiGet('/api/admin/ebooks/' + id);
+                if (result && result.success) {
+                    openEbookModal(result.ebook);
+                } else {
+                    alert('❌ Gagal memuat data ebook.');
                 }
             } catch (error) {
                 console.error('Error loading ebook:', error);
@@ -3756,8 +3756,8 @@
                 return;
             }
 
-            if (password && password.length < 6) {
-                showSettingsAlert('Password minimal 6 karakter!', 'error');
+            if (password && password.length < 8) {
+                showSettingsAlert('Password minimal 8 karakter!', 'error');
                 return;
             }
 

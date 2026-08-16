@@ -609,6 +609,60 @@ const API_BASE = window.location.origin + "/api";
 console.log("✅ API_BASE:", API_BASE);
 
 // ============================================================
+//  🛡️ KEAMANAN RENDER: ESCAPE & SANITASI HTML
+// ============================================================
+
+// Escape teks untuk ditampilkan aman di dalam template (anti XSS)
+window.escapeHtml = function (s) {
+    if (s === null || s === undefined) return '';
+    return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+};
+
+// Sanitasi HTML konten (whitelist tag teks + class; buang script/iframe/img/event handler)
+window.sanitizeHtml = function (html) {
+    if (!html) return '';
+    var doc = new DOMParser().parseFromString(String(html), 'text/html');
+    var allowed = ['P', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+        'STRONG', 'B', 'EM', 'I', 'U', 'S', 'UL', 'OL', 'LI', 'BR', 'A',
+        'BLOCKQUOTE', 'SPAN', 'MARK', 'DIV', 'HR'];
+
+    function cleanNode(node) {
+        var children = Array.prototype.slice.call(node.childNodes);
+        for (var i = 0; i < children.length; i++) {
+            var child = children[i];
+            if (child.nodeType === 1) {
+                if (allowed.indexOf(child.tagName) !== -1) {
+                    var attrs = Array.prototype.slice.call(child.attributes);
+                    for (var j = 0; j < attrs.length; j++) {
+                        var attr = attrs[j];
+                        // href http(s) untuk link; class untuk styling; selain itu dibuang
+                        if (child.tagName === 'A' && attr.name === 'href' && /^https?:\/\//i.test(attr.value)) continue;
+                        if (attr.name === 'class') continue;
+                        child.removeAttribute(attr.name);
+                    }
+                    cleanNode(child);
+                } else {
+                    // Elemen tidak diizinkan → bongkar, sisakan teksnya
+                    var parent = child.parentNode;
+                    while (child.firstChild) parent.insertBefore(child.firstChild, child);
+                    parent.removeChild(child);
+                }
+            } else if (child.nodeType === 8) {
+                child.parentNode.removeChild(child);
+            }
+        }
+    }
+
+    cleanNode(doc.body);
+    return doc.body.innerHTML;
+};
+
+// ============================================================
 //  🔥 EXPOSE KE GLOBAL
 // ============================================================
 window.API_BASE = API_BASE;

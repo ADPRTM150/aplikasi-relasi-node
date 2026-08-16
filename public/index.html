@@ -281,9 +281,9 @@
                     html += `
                         <div class="recommendation-card" onclick="navigateTo('article', '${doc.id}')">
                             <div class="card-badge">📄 Artikel</div>
-                            <h4>${data.title || 'Judul Artikel'}</h4>
-                            <p>${data.excerpt || ''}</p>
-                            <span class="read-time">${data.readTime || '5 menit'} baca</span>
+                            <h4>${window.escapeHtml(data.title || 'Judul Artikel')}</h4>
+                            <p>${window.escapeHtml(data.excerpt || '')}</p>
+                            <span class="read-time">${window.escapeHtml(data.readTime || '5 menit')} baca</span>
                         </div>
                     `;
                 });
@@ -293,9 +293,9 @@
                     html += `
                         <div class="recommendation-card" onclick="navigateTo('ebook', '${doc.id}')">
                             <div class="card-badge">📘 E-Book</div>
-                            <h4>${data.title || 'Judul E-Book'}</h4>
-                            <p>${data.excerpt || ''}</p>
-                            <span class="badge">${data.category || 'Umum'}</span>
+                            <h4>${window.escapeHtml(data.title || 'Judul E-Book')}</h4>
+                            <p>${window.escapeHtml(data.excerpt || '')}</p>
+                            <span class="badge">${window.escapeHtml(data.category || 'Umum')}</span>
                         </div>
                     `;
                 });

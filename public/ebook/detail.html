@@ -189,10 +189,10 @@
                     : 'Gratis';
 
                 container.innerHTML = `
-                    <span class="kategori">${e.category || 'Lainnya'}</span>
-                    <h1>${e.title}</h1>
+                    <span class="kategori">${window.escapeHtml(e.category || 'Lainnya')}</span>
+                    <h1>${window.escapeHtml(e.title)}</h1>
                     <div class="meta">📅 ${tanggal} · 📄 ${e.pages || 0} halaman · 💰 ${harga}</div>
-                    <div class="content"><p>${e.desc || 'Deskripsi belum tersedia.'}</p></div>
+                    <div class="content"><p>${window.escapeHtml(e.desc || 'Deskripsi belum tersedia.')}</p></div>
                 `;
                 document.title = e.title + ' - QUALITY OF LOVE';
 
@@ -212,16 +212,13 @@
             var price = Number(ebookData.price) || 0;
 
             if (price <= 0) {
-                // 🔥 EBOOK GRATIS — langsung unduh
-                if (ebookData.fileUrl) {
-                    area.innerHTML = `
-                        <button onclick="window.open('${ebookData.fileUrl}', '_blank')"
-                            style="background:linear-gradient(135deg,#3a7d76,#2d655f);color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:16px;font-weight:600;width:100%;cursor:pointer;">
-                            ⬇️ Unduh Ebook (Gratis)
-                        </button>`;
-                } else {
-                    area.innerHTML = '<p style="color:#8a9e99;font-size:13px;text-align:center;">File ebook belum tersedia. Coba lagi nanti.</p>';
-                }
+                // 🔥 EBOOK GRATIS — unduh lewat endpoint server
+                // (server memvalidasi status published & harga, link file tidak terekspos)
+                area.innerHTML = `
+                    <button onclick="window.location.href='/api/public/ebooks/download/${ebookId}'"
+                        style="background:linear-gradient(135deg,#3a7d76,#2d655f);color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:16px;font-weight:600;width:100%;cursor:pointer;">
+                        ⬇️ Unduh Ebook (Gratis)
+                    </button>`;
                 return;
             }
 
@@ -342,11 +339,11 @@
 
                 if (data.status === 'success') {
                     if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-                    if (data.fileUrl) {
+                    if (data.downloadUrl) {
                         document.getElementById('buyArea').innerHTML = `
                             <div style="text-align:center;">
                                 <p style="color:#3a7d76;font-weight:600;font-size:15px;margin-bottom:12px;">✅ Pembayaran berhasil!</p>
-                                <button onclick="window.open('${data.fileUrl}', '_blank')"
+                                <button onclick="window.location.href='${data.downloadUrl}'"
                                     style="background:linear-gradient(135deg,#3a7d76,#2d655f);color:#fff;border:none;padding:14px 28px;border-radius:50px;font-size:16px;font-weight:600;width:100%;cursor:pointer;">
                                     ⬇️ Unduh Ebook
                                 </button>

@@ -200,9 +200,9 @@
                     const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
                     html += `
                         <div class="artikel-card" onclick="bacaArtikel('${doc.id}')">
-                            <span class="kategori">${a.category || 'Lainnya'}</span>
-                            <h3>${a.title}</h3>
-                            <div class="desc">${a.desc || ''}</div>
+                            <span class="kategori">${window.escapeHtml(a.category || 'Lainnya')}</span>
+                            <h3>${window.escapeHtml(a.title)}</h3>
+                            <div class="desc">${window.escapeHtml(a.desc || '')}</div>
                             <div class="meta">📅 ${tanggal}</div>
                         </div>
                     `;
@@ -256,9 +256,9 @@
                         : '🆓 Gratis';
                     html += `
                         <div class="artikel-card" onclick="bacaEbook('${doc.id}')">
-                            <span class="kategori">${e.category || 'Lainnya'}</span>
-                            <h3>${e.title}</h3>
-                            <div class="desc">${e.excerpt || e.desc || ''}</div>
+                            <span class="kategori">${window.escapeHtml(e.category || 'Lainnya')}</span>
+                            <h3>${window.escapeHtml(e.title)}</h3>
+                            <div class="desc">${window.escapeHtml(e.excerpt || e.desc || '')}</div>
                             <div class="meta">📅 ${tanggal} · 📄 ${e.pages || 0} halaman · ${harga}</div>
                         </div>
                     `;

@@ -156,9 +156,9 @@
                     const urlAman = (v.url || '').replace(/'/g, "\\'");
                     html += `
                         <div class="artikel-card" onclick="bukaVideo('${urlAman}')">
-                            <span class="kategori">🎥 Video · ⏱ ${v.duration || '-'}</span>
-                            <h3>${v.title}</h3>
-                            <div class="desc">${v.desc || ''}</div>
+                            <span class="kategori">🎥 Video · ⏱ ${window.escapeHtml(v.duration || '-')}</span>
+                            <h3>${window.escapeHtml(v.title)}</h3>
+                            <div class="desc">${window.escapeHtml(v.desc || '')}</div>
                             <div class="meta">📅 ${tanggal}</div>
                         </div>
                     `;

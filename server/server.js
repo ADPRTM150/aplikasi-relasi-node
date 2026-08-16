@@ -11,7 +11,9 @@ const fs = require('fs');
 // ============================================================
 //  🔥 FIREBASE ADMIN
 // ============================================================
-const admin = require('firebase-admin');
+const { initializeApp, cert } = require('firebase-admin/app');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getAuth } = require('firebase-admin/auth');
 
 // Cek environment variables
 if (!process.env.FIREBASE_PROJECT_ID || !process.env.FIREBASE_CLIENT_EMAIL || !process.env.FIREBASE_PRIVATE_KEY) {
@@ -26,15 +28,15 @@ const serviceAccount = {
     privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
 };
 
-admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+initializeApp({
+    credential: cert(serviceAccount),
     databaseURL: `https://${process.env.FIREBASE_PROJECT_ID}.firebaseio.com`
 });
 
 console.log('✅ Firebase Admin initialized');
 console.log(`📁 Project: ${process.env.FIREBASE_PROJECT_ID}`);
 
-const db = admin.firestore();
+const db = getFirestore();
 
 // ============================================================
 //  🔥 JWT SECRET — auto-generate kalau tidak diset
@@ -82,6 +84,31 @@ function rateLimiter(req, res, next) {
         for (const [key, val] of rateLimitMap) {
             if (now > val.windowStart + RATE_LIMIT_WINDOW) rateLimitMap.delete(key);
         }
+    }
+
+    next();
+}
+
+// Rate limiter khusus pembuatan order ebook (anti spam order pending)
+const orderRateMap = new Map();
+const ORDER_RATE_WINDOW = 10 * 60 * 1000; // 10 menit
+const ORDER_RATE_MAX = 20; // max 20 order per IP per window
+
+function orderRateLimiter(req, res, next) {
+    const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const record = orderRateMap.get(ip);
+
+    if (record && now < record.windowStart + ORDER_RATE_WINDOW) {
+        if (record.count >= ORDER_RATE_MAX) {
+            return res.status(429).json({
+                success: false,
+                message: 'Terlalu banyak pesanan. Coba lagi beberapa menit lagi.'
+            });
+        }
+        record.count++;
+    } else {
+        orderRateMap.set(ip, { count: 1, windowStart: now });
     }
 
     next();
@@ -215,7 +242,7 @@ async function verifyAdminPassword(settings, password) {
         const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
         await db.collection('admin').doc('settings').update({
             passwordHash: hash,
-            password: admin.firestore.FieldValue.delete() // hapus plaintext
+            password: FieldValue.delete() // hapus plaintext
         });
         console.log('🔐 Password admin di-upgrade ke bcrypt hash');
         return true;
@@ -271,7 +298,7 @@ app.post('/api/admin/login', rateLimiter, async (req, res) => {
                 await db.collection('admin').doc('settings').set({
                     email: 'admin@relasi.com',
                     passwordHash: hash,
-                    createdAt: admin.firestore.FieldValue.serverTimestamp()
+                    createdAt: FieldValue.serverTimestamp()
                 });
                 console.log('🔐 Default admin dibuat dengan bcrypt hash');
             }
@@ -384,12 +411,12 @@ app.put('/api/admin/settings', verifyAdminToken, async (req, res) => {
         const { email, password, highlightKeywords } = req.body;
         const data = {
             email: email || 'admin@relasi.com',
-            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            updatedAt: FieldValue.serverTimestamp()
         };
-        if (password && password.length >= 6) {
+        if (password && password.length >= 8) {
             data.passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
             // Hapus plaintext kalau ada
-            data.password = admin.firestore.FieldValue.delete();
+            data.password = FieldValue.delete();
         }
         // Kata kunci highlight untuk fitur Upload Word (admin bisa atur)
         if (Array.isArray(highlightKeywords)) {
@@ -425,7 +452,7 @@ app.get('/api/admin/articles', verifyAdminToken, async (req, res) => {
 
 app.post('/api/admin/articles', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
         const ref = await db.collection('articles').add(data);
         res.json({ success: true, id: ref.id, message: 'Artikel dibuat' });
     } catch (error) {
@@ -452,12 +479,44 @@ app.delete('/api/admin/articles/:id', verifyAdminToken, async (req, res) => {
 });
 
 // --- EBOOKS ---
+// 🔐 Link file ebook disimpan di koleksi server-only (ebook_files)
+//    agar TIDAK bisa dibaca publik lewat Firestore (anti bocor download gratis)
+
+async function getEbookFileUrl(ebookId) {
+    try {
+        const doc = await db.collection('ebook_files').doc(ebookId).get();
+        return doc.exists ? (doc.data().url || '') : '';
+    } catch (e) {
+        return '';
+    }
+}
+
 app.get('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
     try {
         const snapshot = await db.collection('ebooks').orderBy('createdAt', 'desc').get();
+        const fileSnap = await db.collection('ebook_files').get();
+        const fileMap = {};
+        fileSnap.forEach(d => { fileMap[d.id] = d.data().url || ''; });
         const ebooks = [];
-        snapshot.forEach(doc => ebooks.push({ id: doc.id, ...doc.data() }));
+        snapshot.forEach(doc => {
+            const data = doc.data();
+            delete data.fileUrl; // field legacy (dulu publik) tidak dikirim
+            ebooks.push({ id: doc.id, ...data, fileUrl: fileMap[doc.id] || '' });
+        });
         res.json({ success: true, ebooks });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Gagal memuat ebook' });
+    }
+});
+
+app.get('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
+    try {
+        const doc = await db.collection('ebooks').doc(req.params.id).get();
+        if (!doc.exists) return res.status(404).json({ success: false, message: 'Ebook tidak ditemukan' });
+        const data = doc.data();
+        delete data.fileUrl;
+        data.fileUrl = await getEbookFileUrl(req.params.id);
+        res.json({ success: true, ebook: { id: doc.id, ...data } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal memuat ebook' });
     }
@@ -465,8 +524,13 @@ app.get('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
 
 app.post('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const fileUrl = typeof req.body.fileUrl === 'string' ? req.body.fileUrl.trim() : '';
+        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
+        delete data.fileUrl; // jangan simpan di dokumen publik
         const ref = await db.collection('ebooks').add(data);
+        if (fileUrl) {
+            await db.collection('ebook_files').doc(ref.id).set({ url: fileUrl });
+        }
         res.json({ success: true, id: ref.id, message: 'Ebook dibuat' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal membuat ebook' });
@@ -475,7 +539,16 @@ app.post('/api/admin/ebooks', verifyAdminToken, async (req, res) => {
 
 app.put('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
     try {
-        await db.collection('ebooks').doc(req.params.id).update(req.body);
+        const fileUrl = typeof req.body.fileUrl === 'string' ? req.body.fileUrl.trim() : '';
+        const data = { ...req.body };
+        delete data.fileUrl;
+        data.fileUrl = FieldValue.delete(); // hapus field legacy di dokumen publik
+        await db.collection('ebooks').doc(req.params.id).update(data);
+        if (fileUrl) {
+            await db.collection('ebook_files').doc(req.params.id).set({ url: fileUrl });
+        } else {
+            await db.collection('ebook_files').doc(req.params.id).delete().catch(() => {});
+        }
         res.json({ success: true, message: 'Ebook diupdate' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal update ebook' });
@@ -485,6 +558,7 @@ app.put('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
 app.delete('/api/admin/ebooks/:id', verifyAdminToken, async (req, res) => {
     try {
         await db.collection('ebooks').doc(req.params.id).delete();
+        await db.collection('ebook_files').doc(req.params.id).delete().catch(() => {});
         res.json({ success: true, message: 'Ebook dihapus' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Gagal hapus ebook' });
@@ -505,7 +579,7 @@ app.get('/api/admin/videos', verifyAdminToken, async (req, res) => {
 
 app.post('/api/admin/videos', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
         const ref = await db.collection('videos').add(data);
         res.json({ success: true, id: ref.id, message: 'Video dibuat' });
     } catch (error) {
@@ -536,7 +610,7 @@ app.delete('/api/admin/videos/:id', verifyAdminToken, async (req, res) => {
 // ============================================================
 app.post('/api/admin/users', verifyAdminToken, async (req, res) => {
     try {
-        const data = { ...req.body, createdAt: admin.firestore.FieldValue.serverTimestamp() };
+        const data = { ...req.body, createdAt: FieldValue.serverTimestamp() };
         const ref = await db.collection('users').add(data);
         res.json({ success: true, id: ref.id, message: 'User dibuat' });
     } catch (error) {
@@ -627,8 +701,8 @@ function midtransBaseUrl() {
         : 'https://app.sandbox.midtrans.com/snap/v1/transactions';
 }
 
-// 🔥 BUAT ORDER EBOOK (PUBLIK — tanpa auth admin)
-app.post('/api/public/ebooks/order', async (req, res) => {
+// 🔥 BUAT ORDER EBOOK (PUBLIK — tanpa auth admin, dengan rate limit)
+app.post('/api/public/ebooks/order', orderRateLimiter, async (req, res) => {
     try {
         const { ebookId } = req.body || {};
         if (!ebookId) {
@@ -656,7 +730,7 @@ app.post('/api/public/ebooks/order', async (req, res) => {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith('Bearer ')) {
             try {
-                const decoded = await admin.auth().verifyIdToken(authHeader.split('Bearer ')[1]);
+                const decoded = await getAuth().verifyIdToken(authHeader.split('Bearer ')[1]);
                 userId = decoded.uid || '';
                 userEmail = decoded.email || '';
                 userName = decoded.name || (decoded.email || '').split('@')[0] || 'Pengguna';
@@ -676,7 +750,7 @@ app.post('/api/public/ebooks/order', async (req, res) => {
             userId: userId,
             userName: userName,
             userEmail: userEmail,
-            createdAt: admin.firestore.FieldValue.serverTimestamp()
+            createdAt: FieldValue.serverTimestamp()
         });
 
         // Panggil Midtrans Snap API
@@ -736,12 +810,46 @@ app.get('/api/public/ebooks/order/:orderId', async (req, res) => {
             price: order.price
         };
         if (order.status === 'success') {
-            const ebookDoc = await db.collection('ebooks').doc(order.ebookId).get();
-            result.fileUrl = ebookDoc.exists ? (ebookDoc.data().fileUrl || '') : '';
+            // Link unduh lewat endpoint server (cek ulang status order di sana)
+            result.downloadUrl = '/api/download/ebook/' + orderId;
         }
         res.json(result);
     } catch (error) {
         console.error('Get order error:', error);
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+    }
+});
+
+// 🔥 UNDUH EBOOK GRATIS (PUBLIK) — server cek status, lalu redirect ke file
+app.get('/api/public/ebooks/download/:ebookId', async (req, res) => {
+    try {
+        const doc = await db.collection('ebooks').doc(req.params.ebookId).get();
+        if (!doc.exists || doc.data().status !== 'published') {
+            return res.status(404).json({ success: false, message: 'Ebook tidak ditemukan' });
+        }
+        if ((Number(doc.data().price) || 0) > 0) {
+            return res.status(403).json({ success: false, message: 'Ebook ini berbayar — selesaikan pembayaran dulu' });
+        }
+        const url = await getEbookFileUrl(req.params.ebookId);
+        if (!url) return res.status(404).json({ success: false, message: 'File belum tersedia' });
+        res.redirect(302, url);
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
+    }
+});
+
+// 🔥 UNDUH EBOOK BERBAYAR — hanya untuk order yang sukses dibayar
+app.get('/api/download/ebook/:orderId', async (req, res) => {
+    try {
+        const doc = await db.collection('orders').doc(req.params.orderId).get();
+        if (!doc.exists || doc.data().status !== 'success') {
+            return res.status(403).json({ success: false, message: 'Pembayaran belum selesai atau order tidak valid' });
+        }
+        const order = doc.data();
+        const url = await getEbookFileUrl(order.ebookId);
+        if (!url) return res.status(404).json({ success: false, message: 'File belum tersedia' });
+        res.redirect(302, url);
+    } catch (error) {
         res.status(500).json({ success: false, message: 'Terjadi kesalahan server' });
     }
 });
@@ -787,7 +895,7 @@ app.post('/api/webhooks/midtrans', async (req, res) => {
                     status: newStatus,
                     midtransStatus: transactionStatus,
                     paymentType: String(body.payment_type || ''),
-                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                    updatedAt: FieldValue.serverTimestamp()
                 });
             }
 
@@ -802,7 +910,7 @@ app.post('/api/webhooks/midtrans', async (req, res) => {
                         type: 'ebook_purchased',
                         icon: '📚',
                         priority: 'high',
-                        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                        timestamp: FieldValue.serverTimestamp(),
                         details: {
                             ebookId: order.ebookId || 'unknown',
                             ebookTitle: order.title || 'Ebook',
@@ -856,7 +964,7 @@ const verifyFirebaseToken = async (req, res, next) => {
     const idToken = authHeader.split('Bearer ')[1];
 
     try {
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
+        const decodedToken = await getAuth().verifyIdToken(idToken);
         req.user = decodedToken;
         next();
     } catch (error) {
@@ -903,7 +1011,7 @@ app.post('/api/wellness/start', verifyFirebaseToken, async (req, res) => {
         const testData = {
             userId,
             role: role || 'user',
-            startedAt: admin.firestore.FieldValue.serverTimestamp(),
+            startedAt: FieldValue.serverTimestamp(),
             userCompleted: false,
             partnerCompleted: false,
             userAnswers: {},
@@ -1036,7 +1144,7 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
         const updateData = {
             [`${role}Answers`]: validAnswers,
             [`${role}Completed`]: true,
-            [`${role}CompletedAt`]: admin.firestore.FieldValue.serverTimestamp()
+            [`${role}CompletedAt`]: FieldValue.serverTimestamp()
         };
 
         if (role === 'partner') {
@@ -1050,7 +1158,7 @@ app.post('/api/wellness/submit', verifyFirebaseToken, async (req, res) => {
             const userAnswers = role === 'user' ? validAnswers : testData.userAnswers;
             const partnerAnswers = role === 'partner' ? validAnswers : testData.partnerAnswers;
             updateData.results = calculateWellnessResults(userAnswers, partnerAnswers);
-            updateData.completedAt = admin.firestore.FieldValue.serverTimestamp();
+            updateData.completedAt = FieldValue.serverTimestamp();
         }
 
         await testRef.update(updateData);

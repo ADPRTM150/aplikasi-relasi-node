@@ -173,18 +173,6 @@
         // ============================================================
         //  LOGIN ADMIN
         // ============================================================
-        function getAdminSettings() {
-            var saved = localStorage.getItem('adminSettings');
-            if (saved) {
-                try {
-                    return JSON.parse(saved);
-                } catch (e) {
-                    return { email: 'admin@relasi.com', password: 'admin123' };
-                }
-            }
-            return { email: 'admin@relasi.com', password: 'admin123' };
-        }
-
         function loginAdmin(e) {
             e.preventDefault();
 
@@ -229,24 +217,10 @@
                 console.error('Login error:', err);
                 btn.disabled = false;
                 btn.innerHTML = '<span>🚪</span> Masuk Dashboard';
-                // Fallback ke cara lama kalau server error
-                fallbackLogin(email, password);
-            });
-        }
-
-        // Fallback login kalau server tidak tersedia
-        function fallbackLogin(email, password) {
-            var settings = getAdminSettings();
-            if (email === settings.email && password === settings.password) {
-                localStorage.setItem('isAdmin', 'true');
-                localStorage.setItem('adminEmail', email);
-                localStorage.setItem('adminName', email.split('@')[0] || 'Admin');
-                window.location.href = '/admin';
-            } else {
-                errorText.textContent = 'Email atau password salah. Coba lagi!';
+                errorText.textContent = 'Terjadi kesalahan server. Coba lagi.';
                 errorDiv.classList.add('show');
                 setTimeout(function() { errorDiv.classList.remove('show'); }, 4000);
-            }
+            });
         }
     </script>
 

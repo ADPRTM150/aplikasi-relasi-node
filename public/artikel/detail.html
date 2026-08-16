@@ -188,10 +188,10 @@
                 }) : '-';
 
                 container.innerHTML = `
-                    <span class="kategori">${a.category || 'Lainnya'}</span>
-                    <h1>${a.title}</h1>
+                    <span class="kategori">${window.escapeHtml(a.category || 'Lainnya')}</span>
+                    <h1>${window.escapeHtml(a.title)}</h1>
                     <div class="meta">📅 ${tanggal}</div>
-                    <div class="content">${a.content || 'Konten belum tersedia.'}</div>
+                    <div class="content">${window.sanitizeHtml(a.content) || 'Konten belum tersedia.'}</div>
                 `;
 
                 document.title = a.title + ' - QUALITY OF LOVE';
