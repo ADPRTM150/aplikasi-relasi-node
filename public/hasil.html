@@ -864,7 +864,7 @@
     </div>
 
     <!-- ===== BOTTOM NAV ===== -->
-    <div class="bottom-nav">
+    <div class="bottom-nav" id="bottomNav">
         <a href="/">
             <span class="nav-icon">🏠</span>
             Beranda
@@ -890,6 +890,16 @@
             Profil
         </a>
     </div>
+
+    <script>
+        // ============================================================
+        //  🔥 MODE EMBED (di dalam halaman Profil): sembunyikan navbar
+        // ============================================================
+        if (new URLSearchParams(window.location.search).get('embed') === '1') {
+            var bn = document.getElementById('bottomNav');
+            if (bn) bn.style.display = 'none';
+        }
+    </script>
 
     <script>
         // ============================================================
