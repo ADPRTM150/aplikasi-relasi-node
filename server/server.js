@@ -248,11 +248,11 @@ app.post('/api/admin/login', rateLimiter, async (req, res) => {
                 validCredentials = await verifyAdminPassword(settings, password);
             } else {
                 // Default credentials — langsung hash saat simpan
-                if (email === 'admin@relasi.com' && password === 'admin123') {
+                if (email === 'admin@qualityoflove.com' && password === 'admin123') {
                     validCredentials = true;
                     const hash = await bcrypt.hash('admin123', BCRYPT_ROUNDS);
                     await db.collection('admin').doc('settings').set({
-                        email: 'admin@relasi.com',
+                        email: 'admin@qualityoflove.com',
                         passwordHash: hash,
                         createdAt: admin.firestore.FieldValue.serverTimestamp()
                     });

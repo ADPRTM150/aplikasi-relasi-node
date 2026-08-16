@@ -25,7 +25,7 @@
 
         <!-- ===== HEADER ===== -->
         <div class="header">
-            <div class="logo"><strong>QUALITY OF LOVE</strong>🌱</div>
+            <div class="logo"><a href="/"><img src="/img/logo.svg" alt="QUALITY OF LOVE" style="height:40px;display:block;" /></a></div>
             <div style="display:flex;align-items:center;gap:10px;">
                 <span class="badge">Beta</span>
                 <div class="user-area" id="userArea">
@@ -63,6 +63,10 @@
             <a href="/artikel?tab=ebook">
                 <span class="nav-icon">📚</span>
                 Ebook
+            </a>
+            <a href="/artikel?tab=video">
+                <span class="nav-icon">🎥</span>
+                Video
             </a>
         </div>
 
@@ -184,7 +188,6 @@
                 }) : '-';
 
                 container.innerHTML = `
-                    <div class="thumb">${a.thumb || '📰'}</div>
                     <span class="kategori">${a.category || 'Lainnya'}</span>
                     <h1>${a.title}</h1>
                     <div class="meta">📅 ${tanggal}</div>
