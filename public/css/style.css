@@ -4322,57 +4322,28 @@ body.love-page {
     margin: 14px 0 6px;
 }
 
-.ring-wrap {
-    position: relative;
-    width: 96px;
-    height: 96px;
+.score-block {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    min-width: 96px;
     flex-shrink: 0;
 }
 
-.ring-svg {
-    width: 96px;
-    height: 96px;
-    transform: rotate(-90deg);
-}
-
-.ring-bg {
-    fill: none;
-    stroke: #eef3f1;
-    stroke-width: 9;
-}
-
-.ring-fg {
-    fill: none;
-    stroke: url(#riwayatGrad);
-    stroke-width: 9;
-    stroke-linecap: round;
-    transition: stroke-dashoffset 1.4s cubic-bezier(.22, .61, .36, 1);
-}
-
-.ring-center {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    gap: 1px;
-}
-
-.ring-center .number {
-    font-size: 26px;
+.score-block .number {
+    font-size: 46px;
     font-weight: 800;
-    color: #1d3b36;
     line-height: 1;
+    background: linear-gradient(135deg, #3a7d76, #e0567a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.ring-center .label {
-    font-size: 11px;
+.score-block .label {
+    font-size: 16px;
+    font-weight: 700;
     color: #5a6f6a;
-    font-weight: 600;
 }
 
 .hero-info {

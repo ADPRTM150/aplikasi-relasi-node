@@ -493,21 +493,9 @@ async function tampilkanRiwayat() {
                     </div>
 
                     <div class="riwayat-hero">
-                        <div class="ring-wrap">
-                            <svg class="ring-svg" viewBox="0 0 120 120">
-                                <defs>
-                                    <linearGradient id="riwayatGrad" x1="0" y1="0" x2="1" y2="1">
-                                        <stop offset="0" stop-color="#3a7d76"></stop>
-                                        <stop offset="1" stop-color="#e0567a"></stop>
-                                    </linearGradient>
-                                </defs>
-                                <circle class="ring-bg" cx="60" cy="60" r="52"></circle>
-                                <circle class="ring-fg" id="riwayatRingFg" cx="60" cy="60" r="52"></circle>
-                            </svg>
-                            <div class="ring-center">
-                                <span class="number" id="riwayatScoreNum">0</span>
-                                <span class="label">%</span>
-                            </div>
+                        <div class="score-block">
+                            <span class="number" id="riwayatScoreNum">0</span>
+                            <span class="label">%</span>
                         </div>
                         <div class="hero-info">
                             <span class="category-pill">${results.category || 'Belum Terukur'}</span>
@@ -543,17 +531,6 @@ async function tampilkanRiwayat() {
             var scoreEl = document.getElementById('riwayatScoreNum');
             if (scoreEl && scoreVal > 0) {
                 animateRiwayatScore(scoreEl, scoreVal);
-            }
-
-            // ⭕ Animate ring progres
-            var ring = document.getElementById('riwayatRingFg');
-            if (ring) {
-                var C = 2 * Math.PI * 52;
-                ring.style.strokeDasharray = C;
-                ring.style.strokeDashoffset = C;
-                setTimeout(function () {
-                    ring.style.strokeDashoffset = C * (1 - Math.min(scoreVal, 100) / 100);
-                }, 60);
             }
 
         } else {
