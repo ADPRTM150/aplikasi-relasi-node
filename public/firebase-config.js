@@ -517,19 +517,16 @@ async function logEbookPurchased(ebook, price) {
 //  🔥 FUNGSI LOG LOVE LANGUAGE TEST
 // ============================================================
 async function logLoveLanguageTest(testData) {
-    const user = auth.currentUser;
-    if (user) {
-        await logUserActivity({
-            type: 'love_language_test',
-            icon: '💕',
-            priority: 'high',
-            details: {
-                primary: testData.primary || 'N/A',
-                secondary: testData.secondary || 'N/A',
-                testId: testData.id || 'unknown'
-            }
-        });
-    }
+    return await logActivity(
+        "love_language_test",
+        "💕",
+        "high",
+        {
+            primary: testData.primary || 'N/A',
+            secondary: testData.secondary || 'N/A',
+            testId: testData.id || 'unknown'
+        }
+    );
 }
 
 // Ekspor ke global

@@ -853,15 +853,6 @@
 
             try {
                 var userRef = db.collection('users').doc(currentUser.uid);
-                var llRef = userRef.collection('love_language_results');
-                
-                await llRef.add({
-                    ...data,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    userEmail: currentUser.email,
-                    userName: currentUser.displayName || 'Pengguna',
-                    userUid: currentUser.uid
-                });
 
                 await userRef.update({
                     loveLanguage: {
@@ -886,31 +877,36 @@
 
                 // ============================================
                 //  🔥 LOG AKTIVITAS LOVE LANGUAGE TEST
+                //  (try/catch terpisah: gagal log TIDAK membatalkan save)
                 // ============================================
-                if (window.logLoveLanguageTest) {
-                    await window.logLoveLanguageTest({
-                        primary: data.primary || 'N/A',
-                        secondary: data.secondary || 'N/A',
-                        id: 'll_' + Date.now()
-                    });
-                    console.log('✅ Love language test activity logged!');
-                } else {
-                    console.warn('⚠️ logLoveLanguageTest tidak tersedia, menggunakan fallback');
-                    await db.collection('activities').add({
-                        userId: currentUser.uid,
-                        userEmail: currentUser.email || '-',
-                        userName: currentUser.displayName || 'Pengguna',
-                        type: 'love_language_test',
-                        icon: '💕',
-                        priority: 'high',
-                        timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-                        details: {
+                try {
+                    if (window.logLoveLanguageTest) {
+                        await window.logLoveLanguageTest({
                             primary: data.primary || 'N/A',
                             secondary: data.secondary || 'N/A',
-                            testId: 'll_' + Date.now()
-                        }
-                    });
-                    console.log('✅ Love language test activity logged (fallback)!');
+                            id: 'll_' + Date.now()
+                        });
+                        console.log('✅ Love language test activity logged!');
+                    } else {
+                        console.warn('⚠️ logLoveLanguageTest tidak tersedia, menggunakan fallback');
+                        await db.collection('activities').add({
+                            userId: currentUser.uid,
+                            userEmail: currentUser.email || '-',
+                            userName: currentUser.displayName || 'Pengguna',
+                            type: 'love_language_test',
+                            icon: '💕',
+                            priority: 'high',
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                            details: {
+                                primary: data.primary || 'N/A',
+                                secondary: data.secondary || 'N/A',
+                                testId: 'll_' + Date.now()
+                            }
+                        });
+                        console.log('✅ Love language test activity logged (fallback)!');
+                    }
+                } catch (logError) {
+                    console.warn('⚠️ Gagal log aktivitas (save utama tetap aman):', logError);
                 }
 
                 return true;
