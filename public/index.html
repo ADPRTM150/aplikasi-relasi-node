@@ -291,22 +291,33 @@
                     const data = doc.data();
                     html += `
                         <div class="recommendation-card" onclick="navigateTo('article', '${doc.id}')">
-                            <div class="card-badge">📄 Artikel</div>
+                            <div class="rec-icon">📄</div>
+                            <span class="rec-badge">Artikel</span>
                             <h4>${window.escapeHtml(data.title || 'Judul Artikel')}</h4>
                             <p>${window.escapeHtml(data.excerpt || '')}</p>
-                            <span class="read-time">${window.escapeHtml(data.readTime || '5 menit')} baca</span>
+                            <div class="rec-footer">
+                                <span>⏱ ${window.escapeHtml(data.readTime || '5 menit')} baca</span>
+                                <span class="rec-arrow">→</span>
+                            </div>
                         </div>
                     `;
                 });
 
                 ebooksSnapshot.forEach(doc => {
                     const data = doc.data();
+                    const hargaTeks = (Number(data.price) || 0) === 0
+                        ? '🆓 Gratis'
+                        : '💰 Rp ' + Number(data.price).toLocaleString('id-ID');
                     html += `
                         <div class="recommendation-card" onclick="navigateTo('ebook', '${doc.id}')">
-                            <div class="card-badge">📘 E-Book</div>
+                            <div class="rec-icon">📘</div>
+                            <span class="rec-badge">E-Book</span>
                             <h4>${window.escapeHtml(data.title || 'Judul E-Book')}</h4>
                             <p>${window.escapeHtml(data.excerpt || '')}</p>
-                            <span class="badge">${window.escapeHtml(data.category || 'Umum')}</span>
+                            <div class="rec-footer">
+                                <span>${hargaTeks}</span>
+                                <span class="rec-arrow">→</span>
+                            </div>
                         </div>
                     `;
                 });
