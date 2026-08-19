@@ -687,7 +687,7 @@ async function tampilkanRiwayat() {
             return db.collection('wellness_tests')
                 .where('userCompleted', '==', true)
                 .orderBy('completedAt', 'desc')
-                .limit(20)
+                .limit(50)
                 .get()
                 .then(function (snapshot) {
                     var found = null;
@@ -699,20 +699,23 @@ async function tampilkanRiwayat() {
                         }
                     });
                     if (found) return found;
+                    // 🔥 Cari sebagai partner — filter di JS, jangan cuma tes pertama
                     return db.collection('wellness_tests')
                         .where('partnerCompleted', '==', true)
                         .where('userCompleted', '==', true)
                         .orderBy('completedAt', 'desc')
-                        .limit(1)
+                        .limit(50)
                         .get()
                         .then(function (snap2) {
-                            if (snap2.empty) return null;
-                            var doc = snap2.docs[0];
-                            var d = doc.data();
-                            if (d.partnerUserId === uid && d.userId) {
-                                return { testId: doc.id, partnerUserId: d.userId };
-                            }
-                            return null;
+                            var foundPartner = null;
+                            snap2.forEach(function (doc) {
+                                if (foundPartner) return;
+                                var d = doc.data();
+                                if (d.partnerUserId === uid && d.userId) {
+                                    foundPartner = { testId: doc.id, partnerUserId: d.userId };
+                                }
+                            });
+                            return foundPartner;
                         });
                 })
                 .catch(function (err) {
