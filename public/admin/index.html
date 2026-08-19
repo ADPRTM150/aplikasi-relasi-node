@@ -4077,7 +4077,7 @@
             tbody.innerHTML = html;
         }
 
-        function liatBuktiChallenge(userId, date) {
+        function lihatBuktiChallenge(userId, date) {
             db.collection('users').doc(userId).collection('challenge_progress').doc(date).get()
                 .then(function (doc) {
                     if (!doc.exists) { alert('Data tidak ditemukan.'); return; }
