@@ -397,7 +397,7 @@
                     html += '<div class="timeline-reflection">💭 "' + escapeHtml(e.reflection) + '"</div>';
                 }
                 if (e.proofBase64) {
-                    html += '<div style="margin-top:10px;"><img src="' + e.proofBase64 + '" alt="Bukti tantangan" class="proof-img" /></div>';
+                    html += '<div style="margin-top:10px;"><img src="' + e.proofBase64 + '" alt="Bukti tantangan" class="proof-img" onclick="this.classList.toggle(\'proof-img-zoom\')" /></div>';
                 }
                 html += '</div>';
             });
