@@ -702,7 +702,7 @@ app.get('/api/admin/challenges', verifyAdminToken, async (req, res) => {
         let todayCount = 0;
         let proofCount = 0;
         let reflectionCount = 0;
-        const latest = [];
+        const entries = [];
 
         snapshot.forEach(doc => {
             const d = doc.data();
@@ -718,17 +718,17 @@ app.get('/api/admin/challenges', verifyAdminToken, async (req, res) => {
             if (d.category) categories[d.category] = (categories[d.category] || 0) + 1;
             total++;
             if (d.date === todayWIB) todayCount++;
-            latest.push({
+            entries.push({
                 userId,
                 date: d.date || '',
                 challengeId: d.challengeId || '',
                 category: d.category || '',
-                hasProof: !!d.proofBase64,
-                hasReflection: !!d.reflection
+                reflection: (d.reflection || '').slice(0, 200),
+                hasProof: !!d.proofBase64
             });
         });
 
-        latest.sort((a, b) => (a.date < b.date ? 1 : -1));
+        entries.sort((a, b) => (a.date < b.date ? 1 : -1));
 
         // Per user: total, streak (hari beruntun dari tanggal selesai), bukti, terakhir
         const userList = Object.values(users).map(u => {
@@ -760,7 +760,7 @@ app.get('/api/admin/challenges', verifyAdminToken, async (req, res) => {
             reflectionCount,
             categories,
             users: userList,
-            latest: latest.slice(0, 10)
+            entries: entries.slice(0, 100)
         });
     } catch (error) {
         console.error('❌ Challenge stats error:', error);

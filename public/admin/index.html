@@ -1255,29 +1255,29 @@
                         </button>
                     </div>
                 </div>
-                <div class="stats-grid" style="margin-bottom:16px;">
-                    <div class="stat-card">
+                <div class="stats-grid" style="margin-bottom:8px;">
+                    <div class="stat-card" style="cursor:pointer;" onclick="filterChallenges('all')" title="Klik untuk melihat semua entri">
                         <div class="stat-icon green"><span>🎯</span></div>
                         <div class="stat-info">
                             <div class="number" id="statChallengeTotal">0</div>
                             <div class="label">Total Selesai</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="cursor:pointer;" onclick="filterChallenges('today')" title="Klik untuk melihat entri hari ini">
                         <div class="stat-icon pink"><span>📅</span></div>
                         <div class="stat-info">
                             <div class="number" id="statChallengeToday">0</div>
                             <div class="label">Selesai Hari Ini</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="cursor:pointer;" onclick="filterChallenges('proof')" title="Klik untuk melihat entri dengan foto bukti">
                         <div class="stat-icon purple"><span>📸</span></div>
                         <div class="stat-info">
                             <div class="number" id="statChallengeProofs">0</div>
                             <div class="label">Foto Bukti</div>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="cursor:pointer;" onclick="filterChallenges('reflection')" title="Klik untuk melihat entri dengan refleksi">
                         <div class="stat-icon orange"><span>💭</span></div>
                         <div class="stat-info">
                             <div class="number" id="statChallengeReflections">0</div>
@@ -1285,6 +1285,7 @@
                         </div>
                     </div>
                 </div>
+                <p style="font-size:11px;color:#8a9a95;margin:0 0 14px;">👆 Klik kartu statistik untuk memfilter daftar entri di bawah</p>
                 <div class="table-wrapper">
                     <table>
                         <thead>
@@ -1297,6 +1298,28 @@
                             </tr>
                         </thead>
                         <tbody id="challengeTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-header" style="margin-top:20px;" id="challengeEntriesSection">
+                    <h3><span>📋</span> Detail Entri Tantangan</h3>
+                    <span class="badge-count" id="challengeEntryCount">0 entri</span>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>User</th>
+                                <th>Kategori</th>
+                                <th>Refleksi</th>
+                                <th style="text-align:center;">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="challengeEntriesBody">
                             <tr>
                                 <td colspan="5" class="loading-text">⏳ Memuat data...</td>
                             </tr>
@@ -3980,10 +4003,117 @@
                     });
                 }
                 tbody.innerHTML = html;
+
+                // 🔥 Simpan cache + render daftar entri detail
+                challengeNamesCache = names;
+                challengeStatsCache = result;
+                renderChallengeEntries();
             } catch (error) {
                 tbody.innerHTML = '<tr><td colspan="5" class="loading-text">⚠️ Gagal memuat data tantangan. <button class="btn-small outline" onclick="loadChallengeStats()">🔄 Coba Lagi</button></td></tr>';
             }
         }
+
+        // ============================================================
+        //  📋 ENTRI TANTANGAN — FILTER + DETAIL + BUKTI FOTO
+        // ============================================================
+        var challengeFilter = 'all';
+        var challengeStatsCache = null;
+        var challengeNamesCache = {};
+
+        var CHALLENGE_CAT_MAP = {
+            komunikasi: 'Komunikasi 💬',
+            kepercayaan: 'Kepercayaan 🔒',
+            resolusi_konflik: 'Resolusi Konflik 🤝',
+            dukungan_emosional: 'Dukungan Emosional ❤️',
+            waktu_berkualitas: 'Waktu Berkualitas ⏰',
+            komitmen: 'Komitmen 🎯',
+            penghargaan: 'Penghargaan 🌟',
+            keuangan: 'Keuangan 💰'
+        };
+
+        function filterChallenges(f) {
+            challengeFilter = f;
+            renderChallengeEntries();
+            var sec = document.getElementById('challengeEntriesSection');
+            if (sec && sec.scrollIntoView) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function renderChallengeEntries() {
+            var tbody = document.getElementById('challengeEntriesBody');
+            if (!tbody) return;
+            var all = (challengeStatsCache && challengeStatsCache.entries) || [];
+            var todayWIB = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+
+            var list = all.filter(function (e) {
+                if (challengeFilter === 'today') return e.date === todayWIB;
+                if (challengeFilter === 'proof') return e.hasProof;
+                if (challengeFilter === 'reflection') return !!e.reflection;
+                return true;
+            });
+
+            document.getElementById('challengeEntryCount').textContent = list.length + ' entri';
+
+            var html = '';
+            if (!list.length) {
+                html = '<tr><td colspan="5" class="empty-state">Tidak ada entri untuk filter ini.</td></tr>';
+            } else {
+                list.forEach(function (e) {
+                    var tanggal = e.date ? new Date(e.date + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                    var catLabel = CHALLENGE_CAT_MAP[e.category] || e.category || '-';
+                    var refleksi = e.reflection ? window.escapeHtml(e.reflection) : '-';
+                    var aksi = e.hasProof
+                        ? '<button class="btn-edit" onclick="lihatBuktiChallenge(\'' + e.userId + '\', \'' + e.date + '\')"><span>📸</span> Bukti</button>'
+                        : '-';
+                    html += `
+                    <tr>
+                        <td>${tanggal}</td>
+                        <td><strong>${challengeNamesCache[e.userId] || e.userId}</strong></td>
+                        <td>${catLabel}</td>
+                        <td style="max-width:280px;">${refleksi}</td>
+                        <td style="text-align:center;">${aksi}</td>
+                    </tr>`;
+                });
+            }
+            tbody.innerHTML = html;
+        }
+
+        function liatBuktiChallenge(userId, date) {
+            db.collection('users').doc(userId).collection('challenge_progress').doc(date).get()
+                .then(function (doc) {
+                    if (!doc.exists) { alert('Data tidak ditemukan.'); return; }
+                    var d = doc.data();
+                    var modal = document.createElement('div');
+                    modal.id = 'buktiModal';
+                    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+                    modal.onclick = function (e) { if (e.target === modal) tutupBuktiModal(); };
+                    var imgHtml = d.proofBase64
+                        ? '<img src="' + d.proofBase64 + '" style="max-width:100%;max-height:60vh;border-radius:14px;display:block;margin:0 auto 12px;" alt="Bukti tantangan" />'
+                        : '<p style="color:#999;text-align:center;">Tidak ada foto.</p>';
+                    modal.innerHTML =
+                        '<div style="background:#fff;border-radius:20px;padding:20px;max-width:520px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.4);">' +
+                        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px;">' +
+                        '<strong style="color:#1d3b36;font-size:14px;">📸 Bukti Tantangan — ' + window.escapeHtml(date || '-') + '</strong>' +
+                        '<button onclick="tutupBuktiModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>' +
+                        '</div>' +
+                        imgHtml +
+                        (d.reflection ? '<p style="font-size:13px;color:#5a6f6a;font-style:italic;">💭 "' + window.escapeHtml(d.reflection) + '"</p>' : '') +
+                        '</div>';
+                    document.body.appendChild(modal);
+                })
+                .catch(function (err) {
+                    console.error('❌ Gagal load bukti:', err);
+                    alert('⚠️ Gagal memuat bukti.');
+                });
+        }
+
+        function tutupBuktiModal() {
+            var m = document.getElementById('buktiModal');
+            if (m) m.remove();
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') tutupBuktiModal();
+        });
 
         // ============================================================
         //  INIT
