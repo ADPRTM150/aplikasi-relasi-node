@@ -42,9 +42,7 @@ Aplikasi relasi pasangan — bantu pasangan mengenali cinta lewat **Love Languag
 │   │   └── wellness-questions.js  # Bank soal wellness check
 │   └── img/               # Logo + favicon
 ├── vercel.json            # Konfigurasi deploy Vercel
-├── firebase.json          # Rules & indexes Firestore + Storage
-├── firestore.rules        # Rules keamanan Firestore
-├── storage.rules          # Rules Firebase Storage (foto bukti tantangan)
+├── firebase.json          # Rules & indexes Firestore
 └── .env                   # Credentials server (TIDAK di-commit)
 ```
 
@@ -83,19 +81,19 @@ node scripts/seed-challenges.js   # idempotent — aman dijalankan ulang
 
 Progress tantangan user tersimpan di subcollection `users/{userId}/challenge_progress/{YYYY-MM-DD}`.
 
-## 🚦 Deploy Rules (Firestore + Storage)
+## 🚦 Deploy Firestore Rules
 
-Setelah mengubah `firestore.rules` / `storage.rules`, deploy dengan salah satu cara:
+Setelah mengubah `firestore.rules`, deploy dengan salah satu cara:
 
 - CLI (firebase-tools sudah ada di devDependencies):
   ```bash
-  npx firebase deploy --only firestore:rules,storage
+  npx firebase deploy --only firestore:rules
   ```
-- Atau manual: Firebase Console → Firestore Database → Rules, dan Storage → Rules → paste isi file-nya → Publish
+- Atau manual: Firebase Console → Firestore Database → Rules → paste isi `firestore.rules` → Publish
 
-> ⚠️ Firebase Storage harus diaktifkan sekali saja: Console → Storage → **Get Started** (buat bucket default). Fitur kirim bukti foto butuh ini.
->
 > Tanpa rules ter-deploy, fitur tantangan tetap menampilkan kartu (pakai bank fallback) tapi penyimpanan progress akan ditolak.
+>
+> 📸 Foto bukti tantangan disimpan sebagai **base64 di dokumen progress Firestore** (tanpa Firebase Storage — tidak butuh plan berbayar).
 
 ## 🌐 API Endpoints
 

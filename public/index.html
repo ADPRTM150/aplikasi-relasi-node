@@ -24,7 +24,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="/firebase-config.js"></script>
 </head>
 
@@ -808,7 +807,7 @@ async function tampilkanRiwayat() {
                     var list = [];
                     snap.forEach(function (doc) {
                         var d = doc.data();
-                        list.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection || '', proofUrl: d.proofUrl || '' });
+                        list.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection || '', proofBase64: d.proofBase64 || '' });
                     });
                     return list;
                 })
@@ -958,9 +957,9 @@ async function tampilkanRiwayat() {
                 }
 
                 // ── BUKTI FOTO ──
-                if (s.progress.proofUrl) {
+                if (s.progress.proofBase64) {
                     html += '<div class="challenge-proof">' +
-                        '<a href="' + escapeHtml(s.progress.proofUrl) + '" target="_blank" rel="noopener"><img src="' + escapeHtml(s.progress.proofUrl) + '" alt="Bukti tantangan" class="proof-thumb" /></a>' +
+                        '<img src="' + s.progress.proofBase64 + '" alt="Bukti tantangan" class="proof-thumb" onclick="this.classList.toggle(\'proof-zoom\')" />' +
                         '<button class="btn-share" onclick="document.getElementById(\'proofInput\').click()">🔄 Ganti Bukti</button>' +
                         '</div>';
                 } else {
@@ -1142,8 +1141,8 @@ async function tampilkanRiwayat() {
                 });
         }
 
-        // ─── KOMPRES GAMBAR (canvas, max 900px) ───
-        function compressImage(file, maxDim, quality) {
+        // ─── KOMPRES GAMBAR JADI DATAURL (canvas, max 900px) ───
+        function compressImageToDataUrl(file, maxDim, quality) {
             return new Promise(function (resolve, reject) {
                 var reader = new FileReader();
                 reader.onload = function (e) {
@@ -1157,13 +1156,7 @@ async function tampilkanRiwayat() {
                         canvas.height = h;
                         var ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, w, h);
-                        canvas.toBlob(function (blob) {
-                            if (blob) {
-                                resolve(blob);
-                            } else {
-                                reject(new Error('Gagal kompres gambar'));
-                            }
-                        }, 'image/jpeg', quality);
+                        resolve(canvas.toDataURL('image/jpeg', quality));
                     };
                     img.onerror = function () { reject(new Error('Gagal baca gambar')); };
                     img.src = e.target.result;
@@ -1173,7 +1166,7 @@ async function tampilkanRiwayat() {
             });
         }
 
-        // ─── UPLOAD BUKTI FOTO TANTANGAN ───
+        // ─── SIMPAN BUKTI FOTO TANTANGAN (base64 di Firestore — gratis) ───
         function uploadBukti(fileInput) {
             var user = firebase.auth().currentUser;
             if (!user || !fileInput.files || !fileInput.files.length) return;
@@ -1184,37 +1177,26 @@ async function tampilkanRiwayat() {
                 return;
             }
 
-            compressImage(file, 900, 0.8).then(function (blob) {
-                var storageRef = firebase.storage().ref('challenge_proofs/' + user.uid + '/' + challengeState.todayKey + '.jpg');
-                var uploadTask = storageRef.put(blob, { contentType: 'image/jpeg' });
-                uploadTask.on('state_changed', null,
-                    function (err) {
-                        console.error('❌ Upload bukti gagal:', err);
-                        alert('⚠️ Gagal mengunggah bukti. Coba lagi.');
+            compressImageToDataUrl(file, 900, 0.7).then(function (dataUrl) {
+                if (dataUrl.length > 700000) {
+                    alert('⚠️ Foto terlalu besar. Coba foto lain yang lebih sederhana.');
+                    fileInput.value = '';
+                    return;
+                }
+                return db.collection('users').doc(user.uid)
+                    .collection('challenge_progress').doc(challengeState.todayKey)
+                    .update({
+                        proofBase64: dataUrl,
+                        proofUploadedAt: firebase.firestore.FieldValue.serverTimestamp()
+                    })
+                    .then(function () {
+                        challengeState.progress.proofBase64 = dataUrl;
                         fileInput.value = '';
-                    },
-                    function () {
-                        storageRef.getDownloadURL().then(function (url) {
-                            return db.collection('users').doc(user.uid)
-                                .collection('challenge_progress').doc(challengeState.todayKey)
-                                .update({
-                                    proofUrl: url,
-                                    proofUploadedAt: firebase.firestore.FieldValue.serverTimestamp()
-                                })
-                                .then(function () {
-                                    challengeState.progress.proofUrl = url;
-                                    fileInput.value = '';
-                                    alert('✅ Bukti terkirim!');
-                                    renderChallengeCard();
-                                });
-                        }).catch(function (err) {
-                            console.error('❌ Gagal simpan URL bukti:', err);
-                            alert('⚠️ Gagal menyimpan bukti.');
-                            fileInput.value = '';
-                        });
+                        alert('✅ Bukti terkirim!');
+                        renderChallengeCard();
                     });
             }).catch(function (err) {
-                console.error('❌ Gagal kompres gambar:', err);
+                console.error('❌ Gagal simpan bukti:', err);
                 alert('⚠️ Gagal memproses gambar. Coba foto lain.');
                 fileInput.value = '';
             });

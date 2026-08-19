@@ -334,7 +334,7 @@
                             challengeId: d.challengeId,
                             category: d.category,
                             reflection: d.reflection || '',
-                            proofUrl: d.proofUrl || ''
+                            proofBase64: d.proofBase64 || ''
                         });
                     });
                     return list;
@@ -352,10 +352,10 @@
             var entries = [];
 
             ctx.ownList.forEach(function (d) {
-                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofUrl: d.proofUrl, who: 'Kamu', partner: false });
+                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofBase64: d.proofBase64, who: 'Kamu', partner: false });
             });
             ctx.partnerList.forEach(function (d) {
-                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofUrl: d.proofUrl, who: ctx.partnerName, partner: true });
+                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofBase64: d.proofBase64, who: ctx.partnerName, partner: true });
             });
 
             entries.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -392,9 +392,8 @@
                 if (e.reflection) {
                     html += '<div class="timeline-reflection">💭 "' + escapeHtml(e.reflection) + '"</div>';
                 }
-                if (e.proofUrl) {
-                    html += '<div style="margin-top:10px;"><a href="' + escapeHtml(e.proofUrl) + '" target="_blank" rel="noopener">' +
-                        '<img src="' + escapeHtml(e.proofUrl) + '" alt="Bukti tantangan" class="proof-img" /></a></div>';
+                if (e.proofBase64) {
+                    html += '<div style="margin-top:10px;"><img src="' + e.proofBase64 + '" alt="Bukti tantangan" class="proof-img" /></div>';
                 }
                 html += '</div>';
             });

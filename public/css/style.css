@@ -3965,6 +3965,12 @@ body.love-page {
     transform: scale(1.03);
 }
 
+.proof-thumb.proof-zoom {
+    max-width: 100%;
+    max-height: none;
+    cursor: zoom-out;
+}
+
 .proof-img {
     max-width: 100%;
     max-height: 320px;
