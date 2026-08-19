@@ -976,9 +976,9 @@ async function tampilkanRiwayat() {
 
             // ── STREAK ──
             html += '<div class="challenge-streak">' +
-                '<div class="streak-item"><span class="streak-icon">🔥</span><span class="streak-number">' + s.streak.current + '</span><span class="streak-label">Hari Beruntun</span></div>' +
-                '<div class="streak-item"><span class="streak-icon">🏅</span><span class="streak-number">' + s.streak.longest + '</span><span class="streak-label">Rekor</span></div>' +
-                '<div class="streak-item"><span class="streak-icon">📅</span><span class="streak-number">' + s.streak.totalDays + '</span><span class="streak-label">Total Hari</span></div>' +
+                '<div class="streak-item"><span class="streak-icon flame">🔥</span><span class="streak-number" id="streakCurrentNum">' + s.streak.current + '</span><span class="streak-label">Hari Beruntun</span></div>' +
+                '<div class="streak-item"><span class="streak-icon">🏅</span><span class="streak-number" id="streakLongestNum">' + s.streak.longest + '</span><span class="streak-label">Rekor</span></div>' +
+                '<div class="streak-item"><span class="streak-icon">📅</span><span class="streak-number" id="streakTotalNum">' + s.streak.totalDays + '</span><span class="streak-label">Total Hari</span></div>' +
                 '</div>';
 
             // ── BADGE ──
@@ -1001,6 +1001,16 @@ async function tampilkanRiwayat() {
             html += renderHeatmap(s.list.map(function (d) { return d.date; }), s.todayKey);
 
             body.innerHTML = html;
+
+            // ✨ Animasi count-up angka streak (delay kecil biar DOM siap)
+            setTimeout(function () {
+                var elCurrent = document.getElementById('streakCurrentNum');
+                var elLongest = document.getElementById('streakLongestNum');
+                var elTotal = document.getElementById('streakTotalNum');
+                if (elCurrent) animateRiwayatScore(elCurrent, s.streak.current);
+                if (elLongest) animateRiwayatScore(elLongest, s.streak.longest);
+                if (elTotal) animateRiwayatScore(elTotal, s.streak.totalDays);
+            }, 80);
         }
 
         // ─── ORKESTRATOR ───
