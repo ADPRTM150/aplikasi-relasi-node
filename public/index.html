@@ -974,14 +974,20 @@ async function tampilkanRiwayat() {
                 html += '<input type="file" id="proofInput" accept="image/*" style="display:none;" onchange="uploadBukti(this)" />';
             }
 
-            // ── STREAK ──
+            // ── STREAK ALA TIKTOK ──
             // 🔥 Api menyala hanya saat kamu & pasangan sama-sama selesai hari ini
-            var flameCls = (s.couple && s.progress && s.partnerProgress) ? 'flame flame-lit' : 'flame flame-dull';
-            var flameTitle = (s.couple && s.progress && s.partnerProgress)
+            var flameLit = !!(s.couple && s.progress && s.partnerProgress);
+            var flameTitle = flameLit
                 ? 'Api menyala — kalian berdua menyelesaikan tantangan hari ini!'
                 : 'Api menyala saat kamu & pasangan sama-sama menyelesaikan tantangan hari ini';
+            html += '<div style="text-align:center;margin-top:14px;">' +
+                '<div class="streak-tiktok ' + (flameLit ? 'lit' : 'dull') + '" title="' + flameTitle + '">' +
+                '<span class="flame-big">🔥</span>' +
+                '<span class="streak-big-num" id="streakCurrentNum">' + s.streak.current + '</span>' +
+                '<span class="streak-big-label">hari beruntun</span>' +
+                '</div>' +
+                '</div>';
             html += '<div class="challenge-streak">' +
-                '<div class="streak-item"><span class="streak-icon ' + flameCls + '" title="' + flameTitle + '">🔥</span><span class="streak-number" id="streakCurrentNum">' + s.streak.current + '</span><span class="streak-label">Hari Beruntun</span></div>' +
                 '<div class="streak-item"><span class="streak-icon">🏅</span><span class="streak-number" id="streakLongestNum">' + s.streak.longest + '</span><span class="streak-label">Rekor</span></div>' +
                 '<div class="streak-item"><span class="streak-icon">📅</span><span class="streak-number" id="streakTotalNum">' + s.streak.totalDays + '</span><span class="streak-label">Total Hari</span></div>' +
                 '</div>';
