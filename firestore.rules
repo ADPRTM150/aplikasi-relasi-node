@@ -64,6 +64,27 @@ service cloud.firestore {
     }
 
     // ============================================================
+    // 📁 CHALLENGES — Publik baca, HANYA SERVER tulis
+    // ============================================================
+    match /challenges/{challengeId} {
+      allow read: if true;
+      allow create, update, delete: if false;  // Server Admin SDK only
+    }
+
+    // ============================================================
+    // 📁 CHALLENGE_PROGRESS — users/{userId}/challenge_progress/{date}
+    //    Owner tulis, semua user auth boleh baca (status pasangan)
+    // ============================================================
+    match /users/{userId}/challenge_progress/{date} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+                          && request.auth.uid == userId
+                          && request.resource.data.date.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')
+                          && exists(/databases/$(database)/documents/challenges/$(request.resource.data.challengeId));
+      allow delete: if false;
+    }
+
+    // ============================================================
     // 🚫 DEFAULT: Tolak semua
     // ============================================================
     match /{document=**} {

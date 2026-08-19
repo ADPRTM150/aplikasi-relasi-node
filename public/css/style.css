@@ -3759,6 +3759,269 @@ body.love-page {
     box-shadow: 0 8px 30px rgba(244, 167, 187, 0.35);
 }
 
+/* ─── CHALLENGE HARI INI — STATUS & AKSI ─── */
+.challenge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(244, 167, 187, 0.15);
+    color: #C26B84;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 12px;
+    border-radius: 20px;
+}
+
+.challenge-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #A8D8B9, #7FB69B);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 50px;
+}
+
+.challenge-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+    align-items: center;
+}
+
+.btn-share {
+    background: #fff;
+    color: #E8879F;
+    border: 1.5px solid rgba(244, 167, 187, 0.5);
+    padding: 9px 18px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-share:hover {
+    background: #FFF5F8;
+    transform: translateY(-2px);
+}
+
+.btn-challenge:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ─── STREAK ─── */
+.challenge-streak {
+    display: flex;
+    gap: 18px;
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px dashed rgba(244, 167, 187, 0.3);
+}
+
+.streak-item {
+    flex: 1;
+    text-align: center;
+}
+
+.streak-item .streak-icon {
+    font-size: 20px;
+}
+
+.streak-item .streak-number {
+    font-size: 20px;
+    font-weight: 700;
+    color: #E8879F;
+    display: block;
+}
+
+.streak-item .streak-label {
+    font-size: 10px;
+    color: #a8768a;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ─── HEATMAP ─── */
+.challenge-heatmap-title {
+    font-size: 11px;
+    color: #a8768a;
+    font-weight: 600;
+    margin: 12px 0 6px;
+}
+
+.challenge-heatmap {
+    display: grid;
+    grid-template-columns: repeat(12, 14px);
+    grid-auto-rows: 14px;
+    gap: 3px;
+    justify-content: center;
+}
+
+.heat-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    background: #F6ECEF;
+    display: inline-block;
+}
+
+.heat-0 { background: #F6ECEF; }
+.heat-1 { background: #FBDCE4; }
+.heat-2 { background: #F7B8C9; }
+.heat-3 { background: #F08BA6; }
+.heat-4 { background: #E8879F; }
+
+.heat-today {
+    outline: 2px solid #B8A9C9;
+    outline-offset: 1px;
+}
+
+.challenge-heatmap-legend {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 6px;
+    font-size: 9px;
+    color: #a8768a;
+}
+
+/* ─── STATUS PASANGAN ─── */
+.challenge-partner {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.65);
+    border-radius: 14px;
+    border: 1px solid rgba(244, 167, 187, 0.15);
+    font-size: 12px;
+    color: #5a6f6a;
+}
+
+.challenge-partner strong {
+    color: #E8879F;
+}
+
+.quote-partner {
+    margin-top: 8px;
+    padding: 10px 12px;
+    background: #FDF6F8;
+    border-left: 3px solid #E8879F;
+    border-radius: 0 12px 12px 0;
+    font-size: 12px;
+    color: #1d3b36;
+    font-style: italic;
+}
+
+/* ─── REFLEKSI ─── */
+.challenge-refleksi {
+    margin-top: 12px;
+}
+
+.challenge-refleksi textarea {
+    width: 100%;
+    min-height: 64px;
+    border: 1.5px solid rgba(244, 167, 187, 0.35);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-family: inherit;
+    font-size: 13px;
+    color: #1d3b36;
+    resize: vertical;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.challenge-refleksi textarea:focus {
+    outline: none;
+    border-color: #E8879F;
+}
+
+/* ─── BADGE & REWARD ─── */
+.challenge-badges {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+
+.badge-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fdf8f0;
+    color: #d4a373;
+    border: 1px solid rgba(212, 163, 115, 0.3);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+}
+
+.reward-hint {
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: #fdf8f0;
+    border: 1.5px dashed #E5C68F;
+    border-radius: 14px;
+    font-size: 12px;
+    color: #8a6d3b;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.reward-hint .btn-reward {
+    background: linear-gradient(135deg, #F4A7BB, #E8879F);
+    color: #fff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 50px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* ─── REMINDER PAGI ─── */
+.challenge-reminder {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #FFF8E7;
+    border: 1px solid #F3D9A4;
+    border-radius: 16px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    font-size: 12px;
+    color: #8a6d3b;
+    animation: fadeInUp 0.5s ease forwards;
+}
+
+.challenge-reminder button {
+    background: none;
+    border: none;
+    font-size: 14px;
+    color: #b99a5e;
+    cursor: pointer;
+    padding: 2px 6px;
+}
+
+.challenge-highlight {
+    animation: challengePulse 1.2s ease-in-out 3;
+}
+
+@keyframes challengePulse {
+    0%, 100% { box-shadow: 0 4px 24px rgba(244, 167, 187, 0.08); }
+    50% { box-shadow: 0 0 0 6px rgba(244, 167, 187, 0.28), 0 4px 24px rgba(244, 167, 187, 0.18); }
+}
+
 /* ─── PERJALANAN RELASI ─── */
 .riwayat-item {
     border-bottom: 1.5px solid rgba(244,167,187,0.10);

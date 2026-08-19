@@ -1,6 +1,6 @@
 # 💚 QUALITY OF LOVE
 
-Aplikasi relasi pasangan — bantu pasangan mengenali cinta lewat **Love Language Test**, **Relationship Wellness Check** (64 pertanyaan, hasil gabungan dua orang), artikel edukasi, dan dashboard admin.
+Aplikasi relasi pasangan — bantu pasangan mengenali cinta lewat **Love Language Test**, **Relationship Wellness Check** (64 pertanyaan, hasil gabungan dua orang), **🎯 Tantangan Hari Ini** (tantangan harian berpasangan dengan streak, refleksi, dan badge), artikel edukasi, dan dashboard admin.
 
 - **Live:** Vercel (repo ini terhubung ke project Vercel `aplikasi-relasi-node`)
 - **GitHub Pages:** nonaktif (sengaja, lihat riwayat commit `fad4447`)
@@ -25,6 +25,8 @@ Aplikasi relasi pasangan — bantu pasangan mengenali cinta lewat **Love Languag
 ```
 ├── server/
 │   └── server.js          # Seluruh backend: API, auth middleware, CSP, CORS
+├── scripts/
+│   └── seed-challenges.js # Seed bank 30 tantangan harian (idempotent)
 ├── public/                # Frontend statis (di-serve Vercel di root)
 │   ├── index.html         # Beranda / dashboard user
 │   ├── login.html         # Login user (Google / email)
@@ -68,6 +70,28 @@ npm run dev   # nodemon, port 3000 (atau npm start)
 | `PORT` | ❌ | Default `3000` |
 
 > ⚠️ Kalau tidak diisi, admin login memakai **kredensial fallback yang ter-hardcode di server** — wajib di-override di produksi (lihat Ide Upgrade nomor 1).
+
+## 🌱 Seed Data Tantangan Harian
+
+Bank tantangan disimpan di koleksi Firestore `challenges` (30 dokumen, `ch001..ch030`, 8 kategori dimensi wellness). Seed sekali setelah clone / setelah ganti environment:
+
+```bash
+node scripts/seed-challenges.js   # idempotent — aman dijalankan ulang
+```
+
+Progress tantangan user tersimpan di subcollection `users/{userId}/challenge_progress/{YYYY-MM-DD}`.
+
+## 🚦 Deploy Firestore Rules
+
+Setelah mengubah `firestore.rules`, deploy dengan salah satu cara:
+
+- CLI (firebase-tools sudah ada di devDependencies):
+  ```bash
+  npx firebase deploy --only firestore:rules
+  ```
+- Atau manual: Firebase Console → Firestore Database → Rules → paste isi `firestore.rules` → Publish
+
+> Tanpa rules ter-deploy, fitur tantangan tetap menampilkan kartu (pakai bank fallback) tapi penyimpanan progress akan ditolak.
 
 ## 🌐 API Endpoints
 

@@ -111,10 +111,16 @@
         </div>
 
         <!-- ===== CHALLENGE HARI INI ===== -->
-        <div class="card challenge-card">
-            <div class="tag">🎯 Tantangan Hari Ini</div>
-            <h4>"Ucapkan satu apresiasi tulus kepada pasanganmu."</h4>
-            <button class="btn-challenge" onclick="alert('✅ Challenge diterima!')">Mulai Challenge</button>
+        <div class="challenge-reminder" id="challengeReminder" style="display:none;">
+            <span>☀️ Selamat pagi! Ada tantangan kecil buat kalian berdua hari ini.</span>
+            <button onclick="tutupReminder()" aria-label="Tutup">✕</button>
+        </div>
+
+        <div class="card challenge-card" id="challengeCard">
+            <div class="tag">🎯 Tantangan Hari Ini · <span id="challengeDateLabel">--</span></div>
+            <div id="challengeBody">
+                <h4 style="color:#aaa;margin:6px 0 12px;">Memuat tantangan...</h4>
+            </div>
         </div>
 
         <!-- ===== RIWAYAT TES ===== -->
@@ -208,6 +214,9 @@
 
                 // 🔥 Tampilkan perjalanan relasi
                 tampilkanRiwayat();
+
+                // 🎯 Tampilkan tantangan hari ini
+                initChallenge();
             } else {
                 userName.textContent = 'Pengguna';
                 userArea.innerHTML = `
@@ -215,6 +224,8 @@
                         <div class="avatar-placeholder">👤</div>
                     </button>
                 `;
+                // 🎯 CTA login di kartu tantangan
+                initChallenge();
             }
         });
 
@@ -569,6 +580,622 @@ async function tampilkanRiwayat() {
         `;
     }
 }
+
+        // ============================================================
+        //  🎯 TANTANGAN HARI INI — CHALLENGE HARIAN
+        // ============================================================
+
+        var BADGES = [
+            { days: 1, icon: '🌱', title: 'Langkah Pertama' },
+            { days: 7, icon: '🔥', title: 'Konsisten 7 Hari' },
+            { days: 14, icon: '💪', title: 'Dua Pekan Hebat' },
+            { days: 30, icon: '🏆', title: 'Sebulan Penuh Cinta' },
+            { days: 100, icon: '👑', title: 'Raja & Ratu Konsisten' }
+        ];
+
+        var DIM_LABELS = {
+            komunikasi: 'Komunikasi 💬',
+            kepercayaan: 'Kepercayaan 🔒',
+            resolusi_konflik: 'Resolusi Konflik 🤝',
+            dukungan_emosional: 'Dukungan Emosional ❤️',
+            waktu_berkualitas: 'Waktu Berkualitas ⏰',
+            komitmen: 'Komitmen 🎯',
+            penghargaan: 'Penghargaan 🌟',
+            keuangan: 'Keuangan 💰'
+        };
+
+        // Fallback biar kartu tetap jalan sebelum rules/seed ter-deploy
+        var FALLBACK_BANK = [
+            { id: 'ch001', category: 'komunikasi', order: 1, text: 'Kirim pesan suara menceritakan satu hal terbaik yang terjadi padamu hari ini.' },
+            { id: 'ch005', category: 'kepercayaan', order: 5, text: 'Tepati satu janji kecil yang selama ini kamu tunda.' },
+            { id: 'ch009', category: 'resolusi_konflik', order: 9, text: 'Selesaikan satu ketidaksepakatan kecil dengan kalimat "Saya merasa..." tanpa menyalahkan.' },
+            { id: 'ch013', category: 'dukungan_emosional', order: 13, text: 'Berikan pelukan 20 detik tanpa bicara saat pasanganmu pulang atau bangun tidur.' },
+            { id: 'ch017', category: 'waktu_berkualitas', order: 17, text: 'Matikan HP selama 30 menit dan habiskan waktu penuh bersama tanpa distraksi.' },
+            { id: 'ch024', category: 'penghargaan', order: 24, text: 'Ucapkan satu apresiasi tulus kepada pasanganmu di depan orang lain hari ini.' }
+        ];
+
+        var challengeState = {
+            todayKey: null,
+            bank: [],
+            couple: null,
+            categories: [],
+            challenge: null,
+            progress: null,
+            partnerProgress: null,
+            partnerName: '',
+            list: [],
+            streak: { current: 0, longest: 0, totalDays: 0 },
+            badges: { earned: [], next: null },
+            freeEbook: null,
+            rewardJustEarned: false,
+            loading: true,
+            error: null
+        };
+
+        var challengeMidnightTimer = null;
+
+        // ─── UTIL TANGGAL ───
+        function fmtDateKey(d) {
+            var m = String(d.getMonth() + 1);
+            var day = String(d.getDate());
+            if (m.length < 2) m = '0' + m;
+            if (day.length < 2) day = '0' + day;
+            return d.getFullYear() + '-' + m + '-' + day;
+        }
+
+        function getTodayKey() {
+            return fmtDateKey(new Date());
+        }
+
+        function shiftDateKey(key, deltaDays) {
+            var parts = key.split('-');
+            var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            d.setDate(d.getDate() + deltaDays);
+            return fmtDateKey(d);
+        }
+
+        function dayIndexForDate(key) {
+            var parts = key.split('-');
+            var d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            return Math.round(d.getTime() / 86400000);
+        }
+
+        // ─── LOAD BANK TANTANGAN ───
+        function loadChallengesBank() {
+            return db.collection('challenges').where('active', '==', true).get()
+                .then(function (snap) {
+                    if (snap.empty) return FALLBACK_BANK;
+                    var bank = [];
+                    snap.forEach(function (doc) {
+                        var d = doc.data();
+                        bank.push({ id: doc.id, category: d.category || '', order: d.order || 0, text: d.text || '' });
+                    });
+                    bank.sort(function (a, b) { return a.order - b.order; });
+                    return bank.length ? bank : FALLBACK_BANK;
+                })
+                .catch(function (err) {
+                    console.warn('⚠️ Gagal load bank tantangan, pakai fallback:', err);
+                    return FALLBACK_BANK;
+                });
+        }
+
+        // ─── CARI LINK PASANGAN (dari wellness_tests) ───
+        function cariCoupleLink(uid) {
+            return db.collection('wellness_tests')
+                .where('userCompleted', '==', true)
+                .orderBy('completedAt', 'desc')
+                .limit(20)
+                .get()
+                .then(function (snapshot) {
+                    var found = null;
+                    snapshot.forEach(function (doc) {
+                        if (found) return;
+                        var d = doc.data();
+                        if (d.userId === uid && d.partnerUserId) {
+                            found = { testId: doc.id, partnerUserId: d.partnerUserId };
+                        }
+                    });
+                    if (found) return found;
+                    return db.collection('wellness_tests')
+                        .where('partnerCompleted', '==', true)
+                        .where('userCompleted', '==', true)
+                        .orderBy('completedAt', 'desc')
+                        .limit(1)
+                        .get()
+                        .then(function (snap2) {
+                            if (snap2.empty) return null;
+                            var doc = snap2.docs[0];
+                            var d = doc.data();
+                            if (d.partnerUserId === uid && d.userId) {
+                                return { testId: doc.id, partnerUserId: d.userId };
+                            }
+                            return null;
+                        });
+                })
+                .catch(function (err) {
+                    console.warn('⚠️ Gagal cari link pasangan:', err);
+                    return null;
+                });
+        }
+
+        // ─── KATEGORI PRIORITAS DARI HASIL WELLNESS ───
+        function getPersonalizationCategories(couple) {
+            if (!couple) return Promise.resolve([]);
+            return db.collection('wellness_tests').doc(couple.testId).get()
+                .then(function (doc) {
+                    if (!doc.exists) return [];
+                    var results = doc.data().results;
+                    if (!results || !results.priorities || !results.priorities.length) return [];
+                    var cats = [];
+                    results.priorities.forEach(function (p) {
+                        if (p.dimension && cats.indexOf(p.dimension) === -1) cats.push(p.dimension);
+                    });
+                    return cats;
+                })
+                .catch(function (err) {
+                    console.warn('⚠️ Gagal ambil kategori prioritas:', err);
+                    return [];
+                });
+        }
+
+        // ─── PILIH TANTANGAN HARI INI (deterministik per tanggal) ───
+        function pilihChallengeHariIni(bank, categories, dayIndex) {
+            var subset = bank;
+            if (categories && categories.length) {
+                var filtered = bank.filter(function (c) {
+                    return categories.indexOf(c.category) !== -1;
+                });
+                if (filtered.length) subset = filtered;
+            }
+            return subset[((dayIndex % subset.length) + subset.length) % subset.length];
+        }
+
+        // ─── HITUNG STREAK ───
+        function hitungStreak(list, todayKey) {
+            var dates = {};
+            list.forEach(function (d) { if (d.date) dates[d.date] = true; });
+            var keys = Object.keys(dates);
+            var totalDays = keys.length;
+
+            var current = 0;
+            var cursor = todayKey;
+            if (!dates[cursor]) cursor = shiftDateKey(cursor, -1);
+            while (dates[cursor]) {
+                current++;
+                cursor = shiftDateKey(cursor, -1);
+            }
+
+            var sorted = keys.slice().sort();
+            var longest = 0;
+            var run = 0;
+            var prev = null;
+            sorted.forEach(function (d) {
+                if (prev === null || d === shiftDateKey(prev, 1)) {
+                    run++;
+                } else {
+                    run = 1;
+                }
+                if (run > longest) longest = run;
+                prev = d;
+            });
+
+            return { current: current, longest: longest, totalDays: totalDays };
+        }
+
+        // ─── BADGE MILESTONE ───
+        function hitungBadges(streak, totalDays) {
+            var acuan = Math.max(streak.longest, totalDays);
+            var earned = [];
+            var next = null;
+            BADGES.forEach(function (b) {
+                if (acuan >= b.days) {
+                    earned.push(b);
+                } else if (!next) {
+                    next = b;
+                }
+            });
+            return { earned: earned, next: next };
+        }
+
+        // ─── LOAD PROGRES ───
+        function loadProgressList(uid) {
+            return db.collection('users').doc(uid).collection('challenge_progress')
+                .orderBy('date', 'desc')
+                .limit(100)
+                .get()
+                .then(function (snap) {
+                    var list = [];
+                    snap.forEach(function (doc) {
+                        var d = doc.data();
+                        list.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection || '' });
+                    });
+                    return list;
+                })
+                .catch(function (err) {
+                    console.warn('⚠️ Gagal load progres tantangan:', err);
+                    return [];
+                });
+        }
+
+        function loadPartnerProgress(partnerUid, todayKey) {
+            return db.collection('users').doc(partnerUid).collection('challenge_progress')
+                .doc(todayKey).get()
+                .then(function (doc) {
+                    if (!doc.exists) return null;
+                    return doc.data();
+                })
+                .catch(function (err) {
+                    console.warn('⚠️ Gagal load progres pasangan:', err);
+                    return null;
+                });
+        }
+
+        function loadFreeEbook() {
+            return db.collection('ebooks').where('status', '==', 'published').limit(5).get()
+                .then(function (snap) {
+                    var free = null;
+                    snap.forEach(function (doc) {
+                        if (free) return;
+                        var d = doc.data();
+                        if ((Number(d.price) || 0) === 0) {
+                            free = { id: doc.id, title: d.title || 'Ebook Gratis' };
+                        }
+                    });
+                    return free;
+                })
+                .catch(function () { return null; });
+        }
+
+        // ─── HEATMAP 12 MINGGU ───
+        function renderHeatmap(dates, todayKey) {
+            var now = new Date();
+            var gridEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - ((now.getDay() + 6) % 7));
+            var gridStart = new Date(gridEnd);
+            gridStart.setDate(gridStart.getDate() - 77); // Senin 11 minggu ke belakang
+            var cells = [];
+            for (var w = 0; w < 12; w++) {
+                for (var dow = 0; dow < 7; dow++) {
+                    var day = new Date(gridStart);
+                    day.setDate(day.getDate() + w * 7 + dow);
+                    var key = fmtDateKey(day);
+                    var cls = 'heat-cell';
+                    var title = day.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+                    if (day > now) {
+                        cls += ' heat-0';
+                    } else if (dates.indexOf(key) !== -1) {
+                        cls += ' heat-4';
+                        title += ' — Selesai ✅';
+                    } else {
+                        cls += ' heat-0';
+                    }
+                    if (key === todayKey) cls += ' heat-today';
+                    cells.push('<div class="' + cls + '" title="' + title + '"></div>');
+                }
+            }
+            return '<div class="challenge-heatmap-title">🔥 12 minggu terakhir</div>' +
+                '<div class="challenge-heatmap">' + cells.join('') + '</div>' +
+                '<div class="challenge-heatmap-legend">' +
+                '<span class="heat-cell heat-0"></span><span class="heat-cell heat-4"></span>' +
+                '<span>kosong → selesai</span></div>';
+        }
+
+        // ─── RENDER KARTU UTAMA ───
+        function renderChallengeCard() {
+            var s = challengeState;
+            var body = document.getElementById('challengeBody');
+            var label = document.getElementById('challengeDateLabel');
+            if (!body) return;
+
+            var tanggalStr = new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long' });
+            if (label) label.textContent = tanggalStr;
+
+            if (!firebase.auth().currentUser) {
+                body.innerHTML =
+                    '<h4 style="color:#1d3b36;margin:6px 0 12px;">🔒 Login untuk mengikuti Tantangan Hari Ini</h4>' +
+                    '<button class="btn-challenge" onclick="window.location.href=\'/login\'">Login</button>';
+                return;
+            }
+
+            if (s.loading) {
+                body.innerHTML = '<h4 style="color:#aaa;margin:6px 0 12px;">Memuat tantangan...</h4>';
+                return;
+            }
+
+            if (s.error) {
+                body.innerHTML =
+                    '<h4 style="color:#1d3b36;margin:6px 0 12px;">⚠️ Gagal memuat tantangan</h4>' +
+                    '<button class="btn-challenge" onclick="cobaUlangChallenge()">🔄 Coba Lagi</button>';
+                return;
+            }
+
+            if (!s.challenge) {
+                body.innerHTML = '<h4 style="color:#1d3b36;margin:6px 0 12px;">Tidak ada tantangan hari ini.</h4>';
+                return;
+            }
+
+            var html = '';
+            var catLabel = DIM_LABELS[s.challenge.category] || s.challenge.category || 'Umum';
+            html += '<div class="challenge-chip">' + escapeHtml(catLabel) + '</div>';
+            html += '<h4 style="color:#1d3b36;margin:8px 0 14px;font-size:15px;line-height:1.55;">"' + escapeHtml(s.challenge.text) + '"</h4>';
+
+            // ── AKSI UTAMA ──
+            html += '<div class="challenge-actions">';
+            if (!s.progress) {
+                html += '<button class="btn-challenge" onclick="mulaiChallenge()">Mulai Challenge</button>';
+            } else {
+                html += '<span class="challenge-done">✅ Selesai Hari Ini</span>';
+            }
+            html += '<button class="btn-share" onclick="bagikanChallenge()">📤 Bagikan</button>';
+            html += '</div>';
+
+            // ── STATUS PASANGAN ──
+            if (!s.couple) {
+                html += '<div class="challenge-partner">💑 Hubungkan akun pasanganmu lewat <a href="/relationship-check" style="color:#E8879F;font-weight:600;">Relationship Check</a> untuk tantangan berdua.</div>';
+            } else if (s.progress && s.partnerProgress) {
+                html += '<div class="challenge-partner">Kamu ✅ · <strong>' + escapeHtml(s.partnerName || 'Pasangan') + '</strong> ✅ — kalian berdua hebat! 🎉</div>';
+                if (s.partnerProgress.reflection) {
+                    html += '<div class="quote-partner">💭 Refleksi ' + escapeHtml(s.partnerName || 'Pasangan') + ': "' + escapeHtml(s.partnerProgress.reflection) + '"</div>';
+                }
+            } else if (s.progress) {
+                html += '<div class="challenge-partner">Kamu ✅ · <strong>' + escapeHtml(s.partnerName || 'Pasangan') + '</strong> ⏳ — tunggu ya!</div>';
+            } else if (s.partnerProgress) {
+                html += '<div class="challenge-partner">Kamu ⏳ · <strong>' + escapeHtml(s.partnerName || 'Pasangan') + '</strong> ✅ — jangan mau kalah! 💪</div>';
+            } else {
+                html += '<div class="challenge-partner">Kamu ⏳ · <strong>' + escapeHtml(s.partnerName || 'Pasangan') + '</strong> ⏳</div>';
+            }
+
+            // ── REFLEKSI ──
+            if (s.progress) {
+                if (s.progress.reflection) {
+                    html += '<div class="quote-partner">💭 Refleksimu: "' + escapeHtml(s.progress.reflection) + '"</div>';
+                } else {
+                    html += '<div class="challenge-refleksi">' +
+                        '<textarea id="reflectionInput" maxlength="280" placeholder="Bagaimana rasanya melakukannya? (opsional)"></textarea>' +
+                        '<div class="challenge-actions" style="margin-top:8px;"><button class="btn-share" onclick="simpanRefleksi()">💾 Simpan Refleksi</button></div>' +
+                        '</div>';
+                }
+            }
+
+            // ── STREAK ──
+            html += '<div class="challenge-streak">' +
+                '<div class="streak-item"><span class="streak-icon">🔥</span><span class="streak-number">' + s.streak.current + '</span><span class="streak-label">Hari Beruntun</span></div>' +
+                '<div class="streak-item"><span class="streak-icon">🏅</span><span class="streak-number">' + s.streak.longest + '</span><span class="streak-label">Rekor</span></div>' +
+                '<div class="streak-item"><span class="streak-icon">📅</span><span class="streak-number">' + s.streak.totalDays + '</span><span class="streak-label">Total Hari</span></div>' +
+                '</div>';
+
+            // ── BADGE ──
+            if (s.badges.earned.length) {
+                html += '<div class="challenge-badges">';
+                s.badges.earned.forEach(function (b) {
+                    html += '<span class="badge-chip" title="' + b.title + '">' + b.icon + ' ' + escapeHtml(b.title) + '</span>';
+                });
+                html += '</div>';
+            }
+
+            // ── REWARD MILESTONE ──
+            if (s.rewardJustEarned && s.freeEbook) {
+                html += '<div class="reward-hint"><span>🎁 Hadiah milestone!</span>' +
+                    '<span>Unduh ebook gratis "<strong>' + escapeHtml(s.freeEbook.title) + '</strong>"</span>' +
+                    '<button class="btn-reward" onclick="window.location.href=\'/api/public/ebooks/download/' + s.freeEbook.id + '\'">Unduh Ebook</button></div>';
+            }
+
+            // ── HEATMAP ──
+            html += renderHeatmap(s.list.map(function (d) { return d.date; }), s.todayKey);
+
+            body.innerHTML = html;
+        }
+
+        // ─── ORKESTRATOR ───
+        function initChallenge() {
+            var user = firebase.auth().currentUser;
+            challengeState.todayKey = getTodayKey();
+            challengeState.loading = true;
+            challengeState.error = null;
+            challengeState.progress = null;
+            challengeState.partnerProgress = null;
+            challengeState.rewardJustEarned = false;
+            renderChallengeCard();
+
+            if (!user) {
+                challengeState.loading = false;
+                renderChallengeCard();
+                return;
+            }
+
+            var uid = user.uid;
+
+            Promise.all([
+                loadChallengesBank(),
+                cariCoupleLink(uid),
+                loadProgressList(uid)
+            ]).then(function (results) {
+                var bank = results[0];
+                var couple = results[1];
+                var list = results[2];
+                return getPersonalizationCategories(couple).then(function (cats) {
+                    challengeState.bank = bank;
+                    challengeState.couple = couple;
+                    challengeState.list = list;
+                    challengeState.categories = cats;
+                    challengeState.challenge = pilihChallengeHariIni(bank, cats, dayIndexForDate(challengeState.todayKey));
+                    challengeState.streak = hitungStreak(list, challengeState.todayKey);
+                    challengeState.badges = hitungBadges(challengeState.streak, challengeState.streak.totalDays);
+                    challengeState.progress = list.filter(function (d) { return d.date === challengeState.todayKey; })[0] || null;
+                });
+            }).then(function () {
+                var partnerTask = Promise.resolve(null);
+                var nameTask = Promise.resolve('');
+                if (challengeState.couple) {
+                    partnerTask = loadPartnerProgress(challengeState.couple.partnerUserId, challengeState.todayKey);
+                    nameTask = db.collection('users').doc(challengeState.couple.partnerUserId).get()
+                        .then(function (doc) {
+                            if (!doc.exists) return 'Pasangan';
+                            var d = doc.data();
+                            return d.nama || d.name || 'Pasangan';
+                        })
+                        .catch(function () { return 'Pasangan'; });
+                }
+                return Promise.all([partnerTask, nameTask]);
+            }).then(function (res) {
+                challengeState.partnerProgress = res[0];
+                challengeState.partnerName = res[1];
+                challengeState.loading = false;
+                renderChallengeCard();
+                cekReminderPagi();
+                startMidnightWatcher();
+            }).catch(function (err) {
+                console.error('❌ Error initChallenge:', err);
+                challengeState.loading = false;
+                challengeState.error = err;
+                renderChallengeCard();
+            });
+        }
+
+        // ─── MULAI / SELESAIKAN CHALLENGE ───
+        function mulaiChallenge() {
+            var user = firebase.auth().currentUser;
+            if (!user || !challengeState.challenge) return;
+
+            db.collection('users').doc(user.uid)
+                .collection('challenge_progress').doc(challengeState.todayKey)
+                .set({
+                    date: challengeState.todayKey,
+                    challengeId: challengeState.challenge.id,
+                    category: challengeState.challenge.category,
+                    completedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    reflection: ''
+                })
+                .then(function () {
+                    challengeState.progress = {
+                        date: challengeState.todayKey,
+                        challengeId: challengeState.challenge.id,
+                        category: challengeState.challenge.category,
+                        reflection: ''
+                    };
+                    if (!challengeState.list.some(function (d) { return d.date === challengeState.todayKey; })) {
+                        challengeState.list.unshift({
+                            date: challengeState.todayKey,
+                            challengeId: challengeState.challenge.id,
+                            category: challengeState.challenge.category,
+                            reflection: ''
+                        });
+                    }
+                    var badgesSebelum = challengeState.badges.earned.length;
+                    challengeState.streak = hitungStreak(challengeState.list, challengeState.todayKey);
+                    challengeState.badges = hitungBadges(challengeState.streak, challengeState.streak.totalDays);
+                    challengeState.rewardJustEarned = challengeState.badges.earned.length > badgesSebelum;
+
+                    if (typeof logActivity === 'function') {
+                        logActivity('challenge_completed', '🎯', 'normal', {
+                            id: challengeState.todayKey,
+                            challengeId: challengeState.challenge.id,
+                            category: challengeState.challenge.category
+                        }).catch(function () {});
+                    }
+
+                    if (challengeState.rewardJustEarned) {
+                        loadFreeEbook().then(function (ebook) {
+                            challengeState.freeEbook = ebook;
+                            renderChallengeCard();
+                        });
+                    } else {
+                        renderChallengeCard();
+                    }
+                })
+                .catch(function (err) {
+                    console.error('❌ Gagal simpan challenge:', err);
+                    alert('⚠️ Gagal menyimpan challenge. Periksa koneksi dan coba lagi.');
+                });
+        }
+
+        // ─── SIMPAN REFLEKSI ───
+        function simpanRefleksi() {
+            var user = firebase.auth().currentUser;
+            var input = document.getElementById('reflectionInput');
+            if (!user || !input) return;
+            var text = input.value.trim();
+
+            db.collection('users').doc(user.uid)
+                .collection('challenge_progress').doc(challengeState.todayKey)
+                .update({ reflection: text })
+                .then(function () {
+                    challengeState.progress.reflection = text;
+                    alert('✅ Refleksi tersimpan!');
+                    renderChallengeCard();
+                })
+                .catch(function (err) {
+                    console.error('❌ Gagal simpan refleksi:', err);
+                    alert('⚠️ Gagal menyimpan refleksi.');
+                });
+        }
+
+        // ─── BAGIKAN KE PASANGAN ───
+        function bagikanChallenge() {
+            if (!challengeState.challenge) return;
+            var label = document.getElementById('challengeDateLabel');
+            var dateStr = label ? label.textContent : '';
+            var message = '🎯 Tantangan Hari Ini (' + dateStr + ')\n"' + challengeState.challenge.text + '"\n\nAyo ikut tantangannya bareng! 💚\n' + window.location.origin + '/';
+
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Tantangan Hari Ini - QUALITY OF LOVE',
+                    text: message
+                }).catch(function () {});
+            } else {
+                navigator.clipboard.writeText(message).then(function () {
+                    alert('✅ Pesan disalin! Bagikan ke pasangan.');
+                }).catch(function () {
+                    alert('⚠️ Gagal menyalin pesan.');
+                });
+            }
+        }
+
+        // ─── REMINDER PAGI (IN-APP) ───
+        function cekReminderPagi() {
+            var reminder = document.getElementById('challengeReminder');
+            var card = document.getElementById('challengeCard');
+            if (!reminder || !card) return;
+            var hour = new Date().getHours();
+            var dismissed = sessionStorage.getItem('challengeReminderDismissed_' + challengeState.todayKey) === '1';
+            var show = !challengeState.progress && hour < 10 && !dismissed && !challengeState.loading && !challengeState.error;
+            if (show) {
+                reminder.style.display = 'flex';
+                card.classList.add('challenge-highlight');
+            } else {
+                reminder.style.display = 'none';
+                card.classList.remove('challenge-highlight');
+            }
+        }
+
+        function tutupReminder() {
+            var reminder = document.getElementById('challengeReminder');
+            var card = document.getElementById('challengeCard');
+            if (reminder) reminder.style.display = 'none';
+            if (card) card.classList.remove('challenge-highlight');
+            sessionStorage.setItem('challengeReminderDismissed_' + challengeState.todayKey, '1');
+        }
+
+        // ─── PANTAU PERGANTIAN HARI ───
+        function startMidnightWatcher() {
+            if (challengeMidnightTimer) return;
+            challengeMidnightTimer = setInterval(function () {
+                if (getTodayKey() !== challengeState.todayKey) {
+                    window.location.reload();
+                }
+            }, 60000);
+        }
+
+        function cobaUlangChallenge() {
+            initChallenge();
+        }
+
+        // Refresh saat tab kembali fokus (multi-tab / kembali dari background)
+        document.addEventListener('visibilitychange', function () {
+            if (!document.hidden && firebase.auth().currentUser) {
+                initChallenge();
+            }
+        });
+
         // ============================================================
         //  🔥 NAVIGASI
         // ============================================================
