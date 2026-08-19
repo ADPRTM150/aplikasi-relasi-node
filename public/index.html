@@ -248,6 +248,13 @@
             }
         }
 
+        // ─── GESER ROW REKOMENDASI (tombol ‹ ›) ───
+        function scrollRec(gridId, dir) {
+            var el = document.getElementById(gridId);
+            if (!el) return;
+            el.scrollBy({ left: dir * 250, behavior: 'smooth' });
+        }
+
         async function loadRecommendations() {
             const container = document.getElementById('rekomendasiContainer');
 
@@ -265,12 +272,12 @@
                     db.collection('articles')
                     .where('status', '==', 'published')
                     .orderBy('createdAt', 'desc')
-                    .limit(2)
+                    .limit(10)
                     .get(),
                     db.collection('ebooks')
                     .where('status', '==', 'published')
                     .orderBy('createdAt', 'desc')
-                    .limit(2)
+                    .limit(10)
                     .get()
                 ]);
 
@@ -290,8 +297,14 @@
                 // 🔥 ARTIKEL & EBOOK DIPISAH — user tidak bingung
                 if (!articlesSnapshot.empty) {
                     html += '<div class="rec-group">';
+                    html += '<div class="rec-group-head">';
                     html += '<h5 class="rec-group-title">📰 Artikel untukmu</h5>';
-                    html += '<div class="recommendations-grid">';
+                    html += '<div class="rec-scroll-btns">' +
+                        '<button class="rec-scroll-btn" onclick="scrollRec(\'recGridArtikel\', -1)" aria-label="Geser kiri">‹</button>' +
+                        '<button class="rec-scroll-btn" onclick="scrollRec(\'recGridArtikel\', 1)" aria-label="Geser kanan">›</button>' +
+                        '</div>';
+                    html += '</div>';
+                    html += '<div class="recommendations-grid" id="recGridArtikel">';
                     articlesSnapshot.forEach(doc => {
                         const data = doc.data();
                         html += `
@@ -312,8 +325,14 @@
 
                 if (!ebooksSnapshot.empty) {
                     html += '<div class="rec-group">';
+                    html += '<div class="rec-group-head">';
                     html += '<h5 class="rec-group-title">📘 Ebook untukmu</h5>';
-                    html += '<div class="recommendations-grid">';
+                    html += '<div class="rec-scroll-btns">' +
+                        '<button class="rec-scroll-btn" onclick="scrollRec(\'recGridEbook\', -1)" aria-label="Geser kiri">‹</button>' +
+                        '<button class="rec-scroll-btn" onclick="scrollRec(\'recGridEbook\', 1)" aria-label="Geser kanan">›</button>' +
+                        '</div>';
+                    html += '</div>';
+                    html += '<div class="recommendations-grid" id="recGridEbook">';
                     ebooksSnapshot.forEach(doc => {
                         const data = doc.data();
                         const hargaTeks = (Number(data.price) || 0) === 0
