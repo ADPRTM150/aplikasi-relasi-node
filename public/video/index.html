@@ -155,8 +155,11 @@
                     const v = doc.data();
                     const tanggal = v.createdAt ? new Date(v.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
                     const urlAman = (v.url || '').replace(/'/g, "\\'");
+                    const judulAman = (v.title || '').replace(/'/g, "\\'");
+                    const thumb = getYoutubeThumb(v.url);
                     html += `
-                        <div class="artikel-card" onclick="bukaVideo('${urlAman}')">
+                        <div class="artikel-card" onclick="bukaVideo('${urlAman}', '${judulAman}')">
+                            ${thumb ? `<img src="${thumb}" alt="Video" style="width:100%;border-radius:12px;margin-bottom:10px;display:block;" />` : ''}
                             <span class="kategori">🎥 Video · ⏱ ${window.escapeHtml(v.duration || '-')}</span>
                             <h3>${window.escapeHtml(v.title)}</h3>
                             <div class="desc">${window.escapeHtml(v.desc || '')}</div>
@@ -177,13 +180,81 @@
             }
         }
 
-        function bukaVideo(url) {
+        // ─── PARSING URL YOUTUBE → ID / EMBED / THUMBNAIL ───
+        function getYoutubeEmbedUrl(url) {
+            if (!url) return null;
+            var id = null;
+            var m;
+            // youtube.com/watch?v=ID
+            m = url.match(/[?&]v=([A-Za-z0-9_-]{11})/);
+            if (m) id = m[1];
+            // youtu.be/ID
+            if (!id) {
+                m = url.match(/youtu\.be\/([A-Za-z0-9_-]{11})/);
+                if (m) id = m[1];
+            }
+            // youtube.com/shorts/ID
+            if (!id) {
+                m = url.match(/youtube\.com\/shorts\/([A-Za-z0-9_-]{11})/);
+                if (m) id = m[1];
+            }
+            // youtube.com/embed/ID
+            if (!id) {
+                m = url.match(/youtube\.com\/embed\/([A-Za-z0-9_-]{11})/);
+                if (m) id = m[1];
+            }
+            if (!id) return null;
+            return 'https://www.youtube.com/embed/' + id + '?rel=0&autoplay=1';
+        }
+
+        function getYoutubeThumb(url) {
+            var embed = getYoutubeEmbedUrl(url);
+            if (!embed) return null;
+            var id = embed.split('/embed/')[1].split('?')[0];
+            return 'https://img.youtube.com/vi/' + id + '/hqdefault.jpg';
+        }
+
+        // ─── PLAYER MODAL (iframe embed — nonton di dalam website) ───
+        function bukaVideo(url, title) {
             if (!url) {
                 alert('Link video belum tersedia.');
                 return;
             }
-            window.open(url, '_blank', 'noopener');
+            var embed = getYoutubeEmbedUrl(url);
+            if (!embed) {
+                // Bukan YouTube — fallback buka di tab baru seperti sebelumnya
+                window.open(url, '_blank', 'noopener');
+                return;
+            }
+
+            var lama = document.getElementById('videoModal');
+            if (lama) lama.remove();
+
+            var modal = document.createElement('div');
+            modal.id = 'videoModal';
+            modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;';
+            modal.onclick = function (e) { if (e.target === modal) tutupVideo(); };
+            modal.innerHTML =
+                '<div style="background:#fff;border-radius:20px;padding:16px;max-width:760px;width:100%;box-shadow:0 24px 80px rgba(0,0,0,0.4);">' +
+                '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;">' +
+                '<strong style="color:#1d3b36;font-size:14px;">🎬 ' + window.escapeHtml(title || 'Video') + '</strong>' +
+                '<button onclick="tutupVideo()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#999;">✕</button>' +
+                '</div>' +
+                '<div style="position:relative;padding-top:56.25%;">' +
+                '<iframe src="' + embed + '" style="position:absolute;top:0;left:0;width:100%;height:100%;border:0;border-radius:12px;" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>' +
+                '</div>' +
+                '</div>';
+            document.body.appendChild(modal);
         }
+
+        function tutupVideo() {
+            var modal = document.getElementById('videoModal');
+            if (modal) modal.remove();
+        }
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') tutupVideo();
+        });
 
         loadVideos();
     </script>
