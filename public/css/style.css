@@ -4850,6 +4850,24 @@ body.love-page {
    REKOMENDASI — REDESIGN: SPACING LEGA & HIERARKI JELAS
    ============================================================ */
 
+.rec-group {
+    margin-bottom: 20px;
+}
+
+.rec-group:last-child {
+    margin-bottom: 0;
+}
+
+.rec-group-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #1d3b36;
+    margin: 0 0 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 .recommendations-grid {
     display: flex;
     gap: 14px;
