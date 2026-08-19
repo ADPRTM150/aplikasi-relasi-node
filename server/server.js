@@ -689,6 +689,86 @@ app.get('/api/admin/activities', verifyAdminToken, async (req, res) => {
 });
 
 // ============================================================
+//  🎯 ADMIN: Monitoring Tantangan Harian
+// ============================================================
+app.get('/api/admin/challenges', verifyAdminToken, async (req, res) => {
+    try {
+        const snapshot = await db.collectionGroup('challenge_progress').get();
+        const todayWIB = new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+
+        const users = {};
+        const categories = {};
+        let total = 0;
+        let todayCount = 0;
+        let proofCount = 0;
+        let reflectionCount = 0;
+        const latest = [];
+
+        snapshot.forEach(doc => {
+            const d = doc.data();
+            const userId = doc.ref.parent.parent.id;
+            if (!users[userId]) users[userId] = { userId, total: 0, dates: [], proofs: 0, last: '' };
+            users[userId].total++;
+            if (d.date) {
+                users[userId].dates.push(d.date);
+                if (d.date > users[userId].last) users[userId].last = d.date;
+            }
+            if (d.proofBase64) { users[userId].proofs++; proofCount++; }
+            if (d.reflection) reflectionCount++;
+            if (d.category) categories[d.category] = (categories[d.category] || 0) + 1;
+            total++;
+            if (d.date === todayWIB) todayCount++;
+            latest.push({
+                userId,
+                date: d.date || '',
+                challengeId: d.challengeId || '',
+                category: d.category || '',
+                hasProof: !!d.proofBase64,
+                hasReflection: !!d.reflection
+            });
+        });
+
+        latest.sort((a, b) => (a.date < b.date ? 1 : -1));
+
+        // Per user: total, streak (hari beruntun dari tanggal selesai), bukti, terakhir
+        const userList = Object.values(users).map(u => {
+            const dates = u.dates.slice().sort();
+            let streak = 0;
+            let run = 0;
+            let prev = null;
+            dates.forEach(dt => {
+                if (prev === null) {
+                    run = 1;
+                } else {
+                    const p = new Date(prev + 'T00:00:00Z');
+                    p.setUTCDate(p.getUTCDate() + 1);
+                    if (dt === p.toISOString().slice(0, 10)) run++;
+                    else run = 1;
+                }
+                if (run > streak) streak = run;
+                prev = dt;
+            });
+            return { userId: u.userId, total: u.total, streak, proofs: u.proofs, last: u.last };
+        });
+        userList.sort((a, b) => b.total - a.total);
+
+        res.json({
+            success: true,
+            total,
+            todayCount,
+            proofCount,
+            reflectionCount,
+            categories,
+            users: userList,
+            latest: latest.slice(0, 10)
+        });
+    } catch (error) {
+        console.error('❌ Challenge stats error:', error);
+        res.status(500).json({ success: false, message: 'Gagal memuat data tantangan' });
+    }
+});
+
+// ============================================================
 //  🔥 PUBLIC EBOOKS: ORDER + STATUS + WEBHOOK MIDTRANS
 // ============================================================
 

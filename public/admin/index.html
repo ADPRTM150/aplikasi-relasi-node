@@ -978,6 +978,9 @@
             <button data-tab="couples" onclick="switchTab('couples')">
                 <span>💑</span> Pasangan
             </button>
+            <button data-tab="challenges" onclick="switchTab('challenges')">
+                <span>🎯</span> Tantangan
+            </button>
             <button data-tab="sales" onclick="switchTab('sales')">
                 <span>💰</span> Penjualan
             </button>
@@ -1230,6 +1233,72 @@
                         <tbody id="coupleTableBody">
                             <tr>
                                 <td colspan="7" class="loading-text">⏳ Memuat data...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================ -->
+        <!--  PANEL TANTANGAN                                             -->
+        <!-- ============================================================ -->
+        <div class="panel" id="panel-challenges">
+            <div class="content-card">
+                <div class="card-header">
+                    <h3><span>🎯</span> Monitoring Tantangan Harian</h3>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                        <span class="badge-count" id="challengeCount">0 tantangan</span>
+                        <button class="btn-add" onclick="loadChallengeStats()"
+                            style="padding:4px 12px;font-size:12px;background:#6c5ce7;color:white;border:none;border-radius:6px;cursor:pointer;">
+                            🔄 Refresh
+                        </button>
+                    </div>
+                </div>
+                <div class="stats-grid" style="margin-bottom:16px;">
+                    <div class="stat-card">
+                        <div class="stat-icon green"><span>🎯</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="statChallengeTotal">0</div>
+                            <div class="label">Total Selesai</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon pink"><span>📅</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="statChallengeToday">0</div>
+                            <div class="label">Selesai Hari Ini</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon purple"><span>📸</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="statChallengeProofs">0</div>
+                            <div class="label">Foto Bukti</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon orange"><span>💭</span></div>
+                        <div class="stat-info">
+                            <div class="number" id="statChallengeReflections">0</div>
+                            <div class="label">Refleksi</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th style="text-align:center;">Total</th>
+                                <th style="text-align:center;">🔥 Streak</th>
+                                <th style="text-align:center;">📸 Bukti</th>
+                                <th>Terakhir Selesai</th>
+                            </tr>
+                        </thead>
+                        <tbody id="challengeTableBody">
+                            <tr>
+                                <td colspan="5" class="loading-text">⏳ Memuat data...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1792,6 +1861,10 @@
                 case 'profile_update':
                     return 'memperbarui profil';
 
+                case 'challenge_completed':
+                    return 'menyelesaikan tantangan hari ini — kategori: <strong>' + (details.category || '-') +
+                        '</strong> (challengeId: ' + (details.challengeId || '-') + ')';
+
                 case 'admin_action': {
                     var actionMap = {
                         create: 'menambahkan',
@@ -1912,6 +1985,9 @@
                     } else if (activity.type === 'user_logout') {
                         label =
                             '<span style="font-size:10px;background:#d46a6a;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">🚪 Logout</span>';
+                    } else if (activity.type === 'challenge_completed') {
+                        label =
+                            '<span style="font-size:10px;background:#E8879F;color:white;padding:1px 8px;border-radius:10px;margin-left:6px;">🎯 Tantangan</span>';
                     }
 
                     html += `
@@ -3864,6 +3940,52 @@
         }
 
         // ============================================================
+        //  🎯 LOAD MONITORING TANTANGAN
+        // ============================================================
+        async function loadChallengeStats() {
+            var tbody = document.getElementById('challengeTableBody');
+            try {
+                var result = await apiGet('/api/admin/challenges');
+                if (!result || !result.success) throw new Error('API error');
+
+                document.getElementById('statChallengeTotal').textContent = result.total || 0;
+                document.getElementById('statChallengeToday').textContent = result.todayCount || 0;
+                document.getElementById('statChallengeProofs').textContent = result.proofCount || 0;
+                document.getElementById('statChallengeReflections').textContent = result.reflectionCount || 0;
+                document.getElementById('challengeCount').textContent = (result.total || 0) + ' tantangan';
+
+                var rows = result.users || [];
+                var names = {};
+                try {
+                    var uRes = await apiGet('/api/admin/users');
+                    (uRes.users || []).forEach(function (u) {
+                        names[u.uid] = u.nama || u.name || ((u.email || '-').split('@')[0]);
+                    });
+                } catch (e) { /* nama user opsional */ }
+
+                var html = '';
+                if (!rows.length) {
+                    html = '<tr><td colspan="5" class="empty-state">Belum ada tantangan yang diselesaikan 🎯</td></tr>';
+                } else {
+                    rows.forEach(function (r) {
+                        var tanggal = r.last ? new Date(r.last + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-';
+                        html += `
+                    <tr>
+                        <td><strong>${names[r.userId] || r.userId}</strong></td>
+                        <td style="text-align:center;">${r.total}</td>
+                        <td style="text-align:center;">${r.streak ? '🔥 ' + r.streak : '-'}</td>
+                        <td style="text-align:center;">${r.proofs || 0}</td>
+                        <td>${tanggal}</td>
+                    </tr>`;
+                    });
+                }
+                tbody.innerHTML = html;
+            } catch (error) {
+                tbody.innerHTML = '<tr><td colspan="5" class="loading-text">⚠️ Gagal memuat data tantangan. <button class="btn-small outline" onclick="loadChallengeStats()">🔄 Coba Lagi</button></td></tr>';
+            }
+        }
+
+        // ============================================================
         //  INIT
         // ============================================================
         async function init() {
@@ -3873,6 +3995,7 @@
             await loadEbooks();
             await loadVideos();
             await loadCouples();
+            await loadChallengeStats();
             await updateStats();
             await loadRecentActivities();
             await loadOrders();
@@ -3892,6 +4015,7 @@
             loadEbooks();
             loadVideos();
             loadCouples();
+            loadChallengeStats();
             loadOrders();
             loadRecentActivities();
         }, 120000);
