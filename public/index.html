@@ -673,7 +673,6 @@ async function tampilkanRiwayat() {
             badges: { earned: [], next: null },
             freeEbook: null,
             rewardJustEarned: false,
-            syncedWithPartner: false,
             loading: true,
             error: null
         };
@@ -963,9 +962,6 @@ async function tampilkanRiwayat() {
             }
 
             var html = '';
-            if (s.syncedWithPartner) {
-                html += '<div class="challenge-partner" style="margin-bottom:10px;">🧭 Mengikuti tantangan yang sudah dikerjakan pasanganmu hari ini, biar datanya sama.</div>';
-            }
             var catLabel = DIM_LABELS[s.challenge.category] || s.challenge.category || 'Umum';
             html += '<div class="challenge-chip">' + escapeHtml(catLabel) + '</div>';
             html += '<h4 style="color:#1d3b36;margin:8px 0 14px;font-size:15px;line-height:1.55;">"' + escapeHtml(s.challenge.text) + '"</h4>';
@@ -1079,7 +1075,6 @@ async function tampilkanRiwayat() {
             challengeState.progress = null;
             challengeState.partnerProgress = null;
             challengeState.rewardJustEarned = false;
-            challengeState.syncedWithPartner = false;
             renderChallengeCard();
 
             if (!user) {
@@ -1125,23 +1120,6 @@ async function tampilkanRiwayat() {
             }).then(function (res) {
                 challengeState.partnerProgress = res[0];
                 challengeState.partnerName = res[1];
-
-                // 🧭 JARING PENGAMAN: kalau pasangan sudah selesai dengan
-                // tantangan yang berbeda, ikuti tantangannya biar data
-                // pasangan selalu sama (admin tidak bingung)
-                if (challengeState.couple && challengeState.partnerProgress &&
-                    challengeState.partnerProgress.challengeId &&
-                    challengeState.challenge &&
-                    challengeState.partnerProgress.challengeId !== challengeState.challenge.id) {
-                    for (var i = 0; i < challengeState.bank.length; i++) {
-                        if (challengeState.bank[i].id === challengeState.partnerProgress.challengeId) {
-                            challengeState.challenge = challengeState.bank[i];
-                            challengeState.syncedWithPartner = true;
-                            break;
-                        }
-                    }
-                }
-
                 challengeState.loading = false;
                 renderChallengeCard();
                 cekReminderPagi();
