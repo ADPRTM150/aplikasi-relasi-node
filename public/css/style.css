@@ -3942,6 +3942,44 @@ body.love-page {
     border-color: #E8879F;
 }
 
+/* ─── BUKTI FOTO ─── */
+.challenge-proof {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.proof-thumb {
+    max-width: 160px;
+    max-height: 160px;
+    border-radius: 12px;
+    border: 1.5px solid rgba(244, 167, 187, 0.35);
+    box-shadow: 0 4px 16px rgba(244, 167, 187, 0.15);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.proof-thumb:hover {
+    transform: scale(1.03);
+}
+
+.proof-img {
+    max-width: 100%;
+    max-height: 320px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(244, 167, 187, 0.35);
+    box-shadow: 0 6px 24px rgba(244, 167, 187, 0.18);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    display: block;
+}
+
+.proof-img:hover {
+    transform: scale(1.02);
+}
+
 /* ─── BADGE & REWARD ─── */
 .challenge-badges {
     display: flex;

@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/img/apple-touch-icon.png" />
+    <title>Riwayat Tantangan - QUALITY OF LOVE</title>
+
+    <link rel="stylesheet" href="/css/style.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="/firebase-config.js"></script>
+
+    <style>
+        /* ─── RIWAYAT TANTANGAN — ALBUM KENANGAN ─── */
+        .album-hero {
+            text-align: center;
+            padding: 8px 0 18px;
+        }
+
+        .album-hero h1 {
+            font-size: 24px;
+            font-weight: 800;
+            color: #1d3b36;
+            margin: 0 0 6px;
+        }
+
+        .album-hero p {
+            font-size: 13px;
+            color: #5a6f6a;
+            max-width: 420px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .album-stats {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 16px 0 4px;
+            flex-wrap: wrap;
+        }
+
+        .album-stat {
+            background: #FFF5F8;
+            border: 1px solid rgba(244, 167, 187, 0.25);
+            border-radius: 16px;
+            padding: 10px 18px;
+            text-align: center;
+            min-width: 90px;
+        }
+
+        .album-stat .num {
+            font-size: 22px;
+            font-weight: 800;
+            color: #E8879F;
+            display: block;
+        }
+
+        .album-stat .lbl {
+            font-size: 10px;
+            color: #a8768a;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .timeline-item {
+            background: #fff;
+            border-radius: 18px;
+            padding: 18px 20px;
+            margin-bottom: 14px;
+            box-shadow: 0 4px 18px rgba(244, 167, 187, 0.08);
+            border: 1px solid rgba(244, 167, 187, 0.12);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+
+        .timeline-date {
+            font-size: 11px;
+            color: #a8768a;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .timeline-who {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #F4A7BB, #E8879F);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+        }
+
+        .timeline-who.partner {
+            background: linear-gradient(135deg, #A8D8B9, #7FB69B);
+        }
+
+        .timeline-text {
+            font-size: 14px;
+            color: #1d3b36;
+            line-height: 1.55;
+            margin: 4px 0 10px;
+            font-weight: 500;
+        }
+
+        .timeline-reflection {
+            font-size: 12px;
+            font-style: italic;
+            color: #5a6f6a;
+            background: #FDF6F8;
+            border-left: 3px solid #E8879F;
+            border-radius: 0 10px 10px 0;
+            padding: 8px 12px;
+            margin-top: 8px;
+        }
+
+        .album-empty {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .album-empty .icon {
+            font-size: 48px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- ===== HEADER ===== -->
+        <div class="header">
+            <div class="logo">
+                <img src="/img/Quality.jpeg" alt="QUALITY OF LOVE" style="height:38px;width:38px;border-radius:10px;display:block;" />
+                <strong>QUALITY OF LOVE</strong>
+            </div>
+            <div style="display:flex;align-items:center;gap:10px;">
+                <a href="/" class="badge" style="text-decoration:none;">← Beranda</a>
+            </div>
+        </div>
+
+        <!-- ===== HERO ALBUM ===== -->
+        <div class="album-hero">
+            <h1>📖 Album Perjuangan Kita</h1>
+            <p>Semua hal kecil yang sudah kalian lakukan untuk satu sama lain. Lihat lagi saat butuh diingatkan betapa berharganya kalian. 💚</p>
+        </div>
+
+        <!-- ===== STATS ===== -->
+        <div class="album-stats" id="albumStats" style="display:none;">
+            <div class="album-stat"><span class="num" id="statTotal">0</span><span class="lbl">Tantangan Selesai</span></div>
+            <div class="album-stat"><span class="num" id="statKamu">0</span><span class="lbl">Oleh Kamu</span></div>
+            <div class="album-stat"><span class="num" id="statPartner">0</span><span class="lbl">Oleh Pasangan</span></div>
+        </div>
+
+        <!-- ===== TIMELINE ===== -->
+        <div class="card" style="margin-top:16px;">
+            <div class="riwayat-title">
+                <span class="title-icon">💝</span>
+                <h4>Jejak Cinta Kalian</h4>
+            </div>
+            <div id="timelineContainer">
+                <div class="loading-text">⏳ Memuat riwayat...</div>
+            </div>
+        </div>
+
+        <!-- ===== BOTTOM NAV ===== -->
+        <div class="bottom-nav">
+            <a href="/">
+                <span class="nav-icon">🏠</span>
+                Beranda
+            </a>
+            <a href="/relationship-check">
+                <span class="nav-icon">💕</span>
+                Health
+            </a>
+            <a href="/love-language">
+                <span class="nav-icon">❤️</span>
+                Love
+            </a>
+            <a href="/artikel?tab=artikel">
+                <span class="nav-icon">📰</span>
+                Artikel
+            </a>
+            <a href="/profil">
+                <span class="nav-icon">👤</span>
+                Profil
+            </a>
+        </div>
+
+    </div>
+
+    <script>
+        // ============================================================
+        //  📖 RIWAYAT TANTANGAN — TIMELINE GABUNGAN (KAMU + PASANGAN)
+        // ============================================================
+
+        var DIM_LABELS = {
+            komunikasi: 'Komunikasi 💬',
+            kepercayaan: 'Kepercayaan 🔒',
+            resolusi_konflik: 'Resolusi Konflik 🤝',
+            dukungan_emosional: 'Dukungan Emosional ❤️',
+            waktu_berkualitas: 'Waktu Berkualitas ⏰',
+            komitmen: 'Komitmen 🎯',
+            penghargaan: 'Penghargaan 🌟',
+            keuangan: 'Keuangan 💰'
+        };
+
+        firebase.auth().onAuthStateChanged(function (user) {
+            if (user) {
+                initRiwayat(user);
+            } else {
+                renderNotLoggedIn();
+            }
+        });
+
+        function renderNotLoggedIn() {
+            document.getElementById('timelineContainer').innerHTML =
+                '<div class="album-empty"><div class="icon">🔒</div>' +
+                '<h4 style="color:#1d3b36;margin:8px 0;">Login dulu untuk membuka album kenangan kalian</h4>' +
+                '<button class="btn-challenge" onclick="window.location.href=\'/login\'">Login</button></div>';
+        }
+
+        function initRiwayat(user) {
+            var uid = user.uid;
+            var container = document.getElementById('timelineContainer');
+
+            Promise.all([
+                loadBank(),
+                cariCouple(uid),
+                loadProgress(uid)
+            ]).then(function (results) {
+                var bank = results[0];
+                var couple = results[1];
+                var ownList = results[2];
+
+                if (!couple) {
+                    return { bank: bank, couple: null, ownList: ownList, partnerList: [], partnerName: '' };
+                }
+
+                var partnerUid = couple.partnerUserId;
+                var nameTask = db.collection('users').doc(partnerUid).get()
+                    .then(function (doc) {
+                        if (!doc.exists) return 'Pasangan';
+                        var d = doc.data();
+                        return d.nama || d.name || 'Pasangan';
+                    })
+                    .catch(function () { return 'Pasangan'; });
+
+                return Promise.all([loadProgress(partnerUid), nameTask]).then(function (r) {
+                    return { bank: bank, couple: couple, ownList: ownList, partnerList: r[0], partnerName: r[1] };
+                });
+            }).then(function (ctx) {
+                renderTimeline(container, ctx);
+            }).catch(function (err) {
+                console.error('❌ Error riwayat:', err);
+                container.innerHTML =
+                    '<div class="album-empty"><div class="icon">⚠️</div>' +
+                    '<p style="color:#8a9e99;font-size:14px;">Gagal memuat riwayat.</p>' +
+                    '<button onclick="initRiwayat(firebase.auth().currentUser)" class="btn-small outline" style="margin-top:6px;">🔄 Coba Lagi</button></div>';
+            });
+        }
+
+        // ─── LOAD BANK ───
+        function loadBank() {
+            return db.collection('challenges').where('active', '==', true).get()
+                .then(function (snap) {
+                    var map = {};
+                    snap.forEach(function (doc) {
+                        var d = doc.data();
+                        map[doc.id] = { text: d.text || '', category: d.category || '' };
+                    });
+                    return map;
+                })
+                .catch(function () { return {}; });
+        }
+
+        // ─── CARI LINK PASANGAN ───
+        function cariCouple(uid) {
+            return db.collection('wellness_tests')
+                .where('userCompleted', '==', true)
+                .orderBy('completedAt', 'desc')
+                .limit(20)
+                .get()
+                .then(function (snapshot) {
+                    var found = null;
+                    snapshot.forEach(function (doc) {
+                        if (found) return;
+                        var d = doc.data();
+                        if (d.userId === uid && d.partnerUserId) {
+                            found = { partnerUserId: d.partnerUserId };
+                        }
+                    });
+                    if (found) return found;
+                    return db.collection('wellness_tests')
+                        .where('partnerCompleted', '==', true)
+                        .where('userCompleted', '==', true)
+                        .orderBy('completedAt', 'desc')
+                        .limit(1)
+                        .get()
+                        .then(function (snap2) {
+                            if (snap2.empty) return null;
+                            var d = snap2.docs[0].data();
+                            if (d.partnerUserId === uid && d.userId) {
+                                return { partnerUserId: d.userId };
+                            }
+                            return null;
+                        });
+                })
+                .catch(function () { return null; });
+        }
+
+        // ─── LOAD PROGRES ───
+        function loadProgress(uid) {
+            return db.collection('users').doc(uid).collection('challenge_progress')
+                .orderBy('date', 'desc')
+                .limit(100)
+                .get()
+                .then(function (snap) {
+                    var list = [];
+                    snap.forEach(function (doc) {
+                        var d = doc.data();
+                        list.push({
+                            date: d.date,
+                            challengeId: d.challengeId,
+                            category: d.category,
+                            reflection: d.reflection || '',
+                            proofUrl: d.proofUrl || ''
+                        });
+                    });
+                    return list;
+                })
+                .catch(function () { return []; });
+        }
+
+        // ─── RENDER TIMELINE ───
+        var riwayatCtx = null; // closure state
+
+        function renderTimeline(container, ctx) {
+            // ctx = { bank, couple, ownList, partnerList, partnerName }
+            riwayatCtx = ctx;
+            var bank = ctx.bank;
+            var entries = [];
+
+            ctx.ownList.forEach(function (d) {
+                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofUrl: d.proofUrl, who: 'Kamu', partner: false });
+            });
+            ctx.partnerList.forEach(function (d) {
+                entries.push({ date: d.date, challengeId: d.challengeId, category: d.category, reflection: d.reflection, proofUrl: d.proofUrl, who: ctx.partnerName, partner: true });
+            });
+
+            entries.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+
+            var statKamu = ctx.ownList.length;
+            var statPartner = ctx.partnerList.length;
+            document.getElementById('albumStats').style.display = 'flex';
+            document.getElementById('statTotal').textContent = entries.length;
+            document.getElementById('statKamu').textContent = statKamu;
+            document.getElementById('statPartner').textContent = statPartner;
+
+            if (!entries.length) {
+                container.innerHTML =
+                    '<div class="album-empty"><div class="icon">🎯</div>' +
+                    '<h4 style="color:#1d3b36;margin:8px 0;">Belum ada tantangan yang diselesaikan</h4>' +
+                    '<p style="color:#8a9e99;font-size:13px;margin-bottom:14px;">Mulai hari ini — satu tantangan kecil tiap hari, dan album ini akan terisi kenangan.</p>' +
+                    '<a href="/" class="btn-primary btn-glow" style="text-decoration:none;">🚀 Mulai Tantangan</a></div>';
+                return;
+            }
+
+            var html = '';
+            entries.forEach(function (e) {
+                var info = bank[e.challengeId] || { text: '', category: e.category };
+                var text = info.text || 'Tantangan hari itu';
+                var catLabel = DIM_LABELS[info.category || e.category] || info.category || 'Umum';
+                var dateParts = e.date.split('-');
+                var dObj = new Date(parseInt(dateParts[0], 10), parseInt(dateParts[1], 10) - 1, parseInt(dateParts[2], 10));
+                var tanggal = dObj.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+                html += '<div class="timeline-item">';
+                html += '<div class="timeline-date">📅 ' + tanggal + '</div>';
+                html += '<span class="timeline-who' + (e.partner ? ' partner' : '') + '">' + (e.partner ? '💚 ' : '💗 ') + escapeHtml(e.who) + '</span>';
+                html += '<div class="timeline-text">"' + escapeHtml(text) + '"</div>';
+                if (e.reflection) {
+                    html += '<div class="timeline-reflection">💭 "' + escapeHtml(e.reflection) + '"</div>';
+                }
+                if (e.proofUrl) {
+                    html += '<div style="margin-top:10px;"><a href="' + escapeHtml(e.proofUrl) + '" target="_blank" rel="noopener">' +
+                        '<img src="' + escapeHtml(e.proofUrl) + '" alt="Bukti tantangan" class="proof-img" /></a></div>';
+                }
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+    </script>
+
+</body>
+
+</html>

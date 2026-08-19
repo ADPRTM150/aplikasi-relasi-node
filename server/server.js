@@ -1368,6 +1368,7 @@ app.get('/love-language', (req, res) => res.sendFile(path.join(__dirname, '../pu
 app.get('/hasil', (req, res) => res.sendFile(path.join(__dirname, '../public/hasil.html')));
 app.get('/relationship-check', (req, res) => res.sendFile(path.join(__dirname, '../public/relationship-check.html')));
 app.get('/profil', (req, res) => res.sendFile(path.join(__dirname, '../public/profil.html')));
+app.get('/riwayat-tantangan', (req, res) => res.sendFile(path.join(__dirname, '../public/riwayat-tantangan.html')));
 app.get('/artikel', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/index.html')));
 app.get('/artikel/detail', (req, res) => res.sendFile(path.join(__dirname, '../public/artikel/detail.html')));
 app.get('/ebook', (req, res) => res.redirect(301, '/artikel'));
