@@ -4911,6 +4911,57 @@ body.love-page {
     margin-bottom: 12px;
 }
 
+/* ─── KARTU DI HALAMAN /ARTIKEL — baris ikon + badge + kategori ─── */
+.artikel-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.artikel-card-top .rec-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #FFF0F3, #FFF5F8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+}
+
+.artikel-card-top .rec-badge {
+    font-size: 10px;
+    font-weight: 700;
+    padding: 3px 10px;
+    background: rgba(244, 167, 187, 0.12);
+    color: #E8879F;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.artikel-card-top .kategori {
+    margin-left: auto;
+    font-size: 11px;
+    color: #8a9a95;
+    background: rgba(58, 125, 118, 0.08);
+    padding: 3px 10px;
+    border-radius: 20px;
+    flex-shrink: 0;
+}
+
+.artikel-meta {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(244, 167, 187, 0.25);
+    font-size: 11px;
+    color: #a8768a;
+}
+
 .recommendation-card .rec-badge {
     align-self: flex-start;
     font-size: 10px;

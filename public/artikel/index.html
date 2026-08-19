@@ -203,10 +203,14 @@
                     const tanggal = a.createdAt ? new Date(a.createdAt.toDate()).toLocaleDateString('id-ID') : '-';
                     html += `
                         <div class="artikel-card" onclick="bacaArtikel('${doc.id}')">
-                            <span class="kategori">${window.escapeHtml(a.category || 'Lainnya')}</span>
+                            <div class="artikel-card-top">
+                                <div class="rec-icon">📄</div>
+                                <span class="rec-badge">Artikel</span>
+                                <span class="kategori">${window.escapeHtml(a.category || 'Lainnya')}</span>
+                            </div>
                             <h3>${window.escapeHtml(a.title)}</h3>
                             <div class="desc">${window.escapeHtml(a.desc || '')}</div>
-                            <div class="meta">📅 ${tanggal}</div>
+                            <div class="artikel-meta">📅 ${tanggal} · ⏱ ${window.escapeHtml(a.readTime || '5 menit')} baca</div>
                         </div>
                     `;
                 });
@@ -260,10 +264,14 @@
                         : '🆓 Gratis';
                     html += `
                         <div class="artikel-card" onclick="bacaEbook('${doc.id}')">
-                            <span class="kategori">${window.escapeHtml(e.category || 'Lainnya')}</span>
+                            <div class="artikel-card-top">
+                                <div class="rec-icon">📘</div>
+                                <span class="rec-badge">E-Book</span>
+                                <span class="kategori">${window.escapeHtml(e.category || 'Lainnya')}</span>
+                            </div>
                             <h3>${window.escapeHtml(e.title)}</h3>
                             <div class="desc">${window.escapeHtml(e.excerpt || e.desc || '')}</div>
-                            <div class="meta">📅 ${tanggal} · 📄 ${e.pages || 0} halaman · ${harga}</div>
+                            <div class="artikel-meta">📅 ${tanggal} · 📄 ${e.pages || 0} halaman · ${harga}</div>
                         </div>
                     `;
                 });
