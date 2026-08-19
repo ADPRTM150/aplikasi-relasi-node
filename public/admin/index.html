@@ -4053,6 +4053,17 @@
 
             document.getElementById('challengeEntryCount').textContent = list.length + ' entri';
 
+            // ⚠️ Deteksi hari di mana ada tantangan berbeda yang dikerjakan
+            // (harusnya per pasangan sama — tanda ini untuk investigasi)
+            var bedaPerTanggal = {};
+            list.forEach(function (e) {
+                if (!e.date) return;
+                if (!bedaPerTanggal[e.date]) bedaPerTanggal[e.date] = [];
+                if (bedaPerTanggal[e.date].indexOf(e.challengeId) === -1) {
+                    bedaPerTanggal[e.date].push(e.challengeId);
+                }
+            });
+
             var html = '';
             if (!list.length) {
                 html = '<tr><td colspan="5" class="empty-state">Tidak ada entri untuk filter ini.</td></tr>';
@@ -4064,9 +4075,10 @@
                     var aksi = e.hasProof
                         ? '<button class="btn-edit" onclick="lihatBuktiChallenge(\'' + e.userId + '\', \'' + e.date + '\')"><span>📸</span> Bukti</button>'
                         : '-';
+                    var beda = (bedaPerTanggal[e.date] || []).length > 1;
                     html += `
                     <tr>
-                        <td>${tanggal}</td>
+                        <td>${tanggal}${beda ? ' <span title="Ada tantangan berbeda yang dikerjakan di hari ini — seharusnya per pasangan sama" style="cursor:help;">⚠️</span>' : ''}</td>
                         <td><strong>${challengeNamesCache[e.userId] || e.userId}</strong></td>
                         <td>${catLabel}</td>
                         <td style="max-width:280px;">${refleksi}</td>
