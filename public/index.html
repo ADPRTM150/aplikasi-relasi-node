@@ -376,18 +376,21 @@ async function tampilkanRiwayat() {
             testId = data.id;
             role = 'user';
         } else {
-            // 🔥 CARI SEBAGAI PARTNER (USER B)
+            // 🔥 CARI SEBAGAI PARTNER (USER B) — filter di JS biar pasti milik user ini
             snapshot = await db.collection('wellness_tests')
                 .where('partnerCompleted', '==', true)
                 .where('userCompleted', '==', true)
                 .orderBy('completedAt', 'desc')
-                .limit(1)
+                .limit(50)
                 .get();
 
-            if (!snapshot.empty) {
-                const doc = snapshot.docs[0];
-                data = { id: doc.id, ...doc.data() };
-                testId = doc.id;
+            const partnerDocs = snapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(doc => doc.partnerUserId === uid);
+
+            if (partnerDocs.length > 0) {
+                data = partnerDocs[0];
+                testId = data.id;
                 role = 'partner';
             }
         }
