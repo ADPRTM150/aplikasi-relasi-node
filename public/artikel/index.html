@@ -98,9 +98,11 @@
                 link.textContent = '📰 Lihat juga artikel kami →';
                 link.style.cssText = 'display:inline-block;margin-top:16px;color:#3a7d76;font-weight:600;font-size:13px;text-decoration:none;';
                 document.getElementById('ebookContainer').after(link);
-                // Sorot nav Ebook
-                document.querySelector('.bottom-nav a[href*="tab=artikel"]').classList.remove('active');
-                document.querySelector('.bottom-nav a[href*="tab=ebook"]').classList.add('active');
+                // Sorot nav Ebook (jaga-jaga kalau link tidak ada di nav)
+                var navArtikel = document.querySelector('.bottom-nav a[href*="tab=artikel"]');
+                var navEbook = document.querySelector('.bottom-nav a[href*="tab=ebook"]');
+                if (navArtikel) navArtikel.classList.remove('active');
+                if (navEbook) navEbook.classList.add('active');
             } else if (tabMode === 'artikel') {
                 document.getElementById('ebookSection').style.display = 'none';
                 document.getElementById('ebookContainer').style.display = 'none';
